@@ -141,8 +141,11 @@ const BuilderElement: React.FC<BuilderElementProps> = ({ id, type, position, isS
         transform: 'translate(-50%, -50%)',
         transition: isResizing ? 'none' : 'all 0.1s ease-out',
         touchAction: 'none',
-        opacity: 1,
-        outline: isSelected ? '1px solid black' : 'none'
+        opacity: isDragging ? 1 : 1,
+        outline: isSelected ? '1px solid black' : 'none',
+        backgroundColor: isDragging ? '#e5e7eb' : 'transparent',
+        border: isDragging ? '1px solid #9ca3af' : 'none',
+        pointerEvents: isDragging ? 'none' : 'auto'
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -150,7 +153,7 @@ const BuilderElement: React.FC<BuilderElementProps> = ({ id, type, position, isS
       }}
     >
       {getElementContent()}
-      {isSelected && (
+      {isSelected && !isDragging && (
         <>
           <ResizeHandle 
             position="top" 
