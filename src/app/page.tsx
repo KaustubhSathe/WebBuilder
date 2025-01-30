@@ -8,7 +8,7 @@ import { store } from '../store/store';
 
 function BuilderCanvas() {
   return (
-    <div className="min-h-screen bg-[#1a1a1a]">
+    <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* Top Navigation */}
       <nav className="h-[35px] bg-[#2c2c2c] border-b border-[#3c3c3c] flex items-center">
         {/* Menu Button */}
@@ -16,20 +16,7 @@ function BuilderCanvas() {
           className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors border-r border-[#3c3c3c]"
           title="Menu"
         >
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 16 16" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M2 4H14M2 8H14M2 12H14" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinecap="round"
-            />
-          </svg>
+          <span className="material-icons text-[20px]">menu</span>
         </button>
 
         {/* Preview Button */}
@@ -37,94 +24,72 @@ function BuilderCanvas() {
           className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
           title="Preview"
         >
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 16 16" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M4 3L12 8L4 13V3Z" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinejoin="round"
-            />
-          </svg>
+          <span className="material-icons text-[20px]">play_arrow</span>
         </button>
 
         {/* Current Page Indicator */}
         <div className="flex-1 flex justify-center items-center">
           <div className="flex items-center gap-2 px-3 py-1 rounded hover:bg-[#3c3c3c] cursor-pointer group">
-            <svg 
-              width="14" 
-              height="14" 
-              viewBox="0 0 16 16" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-gray-400 group-hover:text-gray-200"
-            >
-              <path 
-                d="M3 2C3 1.44772 3.44772 1 4 1H10L13 4V14C13 14.5523 12.5523 15 12 15H4C3.44772 15 3 14.5523 3 14V2Z" 
-                stroke="currentColor" 
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-              />
-              <path 
-                d="M10 1V4H13" 
-                stroke="currentColor" 
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <span className="material-icons text-[18px] text-gray-400 group-hover:text-gray-200">description</span>
             <span className="text-sm text-gray-400 group-hover:text-gray-200">Home</span>
-            <svg 
-              width="10" 
-              height="10" 
-              viewBox="0 0 16 16" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-gray-400 group-hover:text-gray-200"
+            <span className="material-icons text-[16px] text-gray-400 group-hover:text-gray-200">expand_more</span>
+          </div>
+          <div className="flex items-center ml-2">
+            <button 
+              className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
+              title="Responsive"
             >
-              <path 
-                d="M4 6L8 10L12 6" 
-                stroke="currentColor" 
-                strokeWidth="1.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
+              <span className="material-icons text-[20px]">laptop</span>
+            </button>
           </div>
         </div>
 
-        {/* Empty space to balance the layout */}
-        <div className="w-20"></div>
+        {/* Right Side Actions */}
+        <div className="flex items-center">
+          {/* Changes Saved Indicator */}
+          <button 
+            className="flex items-center justify-center text-green-500 hover:text-green-400 transition-colors px-2"
+            title="Changes Saved"
+          >
+            <span className="material-icons text-[20px]">check_circle</span>
+          </button>
+
+          {/* Comments */}
+          <button 
+            className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
+            title="Comments"
+          >
+            <span className="material-icons text-[20px]">comment</span>
+          </button>
+
+          {/* Share */}
+          <button 
+            className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
+            title="Share"
+          >
+            <span className="material-icons text-[20px]">share</span>
+          </button>
+
+          {/* Publish */}
+          <button 
+            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-colors px-4 h-[26px] rounded ml-2 mr-3 text-sm"
+            title="Publish"
+          >
+            Publish
+          </button>
+        </div>
       </nav>
 
       {/* Main Content */}
-      <div className="flex">
+      <div className="flex h-[calc(100vh-35px)]">
         {/* Left Sidebar */}
-        <div className="w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] min-h-[calc(100vh-35px)]">
+        <div className="w-10 bg-[#2c2c2c] border-r border-[#3c3c3c]">
           {/* Add Elements Button */}
           <button 
             className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
             title="Add Elements"
           >
-            <svg 
-              width="16" 
-              height="16" 
-              viewBox="0 0 16 16" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path 
-                d="M8 3V13M3 8H13" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
+            <span className="material-icons text-[20px]">add</span>
           </button>
 
           {/* Pages Button */}
@@ -132,25 +97,7 @@ function BuilderCanvas() {
             className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
             title="Pages"
           >
-            <svg 
-              width="16" 
-              height="16" 
-              viewBox="0 0 16 16" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path 
-                d="M4 1.5H12C12.8284 1.5 13.5 2.17157 13.5 3V13C13.5 13.8284 12.8284 14.5 12 14.5H4C3.17157 14.5 2.5 13.8284 2.5 13V3C2.5 2.17157 3.17157 1.5 4 1.5Z" 
-                stroke="currentColor" 
-                strokeWidth="1.5"
-              />
-              <path 
-                d="M5 5H11M5 8H11M5 11H9" 
-                stroke="currentColor" 
-                strokeWidth="1.5" 
-                strokeLinecap="round"
-              />
-            </svg>
+            <span className="material-icons text-[20px]">article</span>
           </button>
 
           {/* Navigator Button */}
@@ -158,32 +105,7 @@ function BuilderCanvas() {
             className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
             title="Navigator"
           >
-            <svg 
-              width="16" 
-              height="16" 
-              viewBox="0 0 16 16" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path 
-                d="M2 4H14M5 8H14M8 12H14" 
-                stroke="currentColor" 
-                strokeWidth="1.5" 
-                strokeLinecap="round"
-              />
-              <circle 
-                cx="3.5" 
-                cy="8" 
-                r="0.5" 
-                fill="currentColor"
-              />
-              <circle 
-                cx="6.5" 
-                cy="12" 
-                r="0.5" 
-                fill="currentColor"
-              />
-            </svg>
+            <span className="material-icons text-[20px]">account_tree</span>
           </button>
 
           {/* Components Button */}
@@ -191,37 +113,41 @@ function BuilderCanvas() {
             className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
             title="Saved Components"
           >
-            <svg 
-              width="16" 
-              height="16" 
-              viewBox="0 0 16 16" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path 
-                d="M8 2L14 5V11L8 14L2 11V5L8 2Z" 
-                stroke="currentColor" 
-                strokeWidth="1.5" 
-                strokeLinejoin="round"
-              />
-              <path 
-                d="M8 14V8M8 8L14 5M8 8L2 5" 
-                stroke="currentColor" 
-                strokeWidth="1.5" 
-                strokeLinejoin="round"
-              />
-            </svg>
+            <span className="material-icons text-[20px]">widgets</span>
           </button>
         </div>
 
         {/* Canvas */}
         <div className="flex-1 bg-[#1a1a1a] p-8">
-          <div className="w-full h-[calc(100vh-83px)] bg-white rounded">
+          <div className="w-full h-full bg-white rounded">
           </div>
         </div>
 
         {/* Right Sidebar */}
         <div className="w-60 bg-[#2c2c2c] border-l border-[#3c3c3c]">
+          {/* Header */}
+          <div className="h-[35px] border-b border-[#3c3c3c] flex items-center px-3 justify-between">
+            <span className="text-gray-400 text-sm">No element selected</span>
+            <button 
+              className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
+              title="Create Component"
+            >
+              <span className="material-icons text-[18px]">view_in_ar</span>
+            </button>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex h-[35px] border-b border-[#3c3c3c]">
+            <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500">
+              Style
+            </button>
+            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors">
+              Settings
+            </button>
+            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors">
+              Interactions
+            </button>
+          </div>
         </div>
       </div>
     </div>
