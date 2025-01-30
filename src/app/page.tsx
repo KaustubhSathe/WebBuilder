@@ -5,6 +5,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Provider } from 'react-redux';
 import { store } from '../store/store';
+import ZoomableCanvas from '../components/ZoomableCanvas';
 
 function BuilderCanvas() {
   return (
@@ -83,7 +84,7 @@ function BuilderCanvas() {
       {/* Main Content */}
       <div className="flex h-[calc(100vh-35px)]">
         {/* Left Sidebar */}
-        <div className="w-10 bg-[#2c2c2c] border-r border-[#3c3c3c]">
+        <div className="w-[5%] bg-[#2c2c2c] border-r border-[#3c3c3c]">
           {/* Add Elements Button */}
           <button 
             className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
@@ -118,13 +119,13 @@ function BuilderCanvas() {
         </div>
 
         {/* Canvas */}
-        <div className="flex-1 bg-[#1a1a1a] p-8">
-          <div className="w-full h-full bg-white rounded">
+        <ZoomableCanvas>
+          <div className="w-[55%] h-full bg-white rounded">
           </div>
-        </div>
+        </ZoomableCanvas>
 
         {/* Right Sidebar */}
-        <div className="w-60 bg-[#2c2c2c] border-l border-[#3c3c3c]">
+        <div className="w-[40%] bg-[#2c2c2c] border-l border-[#3c3c3c]">
           {/* Header */}
           <div className="h-[35px] border-b border-[#3c3c3c] flex items-center px-3 justify-between">
             <span className="text-gray-400 text-sm">No element selected</span>
@@ -137,14 +138,14 @@ function BuilderCanvas() {
           </div>
 
           {/* Tabs */}
-          <div className="flex h-[35px] border-b border-[#3c3c3c]">
-            <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500">
+          <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
+            <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500 mx-1">
               Style
             </button>
-            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors">
+            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
               Settings
             </button>
-            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors">
+            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
               Interactions
             </button>
           </div>
