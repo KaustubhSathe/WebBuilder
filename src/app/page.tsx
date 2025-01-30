@@ -11,6 +11,12 @@ import ElementsDrawer from '../components/ElementsDrawer';
 function BuilderCanvas() {
   const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
 
+  const handleCanvasClick = () => {
+    if (isElementsDrawerOpen) {
+      setIsElementsDrawerOpen(false);
+    }
+  };
+
   return (
     <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* Top Navigation */}
@@ -85,7 +91,7 @@ function BuilderCanvas() {
       </nav>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-35px)]">
+      <div className="flex h-[calc(100vh-35px)]" onClick={handleCanvasClick}>
         {/* Left Sidebar */}
         <div className="w-[5%] bg-[#2c2c2c] border-r border-[#3c3c3c]">
           {/* Add Elements Button */}

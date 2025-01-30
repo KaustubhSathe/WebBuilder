@@ -29,4 +29,12 @@ export type DragItemType = {
   id: string;
   type: string;
   component: Component;
-}; 
+};
+
+export type ElementType = 'div' | 'text' | 'link' | 'input' | 'button';
+
+export interface DraggableElement {
+  type: ElementType;
+  label: string;
+  icon: string;
+} 

@@ -1,9 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Component, BuilderState } from '../types/builder';
+import { Component, BuilderState, ElementType } from '../types/builder';
+
+interface CanvasElement {
+  id: string;
+  type: ElementType;
+  position: { x: number; y: number };
+  size?: { width: number; height: number };
+}
+
+interface BuilderState {
+  components: Component[];
+  selectedComponent: string | null;
+  elements: CanvasElement[];
+  selectedElementId: string | null;
+}
 
 const initialState: BuilderState = {
   components: [],
   selectedComponent: null,
+  elements: [],
+  selectedElementId: null,
 };
 
 const builderSlice = createSlice({
@@ -36,6 +52,29 @@ const builderSlice = createSlice({
         state.selectedComponent = null;
       }
     },
+    addElement: (state, action: PayloadAction<{ type: ElementType; position: { x: number; y: number } }>) => {
+      const id = `element-${Date.now()}`;
+      state.elements.push({
+        id,
+        ...action.payload,
+      });
+      state.selectedElementId = id;
+    },
+    selectElement: (state, action: PayloadAction<string | null>) => {
+      state.selectedElementId = action.payload;
+    },
+    moveElement: (state, action: PayloadAction<{ id: string; position: { x: number; y: number } }>) => {
+      const element = state.elements.find(el => el.id === action.payload.id);
+      if (element) {
+        element.position = action.payload.position;
+      }
+    },
+    updateElementSize: (state, action: PayloadAction<{ id: string; size: { width: number; height: number } }>) => {
+      const element = state.elements.find(el => el.id === action.payload.id);
+      if (element) {
+        element.size = action.payload.size;
+      }
+    },
   },
 });
 
@@ -45,6 +84,10 @@ export const {
   moveComponent,
   selectComponent,
   deleteComponent,
+  addElement,
+  selectElement,
+  moveElement,
+  updateElementSize,
 } = builderSlice.actions;
 
 export default builderSlice.reducer; 

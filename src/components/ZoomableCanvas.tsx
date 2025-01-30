@@ -2,16 +2,42 @@
 
 import React, { useState, useRef } from 'react';
 import { useGesture } from 'react-use-gesture';
+import { useDrop } from 'react-dnd';
+import { useDispatch, useSelector } from 'react-redux';
+import { DraggableElement } from '../types/builder';
+import { addElement, selectElement } from '../store/builderSlice';
+import { RootState } from '../store/store';
+import BuilderElement from './BuilderElement';
 
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
 }
 
 const ZoomableCanvas: React.FC<ZoomableCanvasProps> = ({ children }) => {
+  const dispatch = useDispatch();
+  const elements = useSelector((state: RootState) => state.builder.elements);
+  const selectedElementId = useSelector((state: RootState) => state.builder.selectedElementId);
+  
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: 'element',
+    drop: (item: DraggableElement, monitor) => {
+      const offset = monitor.getClientOffset();
+      if (offset && canvasRef.current) {
+        const canvasRect = canvasRef.current.getBoundingClientRect();
+        const x = (offset.x - canvasRect.left) / zoom;
+        const y = (offset.y - canvasRect.top) / zoom;
+        dispatch(addElement({ type: item.type, position: { x, y } }));
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  }));
 
   const bind = useGesture({
     onWheel: ({ event, delta: [_x, dy], ctrlKey }) => {
@@ -81,18 +107,30 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = ({ children }) => {
       </div>
 
       <div 
-        ref={canvasRef}
+        ref={(node) => {
+          drop(node);
+          canvasRef.current = node;
+        }}
         {...bind()}
         className={`w-full h-full bg-white rounded relative touch-none select-none ${
-          isDragging ? 'cursor-grabbing' : 'cursor-default'
-        }`}
+          isOver ? 'bg-opacity-90' : ''
+        } ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`}
         style={{
           transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out'
         }}
+        onClick={() => dispatch(selectElement(null))}
       >
-        {children}
+        {elements.map((element) => (
+          <BuilderElement
+            key={element.id}
+            id={element.id}
+            type={element.type}
+            position={element.position}
+            isSelected={element.id === selectedElementId}
+          />
+        ))}
       </div>
     </div>
   );
