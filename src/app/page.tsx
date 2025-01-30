@@ -1,101 +1,239 @@
-import Image from "next/image";
+'use client';
+
+import React from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { Provider } from 'react-redux';
+import { store } from '../store/store';
+
+function BuilderCanvas() {
+  return (
+    <div className="min-h-screen bg-[#1a1a1a]">
+      {/* Top Navigation */}
+      <nav className="h-[35px] bg-[#2c2c2c] border-b border-[#3c3c3c] flex items-center">
+        {/* Menu Button */}
+        <button 
+          className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors border-r border-[#3c3c3c]"
+          title="Menu"
+        >
+          <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 16 16" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path 
+              d="M2 4H14M2 8H14M2 12H14" 
+              stroke="currentColor" 
+              strokeWidth="1.5" 
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+
+        {/* Preview Button */}
+        <button 
+          className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
+          title="Preview"
+        >
+          <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 16 16" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path 
+              d="M4 3L12 8L4 13V3Z" 
+              stroke="currentColor" 
+              strokeWidth="1.5" 
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        {/* Current Page Indicator */}
+        <div className="flex-1 flex justify-center items-center">
+          <div className="flex items-center gap-2 px-3 py-1 rounded hover:bg-[#3c3c3c] cursor-pointer group">
+            <svg 
+              width="14" 
+              height="14" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-gray-400 group-hover:text-gray-200"
+            >
+              <path 
+                d="M3 2C3 1.44772 3.44772 1 4 1H10L13 4V14C13 14.5523 12.5523 15 12 15H4C3.44772 15 3 14.5523 3 14V2Z" 
+                stroke="currentColor" 
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+              <path 
+                d="M10 1V4H13" 
+                stroke="currentColor" 
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="text-sm text-gray-400 group-hover:text-gray-200">Home</span>
+            <svg 
+              width="10" 
+              height="10" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-gray-400 group-hover:text-gray-200"
+            >
+              <path 
+                d="M4 6L8 10L12 6" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+
+        {/* Empty space to balance the layout */}
+        <div className="w-20"></div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="flex">
+        {/* Left Sidebar */}
+        <div className="w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] min-h-[calc(100vh-35px)]">
+          {/* Add Elements Button */}
+          <button 
+            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            title="Add Elements"
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M8 3V13M3 8H13" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          {/* Pages Button */}
+          <button 
+            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            title="Pages"
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M4 1.5H12C12.8284 1.5 13.5 2.17157 13.5 3V13C13.5 13.8284 12.8284 14.5 12 14.5H4C3.17157 14.5 2.5 13.8284 2.5 13V3C2.5 2.17157 3.17157 1.5 4 1.5Z" 
+                stroke="currentColor" 
+                strokeWidth="1.5"
+              />
+              <path 
+                d="M5 5H11M5 8H11M5 11H9" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+
+          {/* Navigator Button */}
+          <button 
+            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            title="Navigator"
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M2 4H14M5 8H14M8 12H14" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round"
+              />
+              <circle 
+                cx="3.5" 
+                cy="8" 
+                r="0.5" 
+                fill="currentColor"
+              />
+              <circle 
+                cx="6.5" 
+                cy="12" 
+                r="0.5" 
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+
+          {/* Components Button */}
+          <button 
+            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            title="Saved Components"
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M8 2L14 5V11L8 14L2 11V5L8 2Z" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinejoin="round"
+              />
+              <path 
+                d="M8 14V8M8 8L14 5M8 8L2 5" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Canvas */}
+        <div className="flex-1 bg-[#1a1a1a] p-8">
+          <div className="w-full h-[calc(100vh-83px)] bg-white rounded">
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="w-60 bg-[#2c2c2c] border-l border-[#3c3c3c]">
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <Provider store={store}>
+      <DndProvider backend={HTML5Backend}>
+        <BuilderCanvas />
+      </DndProvider>
+    </Provider>
   );
 }
