@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useGesture } from 'react-use-gesture';
 
 interface ZoomableCanvasProps {
@@ -10,26 +10,38 @@ interface ZoomableCanvasProps {
 const ZoomableCanvas: React.FC<ZoomableCanvasProps> = ({ children }) => {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const delta = -e.deltaY;
+  const bind = useGesture({
+    onWheel: ({ event, delta: [_x, dy], ctrlKey }) => {
+      if (ctrlKey || event.metaKey) {
+        event.preventDefault();
         setZoom(z => {
-          const newZoom = z + delta * 0.001;
+          const newZoom = z - dy * 0.005;
           return Math.min(Math.max(0.25, newZoom), 2);
         });
       }
-    };
-
-    canvas.addEventListener('wheel', handleWheel, { passive: false });
-    return () => canvas.removeEventListener('wheel', handleWheel);
-  }, []);
+    },
+    onDragStart: ({ event }) => {
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        setIsDragging(true);
+      }
+    },
+    onDrag: ({ delta: [dx, dy], event }) => {
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        setPosition(pos => ({
+          x: pos.x + dx / zoom,
+          y: pos.y + dy / zoom
+        }));
+      }
+    },
+    onDragEnd: () => {
+      setIsDragging(false);
+    }
+  });
 
   const handleZoomIn = () => {
     setZoom(z => Math.min(z + 0.1, 2));
@@ -70,9 +82,12 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = ({ children }) => {
 
       <div 
         ref={canvasRef}
-        className="w-full h-full bg-white rounded relative touch-none"
+        {...bind()}
+        className={`w-full h-full bg-white rounded relative touch-none select-none ${
+          isDragging ? 'cursor-grabbing' : 'cursor-default'
+        }`}
         style={{
-          transform: `scale(${zoom})`,
+          transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out'
         }}

@@ -1,13 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Provider } from 'react-redux';
 import { store } from '../store/store';
 import ZoomableCanvas from '../components/ZoomableCanvas';
+import ElementsDrawer from '../components/ElementsDrawer';
 
 function BuilderCanvas() {
+  const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
+
   return (
     <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* Top Navigation */}
@@ -87,8 +90,11 @@ function BuilderCanvas() {
         <div className="w-[5%] bg-[#2c2c2c] border-r border-[#3c3c3c]">
           {/* Add Elements Button */}
           <button 
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            className={`w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
+              isElementsDrawerOpen ? 'bg-[#3c3c3c] text-gray-200' : ''
+            }`}
             title="Add Elements"
+            onClick={() => setIsElementsDrawerOpen(!isElementsDrawerOpen)}
           >
             <span className="material-icons text-[20px]">add</span>
           </button>
@@ -117,6 +123,12 @@ function BuilderCanvas() {
             <span className="material-icons text-[20px]">widgets</span>
           </button>
         </div>
+
+        {/* Elements Drawer */}
+        <ElementsDrawer 
+          isOpen={isElementsDrawerOpen} 
+          onClose={() => setIsElementsDrawerOpen(false)} 
+        />
 
         {/* Canvas */}
         <ZoomableCanvas>
