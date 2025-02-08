@@ -5,7 +5,7 @@ import { useGesture } from 'react-use-gesture';
 import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
 import { DraggableElement } from '../types/builder';
-import { addElement, selectElement } from '../store/builderSlice';
+import { addElement, selectElement, moveElement } from '../store/builderSlice';
 import { RootState } from '../store/store';
 import BuilderElement from './BuilderElement';
 
@@ -24,18 +24,65 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = ({ children }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [{ isOver }, drop] = useDrop(() => ({
-    accept: 'element',
-    drop: (item: DraggableElement, monitor) => {
+    accept: ['element', 'placed-element'],
+    drop: (item: DraggableElement & { id?: string }, monitor) => {
+      if (!monitor.isOver({ shallow: true })) return;
+      
+      const offset = monitor.getClientOffset();
+      const initialOffset = monitor.getInitialClientOffset();
+      const initialSourceOffset = monitor.getInitialSourceClientOffset();
+
+      if (offset && canvasRef.current) {
+        const canvasRect = canvasRef.current.getBoundingClientRect();
+        
+        // Calculate position relative to canvas
+        let x = (offset.x - canvasRect.left) / zoom;
+        let y = (offset.y - canvasRect.top) / zoom;
+
+        // Account for element size to prevent boundary crossing
+        const elementSize = item.id ? elements.find(el => el.id === item.id)?.size : { width: 100, height: 40 };
+        const halfWidth = (elementSize?.width || 100) / 2;
+        const halfHeight = (elementSize?.height || 40) / 2;
+
+        // Constrain to body bounds accounting for element size
+        x = Math.max(halfWidth, Math.min(x, canvasRef.current.clientWidth - halfWidth));
+        y = Math.max(halfHeight, Math.min(y, canvasRef.current.clientHeight - halfHeight));
+
+        if (item.id) {
+          dispatch(moveElement({
+            id: item.id,
+            position: { x, y }
+          }));
+        } else {
+          dispatch(addElement({ type: item.type, position: { x, y } }));
+        }
+      }
+    },
+    hover: (item: DraggableElement & { id?: string }, monitor) => {
+      if (!item.id) return; // Only handle hover for existing elements
+      
       const offset = monitor.getClientOffset();
       if (offset && canvasRef.current) {
         const canvasRect = canvasRef.current.getBoundingClientRect();
-        const x = (offset.x - canvasRect.left) / zoom;
-        const y = (offset.y - canvasRect.top) / zoom;
-        dispatch(addElement({ type: item.type, position: { x, y } }));
+        
+        let x = (offset.x - canvasRect.left) / zoom;
+        let y = (offset.y - canvasRect.top) / zoom;
+
+        const elementSize = elements.find(el => el.id === item.id)?.size;
+        const halfWidth = (elementSize?.width || 100) / 2;
+        const halfHeight = (elementSize?.height || 40) / 2;
+
+        x = Math.max(halfWidth, Math.min(x, canvasRef.current.clientWidth - halfWidth));
+        y = Math.max(halfHeight, Math.min(y, canvasRef.current.clientHeight - halfHeight));
+
+        dispatch(moveElement({
+          id: item.id,
+          position: { x, y }
+        }));
       }
     },
     collect: (monitor) => ({
-      isOver: monitor.isOver(),
+      isOver: monitor.isOver({ shallow: true }),
     }),
   }));
 
@@ -122,15 +169,23 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = ({ children }) => {
         }}
         onClick={() => dispatch(selectElement(null))}
       >
-        {elements.map((element) => (
-          <BuilderElement
-            key={element.id}
-            id={element.id}
-            type={element.type}
-            position={element.position}
-            isSelected={element.id === selectedElementId}
-          />
-        ))}
+        <div className="absolute inset-0 border-2 border-dashed border-gray-300">
+          {elements.map((element) => (
+            <BuilderElement
+              key={element.id}
+              id={element.id}
+              type={element.type}
+              position={element.position}
+              isSelected={element.id === selectedElementId}
+              bodyBounds={{
+                left: 0,
+                top: 0,
+                right: canvasRef.current?.clientWidth || 0,
+                bottom: canvasRef.current?.clientHeight || 0
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

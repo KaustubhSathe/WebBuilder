@@ -12,9 +12,15 @@ interface BuilderElementProps {
   type: ElementType;
   position: { x: number; y: number };
   isSelected: boolean;
+  bodyBounds: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  };
 }
 
-const BuilderElement: React.FC<BuilderElementProps> = ({ id, type, position, isSelected }) => {
+const BuilderElement: React.FC<BuilderElementProps> = ({ id, type, position, isSelected, bodyBounds }) => {
   const dispatch = useDispatch();
   const [size, setSize] = useState({ width: 100, height: 40 });
   const [isResizing, setIsResizing] = useState(false);
@@ -26,76 +32,55 @@ const BuilderElement: React.FC<BuilderElementProps> = ({ id, type, position, isS
       isDragging: monitor.isDragging(),
     }),
     canDrag: () => !isResizing,
-    end: (item, monitor) => {
-      const delta = monitor.getDifferenceFromInitialOffset();
-      if (delta) {
-        dispatch(moveElement({
-          id: item.id,
-          position: {
-            x: position.x + delta.x,
-            y: position.y + delta.y
-          }
-        }));
-      }
-    },
   }), [id, position, isResizing]);
+
+  const constrainToBody = (x: number, y: number) => {
+    const halfWidth = size.width / 2;
+    const halfHeight = size.height / 2;
+
+    return {
+      x: Math.max(bodyBounds.left + halfWidth, Math.min(x, bodyBounds.right - halfWidth)),
+      y: Math.max(bodyBounds.top + halfHeight, Math.min(y, bodyBounds.bottom - halfHeight))
+    };
+  };
 
   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
     const newSize = { ...size };
+    let newPosition = { ...position };
     
     switch (direction) {
       case 'right':
         const newRightWidth = Math.max(100, size.width + deltaX * 2);
         const rightDelta = newRightWidth - size.width;
         newSize.width = newRightWidth;
-        dispatch(moveElement({
-          id,
-          position: {
-            x: position.x + rightDelta/2,
-            y: position.y
-          }
-        }));
+        newPosition.x += rightDelta/2;
         break;
       case 'left':
         const newWidth = Math.max(100, size.width - deltaX * 2);
         const widthDelta = newWidth - size.width;
         newSize.width = newWidth;
-        dispatch(moveElement({
-          id,
-          position: {
-            x: position.x - widthDelta/2,
-            y: position.y
-          }
-        }));
+        newPosition.x -= widthDelta/2;
         break;
       case 'bottom':
         const newBottomHeight = Math.max(40, size.height + deltaY * 2);
         const bottomDelta = newBottomHeight - size.height;
         newSize.height = newBottomHeight;
-        dispatch(moveElement({
-          id,
-          position: {
-            x: position.x,
-            y: position.y + bottomDelta/2
-          }
-        }));
+        newPosition.y += bottomDelta/2;
         break;
       case 'top':
         const newHeight = Math.max(40, size.height - deltaY * 2);
         const heightDelta = newHeight - size.height;
         newSize.height = newHeight;
-        dispatch(moveElement({
-          id,
-          position: {
-            x: position.x,
-            y: position.y - heightDelta/2
-          }
-        }));
+        newPosition.y -= heightDelta/2;
         break;
     }
 
+    // Constrain position after resize
+    newPosition = constrainToBody(newPosition.x, newPosition.y);
+
     setSize(newSize);
     dispatch(updateElementSize({ id, size: newSize }));
+    dispatch(moveElement({ id, position: newPosition }));
   };
 
   const getElementContent = () => {
