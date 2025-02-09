@@ -29,6 +29,6 @@ export const projectService = {
     });
 
     if (functionError) throw functionError;
-    return projectId ? functionData.project : functionData.projects;
+    return functionData?.projects || [];
   },
 }; 

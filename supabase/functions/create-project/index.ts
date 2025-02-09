@@ -28,12 +28,15 @@ serve(async (req: Request) => {
       // Create Supabase client first to verify the token
       const supabase = createClient(
         Deno.env.get('PROJECT_URL') ?? '',
-        Deno.env.get('PROJECT_ANON_KEY') ?? '',
+        Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ?? '',
         {
           auth: {
             autoRefreshToken: false,
             persistSession: false,
           },
+          db: {
+            schema: 'public'
+          }
         }
       )
 
@@ -52,7 +55,16 @@ serve(async (req: Request) => {
 
     const supabase = createClient(
       Deno.env.get('PROJECT_URL') ?? '',
-      Deno.env.get('PROJECT_ANON_KEY') ?? ''
+      Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+        db: {
+          schema: 'public'
+        }
+      }
     )
 
     const { name, description } = await req.json()
@@ -64,12 +76,15 @@ serve(async (req: Request) => {
           name,
           description,
           owner_id: user_id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         },
       ])
-      .select()
+      .select('id, name, description, owner_id, created_at, updated_at, thumbnail')
       .single()
 
     if (error) {
+      console.error('Database error:', error);
       return new Response(
         JSON.stringify({ error: error.message }),
         { 

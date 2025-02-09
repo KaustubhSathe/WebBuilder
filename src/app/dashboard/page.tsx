@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Project } from '@/types/project';
 import { projectService } from '@/services/projectService';
+import CreateProjectModal from '@/components/CreateProjectModal';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -46,13 +48,10 @@ export default function DashboardPage() {
     }
   };
 
-  const createNewProject = async () => {
+  const handleCreateProject = async (name: string, description: string) => {
     try {
-      const project = await projectService.createProject(
-        'Untitled Project',
-        'A new web project'
-      );
-      router.push(`/builder?project=${project.id}`);
+      const project = await projectService.createProject(name, description);
+      router.push(`/builder?project_id=${project.id}`);
     } catch (error) {
       console.error('Error creating project:', error);
     }
@@ -66,7 +65,7 @@ export default function DashboardPage() {
           <h1 className="text-xl font-semibold text-gray-200">My Projects</h1>
           <div className="flex items-center gap-4">
             <button
-              onClick={createNewProject}
+              onClick={() => setIsCreateModalOpen(true)}
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
             >
               <span className="material-icons text-[20px]">add</span>
@@ -88,46 +87,67 @@ export default function DashboardPage() {
         {loading ? (
           <div className="text-gray-400">Loading projects...</div>
         ) : projects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="bg-[#2c2c2c] rounded-lg overflow-hidden hover:ring-2 ring-blue-500/50 transition-all cursor-pointer"
-                onClick={() => router.push(`/builder?project=${project.id}`)}
-              >
-                <div className="aspect-video bg-[#1f1f1f] flex items-center justify-center">
-                  {project.thumbnail ? (
-                    <img
-                      src={project.thumbnail}
-                      alt={project.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="material-icons text-4xl text-gray-600">web</span>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="text-gray-200 font-medium mb-1">{project.name}</h3>
-                  <p className="text-gray-400 text-sm mb-3">
-                    {project.description || 'No description'}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>
-                      Updated {new Date(project.updated_at).toLocaleDateString()}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Add project deletion logic here
-                      }}
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                    >
-                      <span className="material-icons text-[18px]">delete</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="bg-[#2c2c2c] rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#3c3c3c]">
+                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-400">Name</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 hidden md:table-cell">Description</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-400">Last Updated</th>
+                  <th className="px-6 py-3 text-sm font-medium text-gray-400 w-20">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#3c3c3c]">
+                {projects.map((project) => (
+                  <tr 
+                    key={project.id}
+                    className="hover:bg-[#3c3c3c] transition-colors cursor-pointer"
+                    onClick={() => router.push(`/builder?project_id=${project.id}`)}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-[#1f1f1f] rounded flex items-center justify-center">
+                          {project.thumbnail ? (
+                            <img
+                              src={project.thumbnail}
+                              alt={project.name}
+                              className="w-full h-full object-cover rounded"
+                            />
+                          ) : (
+                            <span className="material-icons text-gray-600">web</span>
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-200">{project.name}</div>
+                          <div className="text-sm text-gray-400 md:hidden">
+                            {project.description || 'No description'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-300 hidden md:table-cell">
+                      {project.description || 'No description'}
+                    </td>
+                    <td className="px-6 py-4 text-gray-400 text-sm">
+                      {new Date(project.updated_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Add project deletion logic here
+                          }}
+                          className="text-red-400 hover:text-red-300 transition-colors p-2"
+                        >
+                          <span className="material-icons text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <div className="text-center py-12">
@@ -139,15 +159,21 @@ export default function DashboardPage() {
               Create your first project to get started
             </p>
             <button
-              onClick={createNewProject}
+              onClick={() => setIsCreateModalOpen(true)}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition-colors"
             >
               <span className="material-icons text-[20px]">add</span>
-              Create Project
+              New Project
             </button>
           </div>
         )}
       </main>
+
+      <CreateProjectModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateProject}
+      />
     </div>
   );
 } 

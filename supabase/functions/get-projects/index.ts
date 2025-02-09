@@ -1,6 +1,5 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0'
-import * as jose from "jose";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,12 +27,15 @@ serve(async (req: Request) => {
       // Create Supabase client first to verify the token
       const supabase = createClient(
         Deno.env.get('PROJECT_URL') ?? '',
-        Deno.env.get('PROJECT_ANON_KEY') ?? '',
+        Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ?? '',
         {
           auth: {
             autoRefreshToken: false,
             persistSession: false,
           },
+          db: {
+            schema: 'public'
+          }
         }
       )
 
@@ -52,7 +54,16 @@ serve(async (req: Request) => {
 
     const supabase = createClient(
       Deno.env.get('PROJECT_URL') ?? '',
-      Deno.env.get('PROJECT_ANON_KEY') ?? ''
+      Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+        db: {
+          schema: 'public'
+        }
+      }
     )
 
     const url = new URL(req.url)
@@ -83,18 +94,11 @@ serve(async (req: Request) => {
       )
     }
 
-    if (!data) {
-      return new Response(
-        JSON.stringify({ projects: [] }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
+    // Always return an array of projects
+    const projects = project_id ? (data ? [data] : []) : (data || []);
 
     return new Response(
-      JSON.stringify({ projects: project_id ? [data] : data }),
+      JSON.stringify({ projects }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
