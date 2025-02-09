@@ -1,184 +1,144 @@
 'use client';
 
-import React, { useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Provider } from 'react-redux';
-import { store } from '../store/store';
-import ZoomableCanvas from '../components/ZoomableCanvas';
-import ElementsDrawer from '../components/ElementsDrawer';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
-function BuilderCanvas() {
-  const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
+export default function LoginPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleCanvasClick = () => {
-    if (isElementsDrawerOpen) {
-      setIsElementsDrawerOpen(false);
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (session) {
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event);
+      if (event === 'SIGNED_IN' && session) {
+        router.push('/dashboard');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
+  const handleGithubLogin = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error logging in:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Top Navigation */}
-      <nav className="h-[35px] bg-[#2c2c2c] border-b border-[#3c3c3c] flex items-center">
-        {/* Menu Button */}
-        <button 
-          className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors border-r border-[#3c3c3c]"
-          title="Menu"
-        >
-          <span className="material-icons text-[20px]">menu</span>
-        </button>
+    <div className="min-h-screen bg-[#1a1a1a] flex">
+      {/* Left Section */}
+      <div className="flex-1 flex flex-col justify-center px-6 lg:px-12 pt-8">
+        <div className="max-w-lg">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-3">
+            WebBuilder
+          </h1>
+          <p className="text-base text-gray-400 mb-6 leading-relaxed">
+            Create stunning web interfaces with our intuitive drag-and-drop builder. 
+            Design, customize, and deploy your website in minutes without writing any code.
+          </p>
 
-        {/* Preview Button */}
-        <button 
-          className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
-          title="Preview"
-        >
-          <span className="material-icons text-[20px]">play_arrow</span>
-        </button>
-
-        {/* Current Page Indicator */}
-        <div className="flex-1 flex justify-center items-center">
-          <div className="flex items-center gap-2 px-3 py-1 rounded hover:bg-[#3c3c3c] cursor-pointer group">
-            <span className="material-icons text-[18px] text-gray-400 group-hover:text-gray-200">description</span>
-            <span className="text-sm text-gray-400 group-hover:text-gray-200">Home</span>
-            <span className="material-icons text-[16px] text-gray-400 group-hover:text-gray-200">expand_more</span>
-          </div>
-          <div className="flex items-center ml-2">
-            <button 
-              className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
-              title="Responsive"
-            >
-              <span className="material-icons text-[20px]">laptop</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Right Side Actions */}
-        <div className="flex items-center">
-          {/* Changes Saved Indicator */}
-          <button 
-            className="flex items-center justify-center text-green-500 hover:text-green-400 transition-colors px-2"
-            title="Changes Saved"
-          >
-            <span className="material-icons text-[20px]">check_circle</span>
-          </button>
-
-          {/* Comments */}
-          <button 
-            className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
-            title="Comments"
-          >
-            <span className="material-icons text-[20px]">comment</span>
-          </button>
-
-          {/* Share */}
-          <button 
-            className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
-            title="Share"
-          >
-            <span className="material-icons text-[20px]">share</span>
-          </button>
-
-          {/* Publish */}
-          <button 
-            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-colors px-4 h-[26px] rounded ml-2 mr-3 text-sm"
-            title="Publish"
-          >
-            Publish
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="flex h-[calc(100vh-35px)]" onClick={handleCanvasClick}>
-        {/* Left Sidebar */}
-        <div className="w-[5%] bg-[#2c2c2c] border-r border-[#3c3c3c]">
-          {/* Add Elements Button */}
-          <button 
-            className={`w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
-              isElementsDrawerOpen ? 'bg-[#3c3c3c] text-gray-200' : ''
-            }`}
-            title="Add Elements"
-            onClick={() => setIsElementsDrawerOpen(!isElementsDrawerOpen)}
-          >
-            <span className="material-icons text-[20px]">add</span>
-          </button>
-
-          {/* Pages Button */}
-          <button 
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
-            title="Pages"
-          >
-            <span className="material-icons text-[20px]">article</span>
-          </button>
-
-          {/* Navigator Button */}
-          <button 
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
-            title="Navigator"
-          >
-            <span className="material-icons text-[20px]">account_tree</span>
-          </button>
-
-          {/* Components Button */}
-          <button 
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
-            title="Saved Components"
-          >
-            <span className="material-icons text-[20px]">widgets</span>
-          </button>
-        </div>
-
-        {/* Elements Drawer */}
-        <ElementsDrawer 
-          isOpen={isElementsDrawerOpen} 
-          onClose={() => setIsElementsDrawerOpen(false)} 
-        />
-
-        {/* Canvas */}
-        <ZoomableCanvas>
-          <div className="w-[55%] h-full bg-white rounded">
-          </div>
-        </ZoomableCanvas>
-
-        {/* Right Sidebar */}
-        <div className="w-[40%] bg-[#2c2c2c] border-l border-[#3c3c3c]">
-          {/* Header */}
-          <div className="h-[35px] border-b border-[#3c3c3c] flex items-center px-3 justify-between">
-            <span className="text-gray-400 text-sm">No element selected</span>
-            <button 
-              className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
-              title="Create Component"
-            >
-              <span className="material-icons text-[18px]">view_in_ar</span>
-            </button>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
-            <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500 mx-1">
-              Style
-            </button>
-            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
-              Settings
-            </button>
-            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
-              Interactions
-            </button>
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center mb-2">
+                <span className="material-icons text-blue-400 text-lg">drag_indicator</span>
+              </div>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">Drag & Drop</h3>
+              <p className="text-gray-400 text-xs">
+                Intuitive drag-and-drop interface for effortless design
+              </p>
+            </div>
+            <div>
+              <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center mb-2">
+                <span className="material-icons text-purple-400 text-lg">widgets</span>
+              </div>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">Components</h3>
+              <p className="text-gray-400 text-xs">
+                Pre-built components to speed up your development
+              </p>
+            </div>
+            <div>
+              <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center mb-2">
+                <span className="material-icons text-green-400 text-lg">code</span>
+              </div>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">No Code</h3>
+              <p className="text-gray-400 text-xs">
+                Build websites without writing a single line of code
+              </p>
+            </div>
+            <div>
+              <div className="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-2">
+                <span className="material-icons text-yellow-400 text-lg">bolt</span>
+              </div>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">Fast & Easy</h3>
+              <p className="text-gray-400 text-xs">
+                Build and deploy your website in minutes
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
 
-export default function Home() {
-  return (
-    <Provider store={store}>
-      <DndProvider backend={HTML5Backend}>
-        <BuilderCanvas />
-      </DndProvider>
-    </Provider>
+      {/* Right Section */}
+      <div className="w-full max-w-md xl:max-w-lg flex flex-col justify-center p-8 lg:p-16 bg-[#1f1f1f] border-l border-gray-800">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-200 mb-2">Get Started</h2>
+          <p className="text-gray-400">Sign in to start building your website</p>
+        </div>
+
+        <button
+          onClick={handleGithubLogin}
+          className="group relative flex items-center gap-3 bg-[#333] hover:bg-[#444] text-white py-4 px-8 rounded-lg transition-all duration-200 hover:shadow-xl hover:scale-105"
+        >
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+          </svg>
+          Continue with GitHub
+          <div className="absolute inset-0 border border-white/20 rounded-lg" />
+        </button>
+
+        <p className="text-sm text-gray-500 mt-6 text-center">
+          By continuing, you agree to our Terms of Service and Privacy Policy
+        </p>
+      </div>
+    </div>
   );
 }
