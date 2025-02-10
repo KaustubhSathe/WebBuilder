@@ -31,4 +31,18 @@ export const projectService = {
     if (functionError) throw functionError;
     return functionData?.projects || [];
   },
+
+  async deleteProject(projectId: string): Promise<void> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+
+    const { error: functionError } = await supabase.functions.invoke('delete-project', {
+      body: { project_id: projectId },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (functionError) throw functionError;
+  },
 }; 

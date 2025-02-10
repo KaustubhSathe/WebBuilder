@@ -1,5 +1,5 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0'
+import { serve } from "http/server";
+import { createClient } from "@supabase/supabase-js";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,7 +24,6 @@ serve(async (req: Request) => {
     const token = authHeader.replace('Bearer ', '')
     let user_id: string
     try {
-      // Create Supabase client first to verify the token
       const supabase = createClient(
         Deno.env.get('PROJECT_URL') ?? '',
         Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ?? '',
@@ -39,7 +38,6 @@ serve(async (req: Request) => {
         }
       )
 
-      // Verify the token using Supabase auth
       const { data: { user }, error: authError } = await supabase.auth.getUser(token)
       
       if (authError || !user) throw new Error('Invalid token')
@@ -52,58 +50,38 @@ serve(async (req: Request) => {
       )
     }
 
-    const supabase = createClient(
-      Deno.env.get('PROJECT_URL') ?? '',
-      Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-        db: {
-          schema: 'public'
-        }
-      }
-    )
+    const { project_id } = await req.json()
 
-    const url = new URL(req.url)
-    const project_id = url.searchParams.get('project_id')
-
-    let query = supabase
-      .from('projects')
-      .select('*')
-      .eq('owner_id', user_id)
-      .is('deleted_at', null)
-
-    if (project_id) {
-      // Fetch single project
-      query = query.eq('id', project_id).single()
-    } else {
-      // Fetch all projects
-      query = query.order('updated_at', { ascending: false })
+    if (!project_id) {
+      return new Response(
+        JSON.stringify({ error: 'Project ID is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    const { data, error } = await query
+    const supabase = createClient(
+      Deno.env.get('PROJECT_URL') ?? '',
+      Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const { data: _, error } = await supabase
+      .from('projects')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', project_id)
+      .eq('owner_id', user_id)
+      .select()
+      .single()
 
     if (error) {
       return new Response(
         JSON.stringify({ error: error.message }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Always return an array of projects
-    const projects = project_id ? (data ? [data] : []) : (data || []);
-
     return new Response(
-      JSON.stringify({ projects }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify({ success: true }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';

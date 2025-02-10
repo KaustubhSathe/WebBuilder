@@ -57,6 +57,19 @@ export default function DashboardPage() {
     }
   };
 
+  const handleDeleteProject = async (projectId: string) => {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    
+    try {
+      await projectService.deleteProject(projectId);
+      // Refresh projects list
+      const updatedProjects = projects.filter(p => p.id !== projectId);
+      setProjects(updatedProjects);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
       {/* Header */}
@@ -87,68 +100,66 @@ export default function DashboardPage() {
         {loading ? (
           <div className="text-gray-400">Loading projects...</div>
         ) : projects.length > 0 ? (
-          <div className="bg-[#2c2c2c] rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[#3c3c3c]">
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-400">Name</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 hidden md:table-cell">Description</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-400">Last Updated</th>
-                  <th className="px-6 py-3 text-sm font-medium text-gray-400 w-20">Actions</th>
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 border-b border-[#3c3c3c]">Name</th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 hidden md:table-cell border-b border-[#3c3c3c]">Description</th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 border-b border-[#3c3c3c]">Last Updated</th>
+                <th className="px-6 py-3 text-sm font-medium text-gray-400 w-20 border-b border-[#3c3c3c]">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projects.map((project) => (
+                <tr 
+                  key={project.id}
+                  className="hover:bg-[#2c2c2c] transition-colors cursor-pointer border-b border-[#3c3c3c] last:border-b-0"
+                  onClick={() => router.push(`/builder?project_id=${project.id}`)}
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-[#2c2c2c] rounded flex items-center justify-center">
+                        {project.thumbnail ? (
+                          <img
+                            src={project.thumbnail}
+                            alt={project.name}
+                            className="w-full h-full object-cover rounded"
+                          />
+                        ) : (
+                          <span className="material-icons text-gray-600">web</span>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-200">{project.name}</div>
+                        <div className="text-sm text-gray-400 md:hidden">
+                          {project.description || 'No description'}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-gray-300 hidden md:table-cell">
+                    {project.description || 'No description'}
+                  </td>
+                  <td className="px-6 py-4 text-gray-400 text-sm">
+                    {new Date(project.updated_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteProject(project.id);
+                        }}
+                        className="text-red-400 hover:text-red-300 transition-colors p-2"
+                      >
+                        <span className="material-icons text-[18px]">delete</span>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#3c3c3c]">
-                {projects.map((project) => (
-                  <tr 
-                    key={project.id}
-                    className="hover:bg-[#3c3c3c] transition-colors cursor-pointer"
-                    onClick={() => router.push(`/builder?project_id=${project.id}`)}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#1f1f1f] rounded flex items-center justify-center">
-                          {project.thumbnail ? (
-                            <img
-                              src={project.thumbnail}
-                              alt={project.name}
-                              className="w-full h-full object-cover rounded"
-                            />
-                          ) : (
-                            <span className="material-icons text-gray-600">web</span>
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-200">{project.name}</div>
-                          <div className="text-sm text-gray-400 md:hidden">
-                            {project.description || 'No description'}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-300 hidden md:table-cell">
-                      {project.description || 'No description'}
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 text-sm">
-                      {new Date(project.updated_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Add project deletion logic here
-                          }}
-                          className="text-red-400 hover:text-red-300 transition-colors p-2"
-                        >
-                          <span className="material-icons text-[18px]">delete</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-[#2c2c2c] rounded-full flex items-center justify-center mx-auto mb-4">
