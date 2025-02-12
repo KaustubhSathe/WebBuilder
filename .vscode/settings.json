@@ -20,5 +20,6 @@
   ],
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
-  }
+  },
+  "mayank1513.trello-kanban.Workspace.filePath": ".tkb"
 }
