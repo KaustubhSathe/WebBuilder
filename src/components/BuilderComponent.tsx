@@ -1,16 +1,23 @@
+'use client';
+
 import React from 'react';
 import { useDrag } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
-import { Component } from '../types/builder';
-import { selectComponent, moveComponent } from '../store/builderSlice';
-import { RootState } from '../store/store';
+import { Component, ComponentType } from '@/types/builder';
+import { setSelectedComponent, moveElement, updateElementSize } from '@/store/builderSlice';
+import { RootState } from '@/store/store';
 import ComponentToolbar from './ComponentToolbar';
+import ResizeHandle from './ResizeHandle';
 
-const BuilderComponent: React.FC<{ component: Component }> = ({ component }) => {
+interface BuilderComponentProps {
+  component: Component;
+}
+
+const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
   const dispatch = useDispatch();
   const selectedComponent = useSelector((state: RootState) => state.builder.selectedComponent);
 
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, dragRef] = useDrag(() => ({
     type: 'COMPONENT',
     item: { id: component.id, type: component.type },
     collect: (monitor) => ({
@@ -20,35 +27,15 @@ const BuilderComponent: React.FC<{ component: Component }> = ({ component }) => 
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(selectComponent(component.id));
+    dispatch(setSelectedComponent(component.id));
+  };
+
+  const handleResize = (size: { width: number; height: number }) => {
+    dispatch(updateElementSize({ id: component.id, size }));
   };
 
   const renderComponent = () => {
     switch (component.type) {
-      case 'text':
-        return (
-          <p style={component.styles} className="min-w-[100px] min-h-[24px]">
-            {component.content}
-          </p>
-        );
-      case 'image':
-        return (
-          <img 
-            src={component.src} 
-            alt={component.content} 
-            style={component.styles}
-            className="rounded-lg shadow-sm" 
-          />
-        );
-      case 'button':
-        return (
-          <button 
-            style={component.styles}
-            className="px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-          >
-            {component.content}
-          </button>
-        );
       case 'container':
         return (
           <div 
@@ -60,14 +47,48 @@ const BuilderComponent: React.FC<{ component: Component }> = ({ component }) => 
             ))}
           </div>
         );
+      case 'body':
+        return (
+          <div style={component.styles}>
+            {component.children?.map((child) => (
+              <BuilderComponent key={child.id} component={child} />
+            ))}
+          </div>
+        );
+      case 'button':
+        return (
+          <button 
+            style={component.styles}
+            className="px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+          >
+            {component.content}
+          </button>
+        );
+      case 'image':
+        return (
+          <img 
+            src={component.src} 
+            alt={component.content} 
+            style={component.styles}
+            className="rounded-lg shadow-sm" 
+          />
+        );
       default:
-        return null;
+        return (
+          <div style={component.styles}>
+            {component.content}
+          </div>
+        );
     }
   };
 
+  if (component.type === 'body') {
+    return renderComponent();
+  }
+
   return (
     <div
-      ref={drag}
+      ref={dragRef}
       onClick={handleClick}
       style={{
         position: 'absolute',
@@ -75,7 +96,6 @@ const BuilderComponent: React.FC<{ component: Component }> = ({ component }) => 
         top: component.position?.y || 0,
         opacity: isDragging ? 0.5 : 1,
         cursor: 'move',
-        backgroundColor: component.styles?.backgroundColor || 'white',
       }}
       className={`
         rounded-lg
@@ -86,7 +106,12 @@ const BuilderComponent: React.FC<{ component: Component }> = ({ component }) => 
       `}
     >
       {renderComponent()}
-      {selectedComponent === component.id && <ComponentToolbar component={component} />}
+      {selectedComponent === component.id && (
+        <>
+          <ComponentToolbar component={component} />
+          <ResizeHandle onResize={handleResize} />
+        </>
+      )}
     </div>
   );
 };

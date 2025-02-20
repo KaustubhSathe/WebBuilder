@@ -11,7 +11,11 @@ const PageSelector = () => {
   const selectedPageId = useSelector((state: RootState) => state.pages.selectedPageId);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const selectedPage = pages.find(page => page.id === selectedPageId);
+  const selectedPage = pages?.find(page => page.id === selectedPageId);
+
+  if (!pages || pages.length === 0) {
+    return null;
+  }
 
   return (
     <div className="relative">

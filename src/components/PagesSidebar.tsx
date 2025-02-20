@@ -99,8 +99,8 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <div 
-        className={`absolute top-0 left-10 h-full bg-[#2c2c2c] border-r border-[#3c3c3c] transition-all duration-300 z-20 overflow-hidden ${
-          isOpen ? 'w-[240px]' : 'w-0'
+        className={`absolute top-0 left-10 h-full bg-[#2c2c2c] transition-all duration-300 z-20 overflow-hidden ${
+          isOpen ? 'w-[240px] border-r border-[#3c3c3c]' : 'w-0'
         }`}
         onClick={(e) => e.stopPropagation()}
       >

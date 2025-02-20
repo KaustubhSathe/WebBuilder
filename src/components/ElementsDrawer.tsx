@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDrag } from 'react-dnd';
-import { ElementType, DraggableElement } from '../types/builder';
+import { ComponentType, DraggableElement } from '../types/builder';
 
 interface ElementsDrawerProps {
   isOpen: boolean;
@@ -22,7 +22,7 @@ const ELEMENTS: DraggableElement[] = [
   { type: 'heading', label: 'Heading', icon: 'H' },
   { type: 'paragraph', label: 'Paragraph', icon: '¶' },
   { type: 'text-link', label: 'Text Link', icon: '🔗' },
-  { type: 'text-block', label: 'Text Block', icon: 'T' },
+  { type: 'text', label: 'Text Block', icon: 'T' },
   { type: 'blockquote', label: 'Block Quote', icon: '❝' },
   { type: 'rich-text', label: 'Rich Text', icon: '📝' },
   // Media Elements
@@ -147,10 +147,10 @@ const ElementsDrawer: React.FC<ElementsDrawerProps> = ({ isOpen, onClose }) => {
 
       {/* Drawer */}
       <div 
-        className={`absolute top-0 left-10 h-full bg-[#2c2c2c] border-r border-[#3c3c3c] transition-all duration-300 z-20 overflow-hidden ${
-          isOpen ? 'w-[240px]' : 'w-0'
+        className={`absolute top-0 left-10 h-full bg-[#2c2c2c] transition-all duration-300 z-20 overflow-hidden ${
+          isOpen ? 'w-[240px] border-r border-[#3c3c3c]' : 'w-0'
         }`}
-        onClick={(e) => e.stopPropagation()}  // Stop propagation here
+        onClick={(e) => e.stopPropagation()}
       >
         {isOpen && (
           <div className="flex flex-col h-full">

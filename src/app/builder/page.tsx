@@ -121,7 +121,7 @@ function BuilderCanvas() {
       {/* Main Content */}
       <div className="flex h-[calc(100vh-35px)]" onClick={handleCanvasClick}>
         {/* Left Sidebar */}
-        <div className="w-[5%] bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
+        <div className="w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
           {/* Add Elements Button */}
           <button 
             className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${

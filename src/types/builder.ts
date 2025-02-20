@@ -1,9 +1,9 @@
 export interface Component {
   id: string;
-  type: 'container' | 'text' | 'image' | 'button';
+  type: ComponentType;
   content?: string;
   src?: string;
-  children?: Component[];
+  children: Component[];
   styles?: {
     width?: string;
     height?: string;
@@ -21,23 +21,17 @@ export interface Component {
 }
 
 export interface BuilderState {
-  components: Component[];
+  component: Component;
   selectedComponent: string | null;
 }
 
-export type DragItemType = {
-  id: string;
-  type: string;
-  component: Component;
-};
-
-export type ElementType = 
+export type ComponentType = 
   | 'section' 
   | 'container' 
   | 'heading'
   | 'paragraph'
   | 'text-link'
-  | 'text-block'
+  | 'text'
   | 'blockquote'
   | 'rich-text'
   | 'div' 
@@ -45,6 +39,7 @@ export type ElementType =
   | 'list-item'
   | 'button' 
   | 'image'
+  | 'input'
   | 'video'
   | 'youtube'
   | 'form'
@@ -54,10 +49,11 @@ export type ElementType =
   | 'checkbox'
   | 'radio'
   | 'select'
-  | 'form-button';
+  | 'form-button'
+  | 'body';
 
 export interface DraggableElement {
-  type: ElementType;
+  type: ComponentType;
   label: string;
   icon: string;
 } 

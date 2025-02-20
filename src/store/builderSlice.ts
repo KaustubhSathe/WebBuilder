@@ -1,93 +1,131 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Component, BuilderState, ElementType } from '../types/builder';
-
-interface CanvasElement {
-  id: string;
-  type: ElementType;
-  position: { x: number; y: number };
-  size?: { width: number; height: number };
-}
-
-interface BuilderState {
-  components: Component[];
-  selectedComponent: string | null;
-  elements: CanvasElement[];
-  selectedElementId: string | null;
-}
+import { Component, BuilderState, ComponentType } from '../types/builder';
+import { v4 as uuidv4 } from 'uuid';
 
 const initialState: BuilderState = {
-  components: [],
+  component: {
+    id: 'root',
+    type: 'body',
+    children: [],
+    styles: {
+      width: '100%',
+      height: '100%',
+    },
+  },
   selectedComponent: null,
-  elements: [],
-  selectedElementId: null,
+};
+
+const findComponentById = (root: Component, id: string): Component | null => {
+  if (root.id === id) return root;
+  for (const child of root.children) {
+    const found = findComponentById(child, id);
+    if (found) return found;
+  }
+  return null;
 };
 
 const builderSlice = createSlice({
   name: 'builder',
   initialState,
   reducers: {
-    addComponent: (state, action: PayloadAction<Component>) => {
-      state.components.push(action.payload);
+    setComponent: (state, action: PayloadAction<Component>) => {
+      state.component = action.payload;
     },
-    updateComponent: (state, action: PayloadAction<{ id: string; updates: Partial<Component> }>) => {
-      const { id, updates } = action.payload;
-      const component = state.components.find(comp => comp.id === id);
-      if (component) {
-        Object.assign(component, updates);
-      }
-    },
-    moveComponent: (state, action: PayloadAction<{ id: string; x: number; y: number }>) => {
-      const { id, x, y } = action.payload;
-      const component = state.components.find(comp => comp.id === id);
-      if (component) {
-        component.position = { x, y };
-      }
-    },
-    selectComponent: (state, action: PayloadAction<string | null>) => {
+    setSelectedComponent: (state, action: PayloadAction<string | null>) => {
       state.selectedComponent = action.payload;
     },
     deleteComponent: (state, action: PayloadAction<string>) => {
-      state.components = state.components.filter(comp => comp.id !== action.payload);
+      const deleteFromChildren = (children: Component[]): Component[] => {
+        return children.filter(child => {
+          if (child.id === action.payload) return false;
+          child.children = deleteFromChildren(child.children);
+          return true;
+        });
+      };
+
+      state.component.children = deleteFromChildren(state.component.children);
       if (state.selectedComponent === action.payload) {
         state.selectedComponent = null;
       }
     },
-    addElement: (state, action: PayloadAction<{ type: ElementType; position: { x: number; y: number } }>) => {
-      const id = `element-${Date.now()}`;
-      state.elements.push({
-        id,
-        ...action.payload,
-      });
-      state.selectedElementId = id;
-    },
-    selectElement: (state, action: PayloadAction<string | null>) => {
-      state.selectedElementId = action.payload;
-    },
-    moveElement: (state, action: PayloadAction<{ id: string; position: { x: number; y: number } }>) => {
-      const element = state.elements.find(el => el.id === action.payload.id);
+    selectElement: (state, action: PayloadAction<string>) => {
+      const elementId = action.payload;
+      // Only set selected if element exists in the tree
+      const element = findComponentById(state.component, elementId);
       if (element) {
-        element.position = action.payload.position;
+        state.selectedComponent = elementId;
       }
     },
-    updateElementSize: (state, action: PayloadAction<{ id: string; size: { width: number; height: number } }>) => {
-      const element = state.elements.find(el => el.id === action.payload.id);
+    addElement: (state, action: PayloadAction<{
+      parentId: string;
+      type: ComponentType;
+      position: { x: number; y: number };
+    }>) => {
+      const { parentId, type, position } = action.payload;
+      const newElement: Component = {
+        id: uuidv4(),
+        type,
+        children: [],
+        position,
+        styles: {
+          position: 'absolute',
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+        },
+      };
+
+      const parent = findComponentById(state.component, parentId);
+      if (parent) {
+        parent.children.push(newElement);
+        state.selectedComponent = newElement.id;
+      }
+    },
+    moveElement: (state, action: PayloadAction<{
+      id: string;
+      position: { x: number; y: number };
+    }>) => {
+      const { id, position } = action.payload;
+      const element = findComponentById(state.component, id);
       if (element) {
-        element.size = action.payload.size;
+        element.position = position;
+        if (element.styles) {
+          element.styles.left = `${position.x}px`;
+          element.styles.top = `${position.y}px`;
+        }
+      }
+    },
+    updateElementSize: (state, action: PayloadAction<{
+      id: string;
+      size: { width: number; height: number };
+    }>) => {
+      const { id, size } = action.payload;
+      const element = findComponentById(state.component, id);
+      if (element && element.styles) {
+        element.styles.width = `${size.width}px`;
+        element.styles.height = `${size.height}px`;
+      }
+    },
+    updateComponent: (state, action: PayloadAction<{ 
+      id: string; 
+      updates: Partial<Component> 
+    }>) => {
+      const component = findComponentById(state.component, action.payload.id);
+      if (component) {
+        Object.assign(component, action.payload.updates);
       }
     },
   },
 });
 
 export const {
-  addComponent,
-  updateComponent,
-  moveComponent,
-  selectComponent,
+  setComponent,
+  setSelectedComponent,
   deleteComponent,
-  addElement,
   selectElement,
+  addElement,
   moveElement,
   updateElementSize,
+  updateComponent,
 } = builderSlice.actions;
 
 export default builderSlice.reducer; 
