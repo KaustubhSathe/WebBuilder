@@ -16,36 +16,29 @@ interface ZoomableCanvasProps {
 const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
   const dispatch = useDispatch();
   const component = useSelector((state: RootState) => state.builder.component);
-  console.log(component);
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [{ isOver }, drop] = useDrop(() => ({
-    accept: ['element', 'COMPONENT'],
-    drop: (item: { id?: string; type: ComponentType }, monitor) => {
+    accept: 'Component',
+    drop: (item: { type: ComponentType }, monitor) => {
+      console.log('Drop event:', item);
       if (!monitor.isOver({ shallow: true })) return;
       
       const offset = monitor.getClientOffset();
       if (offset && canvasRef.current) {
         const canvasRect = canvasRef.current.getBoundingClientRect();
         
-        let x = (offset.x - canvasRect.left) / zoom;
-        let y = (offset.y - canvasRect.top) / zoom;
+        const x = (offset.x - canvasRect.left) / zoom;
+        const y = (offset.y - canvasRect.top) / zoom;
 
-        if (item.id) {
-          dispatch(moveElement({
-            id: item.id,
-            position: { x, y }
-          }));
-        } else {
-          dispatch(addElement({
-            parentId: component.id,
-            type: item.type,
-            position: { x, y }
-          }));
-        }
+        dispatch(addElement({
+          parentId: component.id,
+          type: item.type,
+          position: { x, y }
+        }));
       }
     },
     collect: (monitor) => ({

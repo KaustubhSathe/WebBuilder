@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDrag } from 'react-dnd';
-import { ComponentType, DraggableComponent } from '../types/builder';
+import { DraggableComponent } from '../types/builder';
 
 interface ComponentsDrawerProps {
   isOpen: boolean;
@@ -43,8 +43,8 @@ const ELEMENTS: DraggableComponent[] = [
 
 const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => void }> = ({ element, onDragEnd }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'element',
-    item: element,
+    type: 'Component',
+    item: { type: element.type },
     end: () => onDragEnd(),
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
