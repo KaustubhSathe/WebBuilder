@@ -31,7 +31,30 @@ export type DragItemType = {
   component: Component;
 };
 
-export type ElementType = 'div' | 'text' | 'link' | 'input' | 'button';
+export type ElementType = 
+  | 'section' 
+  | 'container' 
+  | 'heading'
+  | 'paragraph'
+  | 'text-link'
+  | 'text-block'
+  | 'blockquote'
+  | 'rich-text'
+  | 'div' 
+  | 'list' 
+  | 'list-item'
+  | 'button' 
+  | 'image'
+  | 'video'
+  | 'youtube'
+  | 'form'
+  | 'label'
+  | 'textarea'
+  | 'file'
+  | 'checkbox'
+  | 'radio'
+  | 'select'
+  | 'form-button';
 
 export interface DraggableElement {
   type: ElementType;

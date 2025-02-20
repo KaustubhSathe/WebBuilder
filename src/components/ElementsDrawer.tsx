@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDrag } from 'react-dnd';
 import { ElementType, DraggableElement } from '../types/builder';
 
@@ -10,11 +10,35 @@ interface ElementsDrawerProps {
 }
 
 const ELEMENTS: DraggableElement[] = [
+  // Structure Elements
+  { type: 'section', label: 'Section', icon: '⬛' },
+  { type: 'container', label: 'Container', icon: '▢' },
+  // Basic Elements
   { type: 'div', label: 'Div Block', icon: '⬜' },
-  { type: 'text', label: 'Text Block', icon: 'T' },
-  { type: 'link', label: 'Link', icon: '🔗' },
-  { type: 'input', label: 'Input', icon: '⌨️' },
+  { type: 'list', label: 'List', icon: '📋' },
+  { type: 'list-item', label: 'List Item', icon: '•' },
   { type: 'button', label: 'Button', icon: '☐' },
+  // Typography Elements
+  { type: 'heading', label: 'Heading', icon: 'H' },
+  { type: 'paragraph', label: 'Paragraph', icon: '¶' },
+  { type: 'text-link', label: 'Text Link', icon: '🔗' },
+  { type: 'text-block', label: 'Text Block', icon: 'T' },
+  { type: 'blockquote', label: 'Block Quote', icon: '❝' },
+  { type: 'rich-text', label: 'Rich Text', icon: '📝' },
+  // Media Elements
+  { type: 'image', label: 'Image', icon: '🖼️' },
+  { type: 'video', label: 'Video', icon: '🎥' },
+  { type: 'youtube', label: 'YouTube', icon: '▶️' },
+  // Form Elements
+  { type: 'form', label: 'Form Block', icon: '📝' },
+  { type: 'label', label: 'Label', icon: '🏷️' },
+  { type: 'input', label: 'Input', icon: '⌨️' },
+  { type: 'textarea', label: 'Text Area', icon: '📄' },
+  { type: 'file', label: 'File Upload', icon: '📎' },
+  { type: 'checkbox', label: 'Checkbox', icon: '☑️' },
+  { type: 'radio', label: 'Radio Button', icon: '⚪' },
+  { type: 'select', label: 'Select', icon: '▼' },
+  { type: 'form-button', label: 'Form Button', icon: '📤' },
 ];
 
 const DraggableItem: React.FC<{ element: DraggableElement; onDragEnd: () => void }> = ({ element, onDragEnd }) => {
@@ -40,7 +64,76 @@ const DraggableItem: React.FC<{ element: DraggableElement; onDragEnd: () => void
   );
 };
 
+interface CategoryProps {
+  title: string;
+  elements: DraggableElement[];
+  onDragEnd: () => void;
+  isCollapsed: boolean;
+  onToggle: () => void;
+}
+
+const Category: React.FC<CategoryProps> = ({ 
+  title, 
+  elements, 
+  onDragEnd, 
+  isCollapsed, 
+  onToggle 
+}) => {
+  return (
+    <div>
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        className="w-full flex items-center justify-between text-gray-400 hover:text-gray-200 group mb-2"
+      >
+        <span className="text-xs uppercase">{title}</span>
+        <span className={`material-icons text-[18px] transition-transform ${
+          isCollapsed ? '' : 'rotate-90'
+        }`}>
+          chevron_right
+        </span>
+      </button>
+      <div className={`space-y-1 overflow-hidden transition-all ${
+        isCollapsed ? 'h-0' : 'h-auto'
+      }`}>
+        {elements.map((element) => (
+          <DraggableItem key={element.type} element={element} onDragEnd={onDragEnd} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const ElementsDrawer: React.FC<ElementsDrawerProps> = ({ isOpen, onClose }) => {
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({
+    Structure: true,
+    Typography: true,
+    Basic: true,
+    Media: true,
+    Form: true,
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      setCollapsedCategories({
+        Structure: true,
+        Typography: true,
+        Basic: true,
+        Media: true,
+        Form: true,
+      });
+    }
+  }, [isOpen]);
+
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -58,8 +151,8 @@ const ElementsDrawer: React.FC<ElementsDrawerProps> = ({ isOpen, onClose }) => {
         }`}
       >
         {isOpen && (
-          <div className="p-4 w-[240px]">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-4">
               <span className="text-gray-200 text-sm font-medium">Elements</span>
               <button 
                 onClick={onClose}
@@ -69,26 +162,46 @@ const ElementsDrawer: React.FC<ElementsDrawerProps> = ({ isOpen, onClose }) => {
               </button>
             </div>
 
-            <div className="space-y-4">
-              {/* Basic Elements */}
-              <div>
-                <div className="text-gray-400 text-xs uppercase mb-2">Basic</div>
-                <div className="space-y-1">
-                  {ELEMENTS.slice(0, 3).map((element) => (
-                    <DraggableItem key={element.type} element={element} onDragEnd={onClose} />
-                  ))}
-                </div>
-              </div>
+            <div className="space-y-4 p-4 overflow-y-auto hide-scrollbar flex-1">
+              <Category 
+                title="Structure"
+                elements={ELEMENTS.slice(0, 2)}
+                onDragEnd={onClose}
+                isCollapsed={collapsedCategories.Structure}
+                onToggle={() => toggleCategory('Structure')}
+              />
 
-              {/* Form Elements */}
-              <div>
-                <div className="text-gray-400 text-xs uppercase mb-2">Form</div>
-                <div className="space-y-1">
-                  {ELEMENTS.slice(3).map((element) => (
-                    <DraggableItem key={element.type} element={element} onDragEnd={onClose} />
-                  ))}
-                </div>
-              </div>
+              <Category 
+                title="Basic"
+                elements={ELEMENTS.slice(2, 6)}
+                onDragEnd={onClose}
+                isCollapsed={collapsedCategories.Basic}
+                onToggle={() => toggleCategory('Basic')}
+              />
+
+              <Category 
+                title="Typography"
+                elements={ELEMENTS.slice(6, 12)}
+                onDragEnd={onClose}
+                isCollapsed={collapsedCategories.Typography}
+                onToggle={() => toggleCategory('Typography')}
+              />
+
+              <Category 
+                title="Media"
+                elements={ELEMENTS.slice(12, 15)}
+                onDragEnd={onClose}
+                isCollapsed={collapsedCategories.Media}
+                onToggle={() => toggleCategory('Media')}
+              />
+
+              <Category 
+                title="Form"
+                elements={ELEMENTS.slice(15)}
+                onDragEnd={onClose}
+                isCollapsed={collapsedCategories.Form}
+                onToggle={() => toggleCategory('Form')}
+              />
             </div>
           </div>
         )}
