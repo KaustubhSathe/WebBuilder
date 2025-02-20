@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDrag } from 'react-dnd';
-import { ComponentType, DraggableElement } from '../types/builder';
+import { ComponentType, DraggableComponent } from '../types/builder';
 
-interface ElementsDrawerProps {
+interface ComponentsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const ELEMENTS: DraggableElement[] = [
+const ELEMENTS: DraggableComponent[] = [
   // Structure Elements
   { type: 'section', label: 'Section', icon: '⬛' },
   { type: 'div', label: 'Container', icon: '▢' },
@@ -41,7 +41,7 @@ const ELEMENTS: DraggableElement[] = [
   { type: 'form-button', label: 'Form Button', icon: '📤' },
 ];
 
-const DraggableItem: React.FC<{ element: DraggableElement; onDragEnd: () => void }> = ({ element, onDragEnd }) => {
+const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => void }> = ({ element, onDragEnd }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'element',
     item: element,
@@ -67,7 +67,7 @@ const DraggableItem: React.FC<{ element: DraggableElement; onDragEnd: () => void
 
 interface CategoryProps {
   title: string;
-  elements: DraggableElement[];
+  elements: DraggableComponent[];
   onDragEnd: () => void;
   isCollapsed: boolean;
   onToggle: () => void;
@@ -107,7 +107,7 @@ const Category: React.FC<CategoryProps> = ({
   );
 };
 
-const ElementsDrawer: React.FC<ElementsDrawerProps> = ({ isOpen, onClose }) => {
+const ElementsDrawer: React.FC<ComponentsDrawerProps> = ({ isOpen, onClose }) => {
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({
     Structure: true,
     Typography: true,

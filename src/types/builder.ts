@@ -56,7 +56,7 @@ export type ComponentType =
   | 'select'
   | 'form-button';
 
-export interface DraggableElement {
+export interface DraggableComponent {
   type: ComponentType;
   label: string;
   icon: string;
