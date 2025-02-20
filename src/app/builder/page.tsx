@@ -19,14 +19,10 @@ function BuilderCanvas() {
   const [isPagesSidebarOpen, setIsPagesSidebarOpen] = useState(false);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
-    console.log('canvas clicked');
-    console.log(e.target);
     // Check if clicked element is a sidebar icon or button
     const target = e.target as HTMLElement;
     const sidebarButton = target.closest('.left-sidebar-btn');
     if (sidebarButton) {
-      console.log(sidebarButton);
-      console.log('sidebar button clicked');
       return;
     }
 
@@ -175,8 +171,7 @@ function BuilderCanvas() {
 
         {/* Canvas */}
         <ZoomableCanvas>
-          <div className="w-[55%] h-full bg-white rounded">
-          </div>
+          
         </ZoomableCanvas>
 
         {/* Right Sidebar */}

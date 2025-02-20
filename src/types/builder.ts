@@ -27,10 +27,15 @@ export interface BuilderState {
 
 export type ComponentType = 
   | 'section' 
-  | 'container' 
-  | 'heading'
-  | 'paragraph'
-  | 'text-link'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6'
+  | 'p'
+  | 'main'
+  | 'a'
   | 'text'
   | 'blockquote'
   | 'rich-text'
@@ -49,8 +54,7 @@ export type ComponentType =
   | 'checkbox'
   | 'radio'
   | 'select'
-  | 'form-button'
-  | 'body';
+  | 'form-button';
 
 export interface DraggableElement {
   type: ComponentType;

@@ -12,16 +12,16 @@ interface ElementsDrawerProps {
 const ELEMENTS: DraggableElement[] = [
   // Structure Elements
   { type: 'section', label: 'Section', icon: '⬛' },
-  { type: 'container', label: 'Container', icon: '▢' },
+  { type: 'div', label: 'Container', icon: '▢' },
   // Basic Elements
   { type: 'div', label: 'Div Block', icon: '⬜' },
   { type: 'list', label: 'List', icon: '📋' },
   { type: 'list-item', label: 'List Item', icon: '•' },
   { type: 'button', label: 'Button', icon: '☐' },
   // Typography Elements
-  { type: 'heading', label: 'Heading', icon: 'H' },
-  { type: 'paragraph', label: 'Paragraph', icon: '¶' },
-  { type: 'text-link', label: 'Text Link', icon: '🔗' },
+  { type: 'h1', label: 'Heading', icon: 'H' },
+  { type: 'p', label: 'Paragraph', icon: '¶' },
+  { type: 'a', label: 'Text Link', icon: '🔗' },
   { type: 'text', label: 'Text Block', icon: 'T' },
   { type: 'blockquote', label: 'Block Quote', icon: '❝' },
   { type: 'rich-text', label: 'Rich Text', icon: '📝' },
@@ -53,6 +53,7 @@ const DraggableItem: React.FC<{ element: DraggableElement; onDragEnd: () => void
 
   return (
     <div
+      //@ts-ignore
       ref={drag}
       className={`w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm transition-colors cursor-move ${
         isDragging ? 'opacity-50' : ''
