@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import { store } from '../../store/store';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -13,17 +13,25 @@ import ZoomableCanvas from '@/components/ZoomableCanvas';
 import ElementsDrawer from '@/components/ElementsDrawer';
 import PagesSidebar from '@/components/PagesSidebar';
 import PageSelector from '@/components/PageSelector';
+import StyleEditor from '@/components/StyleEditor';
+import { setSelectedComponent } from '@/store/builderSlice';
 
 function BuilderCanvas() {
+  const dispatch = useDispatch();
   const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
   const [isPagesSidebarOpen, setIsPagesSidebarOpen] = useState(false);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Check if clicked element is a sidebar icon or button
     const target = e.target as HTMLElement;
-    const sidebarButton = target.closest('.left-sidebar-btn');
-    if (sidebarButton) {
-      return;
+    const sidebarButton = target.closest('.left-sidebar');
+    const rightSidebar = target.closest('.right-sidebar');
+    const canvas = target.closest('.zoomable-canvas');
+    
+    // If clicked outside canvas and not on a sidebar button, deselect component
+    if (!canvas && !sidebarButton && !rightSidebar) {
+      dispatch(setSelectedComponent(null));
+      console.log('clicked outside canvas and not on a sidebar button, deselecting component');
     }
 
     if (isElementsDrawerOpen) {
@@ -117,7 +125,7 @@ function BuilderCanvas() {
       {/* Main Content */}
       <div className="flex h-[calc(100vh-35px)]" onClick={handleCanvasClick}>
         {/* Left Sidebar */}
-        <div className="w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
+        <div className="left-sidebar w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
           {/* Add Elements Button */}
           <button 
             className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
@@ -170,23 +178,10 @@ function BuilderCanvas() {
         </div>
 
         {/* Canvas */}
-        <ZoomableCanvas>
-          
-        </ZoomableCanvas>
+        <ZoomableCanvas />
 
         {/* Right Sidebar */}
-        <div className="w-[40%] bg-[#2c2c2c] border-l border-[#3c3c3c]">
-          {/* Header */}
-          <div className="h-[35px] border-b border-[#3c3c3c] flex items-center px-3 justify-between">
-            <span className="text-gray-400 text-sm">No element selected</span>
-            <button 
-              className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
-              title="Create Component"
-            >
-              <span className="material-icons text-[18px]">view_in_ar</span>
-            </button>
-          </div>
-
+        <div className="right-sidebar w-[380px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
           {/* Tabs */}
           <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
             <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500 mx-1">
@@ -199,6 +194,9 @@ function BuilderCanvas() {
               Interactions
             </button>
           </div>
+
+          {/* Style Editor */}
+          <StyleEditor />
         </div>
       </div>
     </div>

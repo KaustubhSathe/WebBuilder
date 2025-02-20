@@ -48,11 +48,30 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
     switch (component.type) {
       case 'main':
         return (
-          <main style={component.styles} className="w-full h-full">
-            {component.children?.map((child) => (
-              <BuilderComponent key={child.id} component={child} />
-            ))}
-          </main>
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(setSelectedComponent(component.id));
+            }}
+            className={`w-full h-full relative ${
+              selectedComponent === component.id 
+                ? 'border-2 border-blue-500' 
+                : 'hover:border-2 hover:border-blue-200'
+            }`}
+          >
+            {/* Component Type Tooltip */}
+            {selectedComponent === component.id && (
+              <div className="absolute top-0 left-0 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-br z-50 whitespace-nowrap">
+                Main Container
+              </div>
+            )}
+
+            <main style={component.styles}>
+              {component.children?.map((child) => (
+                <BuilderComponent key={child.id} component={child} />
+              ))}
+            </main>
+          </div>
         );
       
       case 'section':
@@ -153,13 +172,20 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
         cursor: 'move',
       }}
       className={`
-        rounded-lg
+        group relative
         ${selectedComponent === component.id 
-          ? 'ring-2 ring-blue-400 shadow-lg' 
-          : 'hover:ring-2 hover:ring-blue-200'}
+          ? 'border-2 border-blue-500' 
+          : 'hover:border-2 hover:border-blue-200'}
         transition-all duration-200
       `}
     >
+      {/* Component Type Tooltip */}
+      {selectedComponent === component.id && (
+        <div className="absolute top-0 left-0 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-br z-50 whitespace-nowrap">
+          {component.type.charAt(0).toUpperCase() + component.type.slice(1)}
+        </div>
+      )}
+
       {renderComponent()}
       {selectedComponent === component.id && (
         <>

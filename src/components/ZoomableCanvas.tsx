@@ -126,7 +126,7 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
           canvasRef.current = node;
         }}
         {...bind()}
-        className={`w-full h-full bg-white rounded relative touch-none select-none ${
+        className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none ${
           isOver ? 'bg-opacity-90' : ''
         } ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`}
         style={{
