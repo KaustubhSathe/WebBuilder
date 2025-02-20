@@ -11,14 +11,42 @@ import { projectService } from '@/services/projectService';
 import type { Project } from '@/types/project';
 import ZoomableCanvas from '@/components/ZoomableCanvas';
 import ElementsDrawer from '@/components/ElementsDrawer';
+import PagesSidebar from '@/components/PagesSidebar';
+import PageSelector from '@/components/PageSelector';
 
 function BuilderCanvas() {
   const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
+  const [isPagesSidebarOpen, setIsPagesSidebarOpen] = useState(false);
 
-  const handleCanvasClick = () => {
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    console.log('canvas clicked');
+    console.log(e.target);
+    // Check if clicked element is a sidebar icon or button
+    const target = e.target as HTMLElement;
+    const sidebarButton = target.closest('.left-sidebar-btn');
+    if (sidebarButton) {
+      console.log(sidebarButton);
+      console.log('sidebar button clicked');
+      return;
+    }
+
     if (isElementsDrawerOpen) {
       setIsElementsDrawerOpen(false);
     }
+    if (isPagesSidebarOpen) {
+      setIsPagesSidebarOpen(false);
+    }
+  };
+
+  const handleElementsClick = () => {
+    setIsPagesSidebarOpen(false);
+    setIsElementsDrawerOpen(!isElementsDrawerOpen);
+  };
+
+  const handlePagesClick = () => {
+    setIsElementsDrawerOpen(false);
+    console.log('pages clicked', isPagesSidebarOpen);
+    setIsPagesSidebarOpen(!isPagesSidebarOpen);
   };
 
   return (
@@ -41,13 +69,9 @@ function BuilderCanvas() {
           <span className="material-icons text-[20px]">play_arrow</span>
         </button>
 
-        {/* Current Page Indicator */}
+        {/* Current Page Selector */}
         <div className="flex-1 flex justify-center items-center">
-          <div className="flex items-center gap-2 px-3 py-1 rounded hover:bg-[#3c3c3c] cursor-pointer group">
-            <span className="material-icons text-[18px] text-gray-400 group-hover:text-gray-200">description</span>
-            <span className="text-sm text-gray-400 group-hover:text-gray-200">Home</span>
-            <span className="material-icons text-[16px] text-gray-400 group-hover:text-gray-200">expand_more</span>
-          </div>
+          <PageSelector />
           <div className="flex items-center ml-2">
             <button 
               className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
@@ -97,29 +121,32 @@ function BuilderCanvas() {
       {/* Main Content */}
       <div className="flex h-[calc(100vh-35px)]" onClick={handleCanvasClick}>
         {/* Left Sidebar */}
-        <div className="w-[5%] bg-[#2c2c2c] border-r border-[#3c3c3c]">
+        <div className="w-[5%] bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
           {/* Add Elements Button */}
           <button 
-            className={`w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
+            className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
               isElementsDrawerOpen ? 'bg-[#3c3c3c] text-gray-200' : ''
             }`}
             title="Add Elements"
-            onClick={() => setIsElementsDrawerOpen(!isElementsDrawerOpen)}
+            onClick={handleElementsClick}
           >
             <span className="material-icons text-[20px]">add</span>
           </button>
 
           {/* Pages Button */}
           <button 
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
+              isPagesSidebarOpen ? 'bg-[#3c3c3c] text-gray-200' : ''
+            }`}
             title="Pages"
+            onClick={handlePagesClick}
           >
             <span className="material-icons text-[20px]">article</span>
           </button>
 
           {/* Navigator Button */}
           <button 
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            className="left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
             title="Navigator"
           >
             <span className="material-icons text-[20px]">account_tree</span>
@@ -127,18 +154,24 @@ function BuilderCanvas() {
 
           {/* Components Button */}
           <button 
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+            className="left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
             title="Saved Components"
           >
             <span className="material-icons text-[20px]">widgets</span>
           </button>
-        </div>
 
-        {/* Elements Drawer */}
-        <ElementsDrawer 
-          isOpen={isElementsDrawerOpen} 
-          onClose={() => setIsElementsDrawerOpen(false)} 
-        />
+          {/* Elements Drawer */}
+          <ElementsDrawer 
+            isOpen={isElementsDrawerOpen} 
+            onClose={() => setIsElementsDrawerOpen(false)} 
+          />
+
+          {/* Pages Sidebar */}
+          <PagesSidebar 
+            isOpen={isPagesSidebarOpen} 
+            onClose={() => setIsPagesSidebarOpen(false)} 
+          />
+        </div>
 
         {/* Canvas */}
         <ZoomableCanvas>

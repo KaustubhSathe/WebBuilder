@@ -139,16 +139,18 @@ const ElementsDrawer: React.FC<ElementsDrawerProps> = ({ isOpen, onClose }) => {
       {/* Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-0"
+          className="fixed inset-0 z-10"
+          style={{ left: '40px' }}  // Width of the left sidebar
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
       <div 
-        className={`absolute top-[35px] left-10 h-[calc(100%-35px)] bg-[#2c2c2c] border-r border-[#3c3c3c] transition-all duration-300 z-10 overflow-hidden ${
+        className={`absolute top-0 left-10 h-full bg-[#2c2c2c] border-r border-[#3c3c3c] transition-all duration-300 z-20 overflow-hidden ${
           isOpen ? 'w-[240px]' : 'w-0'
         }`}
+        onClick={(e) => e.stopPropagation()}  // Stop propagation here
       >
         {isOpen && (
           <div className="flex flex-col h-full">
