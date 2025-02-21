@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useDrag } from "react-dnd";
+import { DragSourceMonitor, useDrag } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { Component } from "@/types/builder";
 import {
@@ -42,7 +42,6 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
     const currentStyles = component.styles || {};
-    console.log(currentStyles);
     const currentWidth = parseInt(currentStyles.width || "100", 10);
     const currentHeight = parseInt(currentStyles.height || "40", 10);
     const currentX = parseInt(
