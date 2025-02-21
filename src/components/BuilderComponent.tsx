@@ -81,7 +81,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
               e.stopPropagation();
               dispatch(setSelectedComponent(component.id));
             }}
-            className={`w-full h-full relative ${
+            className={`${
               selectedComponent === component.id 
                 ? 'border-2 border-blue-500' 
                 : 'hover:border-2 hover:border-blue-200'

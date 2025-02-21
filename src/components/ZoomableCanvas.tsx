@@ -24,7 +24,7 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
 
   const [{ isOver }, drop] = useDrop({
     accept: ['component', 'placed-component'],
-    drop: (item: DraggableComponent, monitor) => {
+    drop: (item: DraggableComponent & { id?: string }, monitor) => {
       console.log('Drop called:', item);
       if (!monitor.isOver({ shallow: true })) return;
       
@@ -43,9 +43,11 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
 
       return { dropped: true };
     },
-    collect: (monitor) => ({
-      isOver: monitor.isOver({ shallow: true }),
-    }),
+    collect: (monitor) => {
+      const isOver = monitor.isOver({ shallow: true });
+      console.log('isOver:', isOver);
+      return { isOver };
+    },
   });
 
   const bind = useGesture({
@@ -91,13 +93,6 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
     setPosition({ x: 0, y: 0 });
   };
 
-  const setRefs = useCallback((node: HTMLDivElement | null) => {
-    drop(node);
-    if (node) {
-      canvasRef.current = node;
-    }
-  }, [drop]);
-
   return (
     <div className="w-full h-full bg-[#1a1a1a] p-8 overflow-hidden relative">
       {/* Zoom Controls */}
@@ -122,22 +117,31 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
         </button>
       </div>
 
+      {/* Drop Target Wrapper */}
       <div 
         //@ts-ignore
-        ref={setRefs}
-        {...bind()}
-        className={`w-full h-full bg-white rounded relative touch-none select-none ${
+        ref={drop}
+        className={`w-full h-full relative ${
           isOver ? 'bg-blue-100 bg-opacity-50' : ''
-        } ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`}
-        style={{
-          transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
-          transformOrigin: 'center center',
-          transition: isOver ? 'none' : 'transform 0.1s ease-out'
-        }}
-        onClick={() => dispatch(setSelectedComponent(null))}
+        }`}
+        style={{ border: '2px solid red' }}
       >
-        <div className="absolute inset-0 border-2 border-gray-300">
-          <BuilderComponent component={component} />
+        {/* Transformed Canvas */}
+        <div 
+          ref={canvasRef}
+          {...bind()}
+          className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none
+            ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`}
+          style={{
+            transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
+            transformOrigin: 'center center',
+            transition: 'transform 0.1s ease-out'
+          }}
+          onClick={() => dispatch(setSelectedComponent(null))}
+        >
+          <div className="absolute inset-0 border-2 border-gray-300">
+            <BuilderComponent component={component} />
+          </div>
         </div>
       </div>
     </div>

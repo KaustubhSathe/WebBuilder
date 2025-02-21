@@ -45,7 +45,7 @@ const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => vo
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'component',
     item: () => {
-      console.log('Drag started:', element.type);
+      console.log('Drag started:', element);
       return element;
     },
     end: (item, monitor) => {
@@ -53,9 +53,16 @@ const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => vo
       console.log('Drop result:', monitor.getDropResult());
       onDragEnd();
     },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
+    collect: (monitor) => {
+      console.log('Drag collecting:', {
+        isDragging: monitor.isDragging(),
+        item: monitor.getItem(),
+        type: monitor.getItemType()
+      });
+      return {
+        isDragging: monitor.isDragging()
+      };
+    }
   }));
 
   return (

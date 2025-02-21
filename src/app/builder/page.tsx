@@ -31,7 +31,6 @@ function BuilderCanvas() {
     // If clicked outside canvas and not on a sidebar button, deselect component
     if (!canvas && !sidebarButton && !rightSidebar) {
       dispatch(setSelectedComponent(null));
-      console.log('clicked outside canvas and not on a sidebar button, deselecting component');
     }
 
     if (isElementsDrawerOpen) {
