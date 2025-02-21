@@ -42,32 +42,32 @@ const ELEMENTS: DraggableComponent[] = [
 ];
 
 const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => void }> = ({ element, onDragEnd }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, drag, preview] = useDrag<DraggableComponent, void, { isDragging: boolean }>(() => ({
     type: 'component',
-    item: element,
-    canDrag: (monitor) => {
-      console.log("inside can drag", element);
-      return true;
+    item: () => {
+      console.log('Drag beginning:', element);
+      return element;
     },
-    end: (item, monitor) => {
-      console.log('Drag ended:', item);
-      console.log('Drop result:', monitor.getDropResult());
-      console.log('Can drag?', monitor.canDrag());
-      console.log('Did drop?', monitor.didDrop());
-      onDragEnd();
+    previewOptions: {
+      captureDraggingState: true
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     })
   }));
 
+
   return (
     <div
       //@ts-ignore
       ref={drag}
-      className={`draggable-item w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm transition-colors cursor-move ${
+      className={`draggable-item w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm transition-colors ${
         isDragging ? 'opacity-50' : ''
       }`}
+      style={{
+        cursor: isDragging ? 'grabbing' : 'grab',
+        opacity: isDragging ? 0.5 : 1
+      }}
     >
       <span className="inline-block w-6 text-center mr-2">{element.icon}</span>
       {element.label}

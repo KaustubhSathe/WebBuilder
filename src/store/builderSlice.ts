@@ -5,12 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 const initialState: BuilderState = {
   component: {
     id: 'root',
-    type: 'main',
+    type: 'button',
     children: [],
     styles: {
-      position: 'absolute',
-      left: '0px',
-      top: '0px',
+      position: 'relative',
+      left: '50px',
+      top: '50px',
       backgroundColor: 'blue',
       width: '100px',
       height: '100px',

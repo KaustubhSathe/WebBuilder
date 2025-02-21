@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { useGesture } from 'react-use-gesture';
 import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
-import { ComponentType, DraggableComponent } from '../types/builder';
+import { DraggableComponent } from '../types/builder';
 import { addElement, setSelectedComponent, moveElement } from '../store/builderSlice';
 import { RootState } from '../store/store';
 import BuilderComponent from './BuilderComponent';
@@ -24,13 +24,8 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
 
   const [{ isOver }, drop] = useDrop({
     accept: ['component', 'placed-component'],
-    canDrop: (item: DraggableComponent & { id?: string }, monitor) => {
-      console.log('Can drop?', { item, type: monitor.getItemType() });
-      return true;
-    },
     drop: (item: DraggableComponent & { id?: string }, monitor) => {
-      const dragItem = monitor.getItem();
-      console.log('Drop called:', { item, dragItem });
+      console.log('Drop called:', { item, type: monitor.getItemType() });
       
       if (!monitor.isOver({ shallow: true })) return;
       
@@ -38,28 +33,29 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
       if (!offset || !canvasRef.current) return;
 
       const canvasRect = canvasRef.current.getBoundingClientRect();
-      let x = (offset.x - canvasRect.left) / zoom;
-      let y = (offset.y - canvasRect.top) / zoom;
+      
+      // Calculate position relative to canvas, accounting for zoom and scroll
+      const x = (offset.x - canvasRect.left - position.x * zoom) / zoom;
+      const y = (offset.y - canvasRect.top - position.y * zoom) / zoom;
 
-      dispatch(addElement({
-        parentId: component.id,
-        type: dragItem.type,
-        position: { x, y }
-      }));
+      if (monitor.getItemType() === 'component') {
+        dispatch(addElement({
+          parentId: component.id,
+          type: item.type,
+          position: { x, y }
+        }));
+      } else if (monitor.getItemType() === 'placed-component' && item.id) {
+        dispatch(moveElement({
+          id: item.id,
+          position: { x, y }
+        }));
+      }
 
       return { dropped: true };
     },
-    collect: (monitor) => {
-      const isOver = monitor.isOver({ shallow: true });
-      const item = monitor.getItem();
-      console.log('Drop monitor:', {
-        isOver,
-        canDrop: monitor.canDrop(),
-        itemType: monitor.getItemType(),
-        item
-      });
-      return { isOver };
-    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver({ shallow: true })
+    }),
   });
 
   const bind = useGesture(
@@ -144,7 +140,7 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
           }}
           {...bind()}
           className={`zoomable-canvas w-full h-full bg-red-500 rounded relative touch-none select-none
-            ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`}
+            ${isDragging ? 'cursor-grabbing' : isOver ? 'cursor-grabbing' : 'cursor-default'}`}
           style={{
             transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
             transformOrigin: 'center center',
