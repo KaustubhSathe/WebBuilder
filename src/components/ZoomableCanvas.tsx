@@ -25,8 +25,6 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
   const [{ isOver }, drop] = useDrop({
     accept: ['component', 'placed-component'],
     drop: (item: DraggableComponent & { id?: string }, monitor) => {
-      console.log('Drop called:', { item, type: monitor.getItemType() });
-      
       if (!monitor.isOver({ shallow: true })) return;
       
       const offset = monitor.getClientOffset();
@@ -132,14 +130,14 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
         </button>
       </div>
 
-        {/* Transformed Canvas */}
         <div 
           ref={(node) => {
             drop(node);
             canvasRef.current = node;
           }}
           {...bind()}
-          className={`zoomable-canvas w-full h-full bg-red-500 rounded relative touch-none select-none
+          className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none
+            ${isOver ? 'bg-opacity-90' : ''}
             ${isDragging ? 'cursor-grabbing' : isOver ? 'cursor-grabbing' : 'cursor-default'}`}
           style={{
             transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,

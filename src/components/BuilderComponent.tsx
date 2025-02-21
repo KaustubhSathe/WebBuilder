@@ -1,25 +1,33 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useDrag } from 'react-dnd';
-import { useDispatch, useSelector } from 'react-redux';
-import { Component } from '@/types/builder';
-import { setSelectedComponent, moveElement, updateElementSize } from '@/store/builderSlice';
-import { RootState } from '@/store/store';
-import ComponentToolbar from './ComponentToolbar';
-import ResizeHandle from './ResizeHandle';
+import React, { useState } from "react";
+import { useDrag } from "react-dnd";
+import { useDispatch, useSelector } from "react-redux";
+import { Component } from "@/types/builder";
+import {
+  moveElement,
+  setSelectedComponent,
+  updateElementSize,
+} from "@/store/builderSlice";
+import { RootState } from "@/store/store";
+import ComponentToolbar from "./ComponentToolbar";
+import ResizeHandle from "./ResizeHandle";
 
 interface BuilderComponentProps {
   component: Component;
 }
 
-const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
+const BuilderComponent: React.FC<BuilderComponentProps> = (
+  { component }: BuilderComponentProps,
+) => {
   const dispatch = useDispatch();
-  const selectedComponent = useSelector((state: RootState) => state.builder.selectedComponent);
+  const selectedComponent = useSelector((state: RootState) =>
+    state.builder.selectedComponent
+  );
   const [isResizing, setIsResizing] = useState(false);
 
   const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: 'placed-component',
+    type: "placed-component",
     item: { id: component.id, type: component.type },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -34,57 +42,60 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
 
   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
     const currentStyles = component.styles || {};
-    const currentWidth = parseInt(currentStyles.width || '100', 10);
-    const currentHeight = parseInt(currentStyles.height || '40', 10);
-    
+    const currentWidth = parseInt(currentStyles.width || "100", 10);
+    const currentHeight = parseInt(currentStyles.height || "40", 10);
+
     let newWidth = currentWidth;
     let newHeight = currentHeight;
     let newX = component.position?.x || 0;
     let newY = component.position?.y || 0;
 
     switch (direction) {
-      case 'right':
+      case "right":
         newWidth = Math.max(100, currentWidth + deltaX * 2);
         newX += (newWidth - currentWidth) / 2;
         break;
-      case 'left':
+      case "left":
         newWidth = Math.max(100, currentWidth - deltaX * 2);
         newX -= (newWidth - currentWidth) / 2;
         break;
-      case 'bottom':
+      case "bottom":
         newHeight = Math.max(40, currentHeight + deltaY * 2);
         newY += (newHeight - currentHeight) / 2;
         break;
-      case 'top':
+      case "top":
         newHeight = Math.max(40, currentHeight - deltaY * 2);
         newY -= (newHeight - currentHeight) / 2;
         break;
     }
 
-    dispatch(updateElementSize({ 
-      id: component.id, 
-      size: { width: newWidth, height: newHeight }
+    dispatch(updateElementSize({
+      id: component.id,
+      size: { width: newWidth, height: newHeight },
     }));
 
     dispatch(moveElement({
       id: component.id,
-      position: { x: newX, y: newY }
+      position: { x: newX, y: newY },
     }));
   };
 
   const renderComponent = () => {
+    // Create a copy of styles without position properties
+    let { position, left, top, width, height, ...otherStyles } = component.styles || {};
+
     switch (component.type) {
-      case 'main':
+      case "main":
         return (
-          <div 
+          <div
             onClick={(e) => {
               e.stopPropagation();
               dispatch(setSelectedComponent(component.id));
             }}
-            className={`${
-              selectedComponent === component.id 
-                ? 'border-2 border-blue-500' 
-                : 'hover:border-2 hover:border-blue-200'
+            className={`w-full h-full relative ${
+              selectedComponent === component.id
+                ? "border-2 border-blue-500"
+                : "hover:border-2 hover:border-blue-200"
             }`}
           >
             {/* Component Type Tooltip */}
@@ -94,26 +105,32 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
               </div>
             )}
 
-            <main style={component.styles}>
+            <main style={otherStyles}>
               {component.children?.map((child) => (
                 <BuilderComponent key={child.id} component={child} />
               ))}
             </main>
           </div>
         );
-      
-      case 'section':
+
+      case "section":
         return (
-          <section style={component.styles} className="min-h-[100px] rounded-lg border border-slate-200">
+          <section
+            style={otherStyles}
+            className="min-h-[100px] rounded-lg border border-slate-200"
+          >
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
             ))}
           </section>
         );
 
-      case 'div':
+      case "div":
         return (
-          <div style={component.styles} className="min-h-[100px] rounded-lg border border-slate-200">
+          <div
+            style={otherStyles}
+            className="h-full w-full border border-slate-200"
+          >
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
             ))}
@@ -121,130 +138,206 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
         );
 
       // Typography components
-      case 'h1': return <h1 style={component.styles}>{component.content}</h1>;
-      case 'h2': return <h2 style={component.styles}>{component.content}</h2>;
-      case 'h3': return <h3 style={component.styles}>{component.content}</h3>;
-      case 'h4': return <h4 style={component.styles}>{component.content}</h4>;
-      case 'h5': return <h5 style={component.styles}>{component.content}</h5>;
-      case 'h6': return <h6 style={component.styles}>{component.content}</h6>;
-      case 'p': return <p style={component.styles}>{component.content}</p>;
-      case 'a': return <a href={component.content} style={component.styles}>{component.content}</a>;
-      case 'text': return <span style={component.styles}>{component.content}</span>;
-      case 'blockquote': return <blockquote style={component.styles}>{component.content}</blockquote>;
-      case 'rich-text': return <div style={component.styles} dangerouslySetInnerHTML={{ __html: component.content || '' }} />;
+      case "h1":
+        return <h1 style={otherStyles}>{component.content}</h1>;
+      case "h2":
+        return <h2 style={otherStyles}>{component.content}</h2>;
+      case "h3":
+        return <h3 style={otherStyles}>{component.content}</h3>;
+      case "h4":
+        return <h4 style={otherStyles}>{component.content}</h4>;
+      case "h5":
+        return <h5 style={otherStyles}>{component.content}</h5>;
+      case "h6":
+        return <h6 style={otherStyles}>{component.content}</h6>;
+      case "p":
+        return <p style={otherStyles}>{component.content}</p>;
+      case "a":
+        return (
+          <a href={component.content} style={otherStyles}>
+            {component.content}
+          </a>
+        );
+      case "text":
+        return <span style={otherStyles}>{component.content}</span>;
+      case "blockquote":
+        return (
+          <blockquote style={otherStyles}>{component.content}</blockquote>
+        );
+      case "rich-text":
+        return (
+          <div
+            style={otherStyles}
+            dangerouslySetInnerHTML={{ __html: component.content || "" }}
+          />
+        );
 
       // List components
-      case 'list': return (
-        <ul style={component.styles} className="list-disc list-inside">
-          {component.children?.map((child) => (
-            <BuilderComponent key={child.id} component={child} />
-          ))}
-        </ul>
-      );
-      case 'list-item': return <li style={component.styles}>{component.content}</li>;
+      case "list":
+        return (
+          <ul style={otherStyles} className="list-disc list-inside">
+            {component.children?.map((child) => (
+              <BuilderComponent key={child.id} component={child} />
+            ))}
+          </ul>
+        );
+      case "list-item":
+        return <li style={otherStyles}>{component.content}</li>;
 
       // Form components
-      case 'form': return (
-        <form style={component.styles} className="space-y-4">
-          {component.children?.map((child) => (
-            <BuilderComponent key={child.id} component={child} />
-          ))}
-        </form>
-      );
-      case 'input': return <input type="text" style={component.styles} placeholder={component.content} className="border rounded px-3 py-2" />;
-      case 'textarea': return <textarea style={component.styles} placeholder={component.content} className="border rounded px-3 py-2" />;
-      case 'label': return <label style={component.styles}>{component.content}</label>;
-      case 'button': return <button style={component.styles} className="px-4 py-2 rounded bg-blue-500 text-white">{component.content}</button>;
-      case 'checkbox': return <input type="checkbox" style={component.styles} />;
-      case 'radio': return <input type="radio" style={component.styles} />;
-      case 'select': return <select style={component.styles} className="border rounded px-3 py-2" />;
-      case 'file': return <input type="file" style={component.styles} />;
-      case 'form-button': return <button type="submit" style={component.styles} className="px-4 py-2 rounded bg-blue-500 text-white">{component.content}</button>;
+      case "form":
+        return (
+          <form style={otherStyles} className="space-y-4">
+            {component.children?.map((child) => (
+              <BuilderComponent key={child.id} component={child} />
+            ))}
+          </form>
+        );
+      case "input":
+        return (
+          <input
+            type="text"
+            style={otherStyles}
+            placeholder={component.content}
+            className="border rounded px-3 py-2"
+          />
+        );
+      case "textarea":
+        return (
+          <textarea
+            style={otherStyles}
+            placeholder={component.content}
+            className="border rounded px-3 py-2"
+          />
+        );
+      case "label":
+        return <label style={otherStyles}>{component.content}</label>;
+      case "button":
+        return (
+          <button
+            style={otherStyles}
+            className="px-4 py-2 rounded text-white"
+          >
+            {component.content}
+          </button>
+        );
+      case "checkbox":
+        return <input type="checkbox" style={otherStyles} />;
+      case "radio":
+        return <input type="radio" style={otherStyles} />;
+      case "select":
+        return (
+          <select
+            style={otherStyles}
+            className="border rounded px-3 py-2"
+          />
+        );
+      case "file":
+        return <input type="file" style={otherStyles} />;
+      case "form-button":
+        return (
+          <button
+            type="submit"
+            style={otherStyles}
+            className="px-4 py-2 rounded bg-blue-500 text-white"
+          >
+            {component.content}
+          </button>
+        );
 
       // Media components
-      case 'image': return <img src={component.src} alt={component.content} style={component.styles} className="rounded-lg" />;
-      case 'video': return <video src={component.src} controls style={component.styles} className="rounded-lg" />;
-      case 'youtube': return (
-        <iframe 
-          src={component.src} 
-          style={component.styles}
-          className="rounded-lg"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      );
+      case "image":
+        return (
+          <img
+            src={component.src}
+            alt={component.content}
+            style={otherStyles}
+            className="rounded-lg"
+          />
+        );
+      case "video":
+        return (
+          <video
+            src={component.src}
+            controls
+            style={otherStyles}
+            className="rounded-lg"
+          />
+        );
+      case "youtube":
+        return (
+          <iframe
+            src={component.src}
+            style={otherStyles}
+            className="rounded-lg"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        );
 
       default:
         return (
-          <div style={component.styles}>
+            <div style={otherStyles}>
             {component.content || `Unknown component type: ${component.type}`}
           </div>
         );
     }
   };
 
-  if (component.type === 'main') {
+  if (component.type === "main") {
     return renderComponent();
   }
-
   return (
     <div
       //@ts-ignore
       ref={dragRef}
       onClick={handleClick}
       style={{
-        position: 'absolute',
-        left: component.position?.x || 0,
-        top: component.position?.y || 0,
-        width: component.styles?.width || '100px',
-        height: component.styles?.height || '40px',
-        transform: 'translate(-50%, -50%)',
+        position: component.styles?.position as React.CSSProperties["position"],
+        left: component.styles?.left || 0,
+        top: component.styles?.top || 0,
+        width: component.styles?.width || "100px",
+        height: component.styles?.height || "40px",
+        transform: "translate(-50%, -50%)",
         opacity: isDragging ? 0.5 : 1,
-        cursor: isResizing ? 'auto' : 'move',
-        transition: isResizing ? 'none' : 'all 0.1s ease-out',
-        touchAction: 'none',
+        cursor: isResizing ? "auto" : "pointer",
+        transition: isResizing ? "none" : "all 0.1s ease-out",
+        touchAction: "none",
       }}
       className={`
-        group relative
-        ${selectedComponent === component.id 
-          ? 'border-2 border-blue-500' 
-          : 'hover:border-2 hover:border-blue-200'}
+        ${
+        selectedComponent === component.id
+          ? "border-2 border-blue-500"
+          : "hover:border-2 hover:border-blue-200"
+      }
         transition-all duration-200
       `}
     >
-      {/* Component Type Tooltip */}
-      {selectedComponent === component.id && (
-        <div className="absolute top-0 left-0 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-br z-50 whitespace-nowrap">
-          {component.type.charAt(0).toUpperCase() + component.type.slice(1)}
-        </div>
-      )}
-
       {renderComponent()}
-      
       {selectedComponent === component.id && !isDragging && (
         <>
           <ComponentToolbar component={component} />
-          <ResizeHandle 
+          <ResizeHandle
             position="top"
-            onResize={(_, dy) => handleResize('top', 0, dy)}
+            onResize={(_, dy) => handleResize("top", 0, dy)}
             onResizeStart={() => setIsResizing(true)}
             onResizeEnd={() => setIsResizing(false)}
           />
-          <ResizeHandle 
+          <ResizeHandle
             position="right"
-            onResize={(dx) => handleResize('right', dx, 0)}
+            onResize={(dx) => handleResize("right", dx, 0)}
             onResizeStart={() => setIsResizing(true)}
             onResizeEnd={() => setIsResizing(false)}
           />
-          <ResizeHandle 
+          <ResizeHandle
             position="bottom"
-            onResize={(_, dy) => handleResize('bottom', 0, dy)}
+            onResize={(_, dy) => handleResize("bottom", 0, dy)}
             onResizeStart={() => setIsResizing(true)}
             onResizeEnd={() => setIsResizing(false)}
           />
-          <ResizeHandle 
+          <ResizeHandle
             position="left"
-            onResize={(dx) => handleResize('left', dx, 0)}
+            onResize={(dx) => handleResize("left", dx, 0)}
             onResizeStart={() => setIsResizing(true)}
             onResizeEnd={() => setIsResizing(false)}
           />
@@ -254,7 +347,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
   );
 };
 
-export default BuilderComponent; 
+export default BuilderComponent;
 
 // const BuilderElement: React.FC<BuilderElementProps> = ({ id, type, position, isSelected, bodyBounds }) => {
 //   const dispatch = useDispatch();
@@ -283,7 +376,7 @@ export default BuilderComponent;
 //   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
 //     const newSize = { ...size };
 //     let newPosition = { ...position };
-    
+
 //     switch (direction) {
 //       case 'right':
 //         const newRightWidth = Math.max(100, size.width + deltaX * 2);
@@ -333,10 +426,10 @@ export default BuilderComponent;
 //         </div>;
 //       case 'input':
 //         return <div className="absolute inset-0 flex items-center p-2">
-//           <input 
-//             type="text" 
-//             className="w-full h-full border border-gray-300 rounded px-2" 
-//             placeholder="Input" 
+//           <input
+//             type="text"
+//             className="w-full h-full border border-gray-300 rounded px-2"
+//             placeholder="Input"
 //           />
 //         </div>;
 //       case 'button':
@@ -376,26 +469,26 @@ export default BuilderComponent;
 //       {getElementContent()}
 //       {isSelected && !isDragging && (
 //         <>
-//           <ResizeHandle 
-//             position="top" 
+//           <ResizeHandle
+//             position="top"
 //             onResize={(_, dy) => handleResize('top', 0, dy)}
 //             onResizeStart={() => setIsResizing(true)}
 //             onResizeEnd={() => setIsResizing(false)}
 //           />
-//           <ResizeHandle 
-//             position="right" 
+//           <ResizeHandle
+//             position="right"
 //             onResize={(dx) => handleResize('right', dx, 0)}
 //             onResizeStart={() => setIsResizing(true)}
 //             onResizeEnd={() => setIsResizing(false)}
 //           />
-//           <ResizeHandle 
-//             position="bottom" 
+//           <ResizeHandle
+//             position="bottom"
 //             onResize={(_, dy) => handleResize('bottom', 0, dy)}
 //             onResizeStart={() => setIsResizing(true)}
 //             onResizeEnd={() => setIsResizing(false)}
 //           />
-//           <ResizeHandle 
-//             position="left" 
+//           <ResizeHandle
+//             position="left"
 //             onResize={(dx) => handleResize('left', dx, 0)}
 //             onResizeStart={() => setIsResizing(true)}
 //             onResizeEnd={() => setIsResizing(false)}
@@ -406,4 +499,4 @@ export default BuilderComponent;
 //   );
 // };
 
-// export default BuilderElement; 
+// export default BuilderElement;

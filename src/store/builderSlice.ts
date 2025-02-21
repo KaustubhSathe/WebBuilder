@@ -5,15 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 const initialState: BuilderState = {
   component: {
     id: 'root',
-    type: 'button',
+    type: 'main',
     children: [],
     styles: {
       position: 'relative',
-      left: '50px',
-      top: '50px',
-      backgroundColor: 'blue',
-      width: '100px',
-      height: '100px',
+      width: '100%',
+      height: '100%',
     },
   },
   selectedComponent: null,
@@ -77,6 +74,10 @@ const builderSlice = createSlice({
           top: `${position.y}px`,
           width: '100px',
           height: '40px',
+        },
+        position: {
+          x: position.x,
+          y: position.y,
         },
       };
 

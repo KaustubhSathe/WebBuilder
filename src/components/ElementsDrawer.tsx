@@ -48,6 +48,9 @@ const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => vo
       console.log('Drag beginning:', element);
       return element;
     },
+    end: () => {
+      onDragEnd();
+    },
     previewOptions: {
       captureDraggingState: true
     },
@@ -56,14 +59,11 @@ const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => vo
     })
   }));
 
-
   return (
     <div
       //@ts-ignore
       ref={drag}
-      className={`draggable-item w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm transition-colors ${
-        isDragging ? 'opacity-50' : ''
-      }`}
+      className="draggable-item w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm"
       style={{
         cursor: isDragging ? 'grabbing' : 'grab',
         opacity: isDragging ? 0.5 : 1
@@ -147,18 +147,8 @@ const ElementsDrawer: React.FC<ComponentsDrawerProps> = ({ isOpen, onClose }) =>
 
   return (
     <>
-      {/* Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-10"
-          style={{ left: '40px' }}  // Width of the left sidebar
-          onClick={onClose}
-        />
-      )}
-
-      {/* Drawer */}
-      <div 
-        className={`absolute top-0 left-10 h-full bg-[#2c2c2c] transition-all duration-300 z-20 overflow-hidden ${
+      {isOpen && <div 
+        className={`absolute top-0 left-10 h-full bg-[#2c2c2c] transition-all duration-300 z-10 overflow-hidden ${
           isOpen ? 'w-[240px] border-r border-[#3c3c3c]' : 'w-0'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -218,7 +208,7 @@ const ElementsDrawer: React.FC<ComponentsDrawerProps> = ({ isOpen, onClose }) =>
             </div>
           </div>
         )}
-      </div>
+      </div>}
     </>
   );
 };
