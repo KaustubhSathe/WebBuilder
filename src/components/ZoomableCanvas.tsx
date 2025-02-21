@@ -23,7 +23,7 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [{ isOver }, drop] = useDrop({
-    accept: 'Component',
+    accept: ['component', 'placed-component'],
     drop: (item: DraggableComponent, monitor) => {
       console.log('Drop called:', item);
       if (!monitor.isOver({ shallow: true })) return;

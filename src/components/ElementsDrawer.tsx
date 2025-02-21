@@ -43,7 +43,7 @@ const ELEMENTS: DraggableComponent[] = [
 
 const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => void }> = ({ element, onDragEnd }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'Component',
+    type: 'component',
     item: () => {
       console.log('Drag started:', element.type);
       return element;
