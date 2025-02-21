@@ -55,7 +55,7 @@ const DraggableItem: React.FC<{ element: DraggableComponent; onDragEnd: () => vo
     <div
       //@ts-ignore
       ref={drag}
-      className={`w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm transition-colors cursor-move ${
+      className={`draggable-item w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm transition-colors cursor-move ${
         isDragging ? 'opacity-50' : ''
       }`}
     >

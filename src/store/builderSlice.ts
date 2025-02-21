@@ -63,22 +63,23 @@ const builderSlice = createSlice({
     }>) => {
       const { parentId, type, position } = action.payload;
       
-      // Create new component
       const newComponent: Component = {
         id: uuidv4(),
         type,
         children: [],
         styles: {
           position: 'absolute',
+          left: `${position.x}px`,
+          top: `${position.y}px`,
           width: '100px',
           height: '40px',
         },
       };
 
-      // Find parent component
       const parent = findComponentById(state.component, parentId);
       if (parent) {
         parent.children.push(newComponent);
+        state.selectedComponent = newComponent.id; // Select the new component
       }
     },
     moveElement: (state, action: PayloadAction<{
