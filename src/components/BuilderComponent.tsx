@@ -92,7 +92,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
   const renderComponent = () => {
     // Create a copy of styles without position properties
-    let { position, left, top, width, height, ...otherStyles } =
+    let { position, left, top, width, height, float, ...otherStyles } =
       component.styles || {};
 
     switch (component.type) {
@@ -305,6 +305,8 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         position: component.styles?.position as React.CSSProperties["position"],
         left: component.styles?.left || 0,
         top: component.styles?.top || 0,
+        float: component.styles?.float as React.CSSProperties["float"] ||
+          "none",
         width: component.styles?.width || "100px",
         height: component.styles?.height || "40px",
         opacity: isDragging ? 0.5 : 1,
