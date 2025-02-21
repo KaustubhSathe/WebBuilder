@@ -24,8 +24,14 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
 
   const [{ isOver }, drop] = useDrop({
     accept: ['component', 'placed-component'],
+    canDrop: (item: DraggableComponent & { id?: string }, monitor) => {
+      console.log('Can drop?', { item, type: monitor.getItemType() });
+      return true;
+    },
     drop: (item: DraggableComponent & { id?: string }, monitor) => {
-      console.log('Drop called:', item);
+      const dragItem = monitor.getItem();
+      console.log('Drop called:', { item, dragItem });
+      
       if (!monitor.isOver({ shallow: true })) return;
       
       const offset = monitor.getClientOffset();
@@ -37,7 +43,7 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
 
       dispatch(addElement({
         parentId: component.id,
-        type: item.type,
+        type: dragItem.type,
         position: { x, y }
       }));
 
@@ -45,40 +51,53 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
     },
     collect: (monitor) => {
       const isOver = monitor.isOver({ shallow: true });
-      console.log('isOver:', isOver);
+      const item = monitor.getItem();
+      console.log('Drop monitor:', {
+        isOver,
+        canDrop: monitor.canDrop(),
+        itemType: monitor.getItemType(),
+        item
+      });
       return { isOver };
     },
   });
 
-  const bind = useGesture({
-    onWheel: ({ event, delta: [_x, dy], ctrlKey }) => {
-      if (ctrlKey || event.metaKey) {
-        event.preventDefault();
-        setZoom(z => {
-          const newZoom = z - dy * 0.005;
-          return Math.min(Math.max(0.25, newZoom), 2);
-        });
+  const bind = useGesture(
+    {
+      onWheel: ({ event, delta: [_x, dy], ctrlKey }) => {
+        if (ctrlKey || event.metaKey) {
+          event.preventDefault();
+          setZoom(z => {
+            const newZoom = z - dy * 0.005;
+            return Math.min(Math.max(0.25, newZoom), 2);
+          });
+        }
+      },
+      onDragStart: ({ event }) => {
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          setIsDragging(true);
+        }
+      },
+      onDrag: ({ delta: [dx, dy], event }) => {
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          setPosition(pos => ({
+            x: pos.x + dx / zoom,
+            y: pos.y + dy / zoom
+          }));
+        }
+      },
+      onDragEnd: () => {
+        setIsDragging(false);
       }
     },
-    onDragStart: ({ event }) => {
-      if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
-        setIsDragging(true);
+    {
+      eventOptions: {
+        passive: false
       }
-    },
-    onDrag: ({ delta: [dx, dy], event }) => {
-      if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
-        setPosition(pos => ({
-          x: pos.x + dx / zoom,
-          y: pos.y + dy / zoom
-        }));
-      }
-    },
-    onDragEnd: () => {
-      setIsDragging(false);
     }
-  });
+  );
 
   const handleZoomIn = () => {
     setZoom(z => Math.min(z + 0.1, 2));
@@ -117,20 +136,14 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
         </button>
       </div>
 
-      {/* Drop Target Wrapper */}
-      <div 
-        //@ts-ignore
-        ref={drop}
-        className={`w-full h-full relative ${
-          isOver ? 'bg-blue-100 bg-opacity-50' : ''
-        }`}
-        style={{ border: '2px solid red' }}
-      >
         {/* Transformed Canvas */}
         <div 
-          ref={canvasRef}
+          ref={(node) => {
+            drop(node);
+            canvasRef.current = node;
+          }}
           {...bind()}
-          className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none
+          className={`zoomable-canvas w-full h-full bg-red-500 rounded relative touch-none select-none
             ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`}
           style={{
             transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
@@ -144,7 +157,6 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
