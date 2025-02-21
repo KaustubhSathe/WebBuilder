@@ -42,30 +42,39 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
     const currentStyles = component.styles || {};
+    console.log(currentStyles);
     const currentWidth = parseInt(currentStyles.width || "100", 10);
     const currentHeight = parseInt(currentStyles.height || "40", 10);
+    const currentX = parseInt(
+      String(component.styles?.left || "0").replace("px", ""),
+      10,
+    );
+    const currentY = parseInt(
+      String(component.styles?.top || "0").replace("px", ""),
+      10,
+    );
 
     let newWidth = currentWidth;
     let newHeight = currentHeight;
-    let newX = component.position?.x || 0;
-    let newY = component.position?.y || 0;
+    let newX = currentX;
+    let newY = currentY;
 
     switch (direction) {
       case "right":
-        newWidth = Math.max(100, currentWidth + deltaX * 2);
-        newX += (newWidth - currentWidth) / 2;
+        newWidth = Math.max(100, currentWidth + deltaX);
         break;
       case "left":
-        newWidth = Math.max(100, currentWidth - deltaX * 2);
-        newX -= (newWidth - currentWidth) / 2;
+        const widthChange = deltaX;
+        newWidth = Math.max(100, currentWidth - widthChange);
+        newX = currentX + widthChange;
         break;
       case "bottom":
-        newHeight = Math.max(40, currentHeight + deltaY * 2);
-        newY += (newHeight - currentHeight) / 2;
+        newHeight = Math.max(40, currentHeight + deltaY);
         break;
       case "top":
-        newHeight = Math.max(40, currentHeight - deltaY * 2);
-        newY -= (newHeight - currentHeight) / 2;
+        const heightChange = deltaY;
+        newHeight = Math.max(40, currentHeight - heightChange);
+        newY = currentY + heightChange;
         break;
     }
 
@@ -74,15 +83,18 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       size: { width: newWidth, height: newHeight },
     }));
 
-    dispatch(moveElement({
-      id: component.id,
-      position: { x: newX, y: newY },
-    }));
+    if (newX !== currentX || newY !== currentY) {
+      dispatch(moveElement({
+        id: component.id,
+        position: { x: newX, y: newY },
+      }));
+    }
   };
 
   const renderComponent = () => {
     // Create a copy of styles without position properties
-    let { position, left, top, width, height, ...otherStyles } = component.styles || {};
+    let { position, left, top, width, height, ...otherStyles } =
+      component.styles || {};
 
     switch (component.type) {
       case "main":
@@ -161,9 +173,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "text":
         return <span style={otherStyles}>{component.content}</span>;
       case "blockquote":
-        return (
-          <blockquote style={otherStyles}>{component.content}</blockquote>
-        );
+        return <blockquote style={otherStyles}>{component.content}</blockquote>;
       case "rich-text":
         return (
           <div
@@ -277,7 +287,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
       default:
         return (
-            <div style={otherStyles}>
+          <div style={otherStyles}>
             {component.content || `Unknown component type: ${component.type}`}
           </div>
         );
@@ -298,7 +308,6 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         top: component.styles?.top || 0,
         width: component.styles?.width || "100px",
         height: component.styles?.height || "40px",
-        transform: "translate(-50%, -50%)",
         opacity: isDragging ? 0.5 : 1,
         cursor: isResizing ? "auto" : "pointer",
         transition: isResizing ? "none" : "all 0.1s ease-out",
