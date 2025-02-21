@@ -19,7 +19,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({ component }) => {
   const [isResizing, setIsResizing] = useState(false);
 
   const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: 'COMPONENT',
+    type: 'Component',
     item: { id: component.id, type: component.type },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),

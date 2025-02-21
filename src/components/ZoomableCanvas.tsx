@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useGesture } from 'react-use-gesture';
 import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
-import { ComponentType } from '../types/builder';
+import { ComponentType, DraggableComponent } from '../types/builder';
 import { addElement, setSelectedComponent, moveElement } from '../store/builderSlice';
 import { RootState } from '../store/store';
 import BuilderComponent from './BuilderComponent';
@@ -12,6 +12,7 @@ import BuilderComponent from './BuilderComponent';
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
 }
+
 
 const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
   const dispatch = useDispatch();
@@ -21,47 +22,31 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const [{ isOver }, drop] = useDrop(() => ({
+  const [{ isOver }, drop] = useDrop({
     accept: 'Component',
-    drop: (item: { type: ComponentType }, monitor) => {
-      console.log('Drop event:', item);
+    drop: (item: DraggableComponent, monitor) => {
+      console.log('Drop called:', item);
       if (!monitor.isOver({ shallow: true })) return;
       
       const offset = monitor.getClientOffset();
-      const initialOffset = monitor.getInitialClientOffset();
-      const initialSourceOffset = monitor.getInitialSourceClientOffset();
+      if (!offset || !canvasRef.current) return;
 
-      if (offset && canvasRef.current) {
-        const canvasRect = canvasRef.current.getBoundingClientRect();
-        
-        // Calculate position relative to canvas
-        let x = (offset.x - canvasRect.left) / zoom;
-        let y = (offset.y - canvasRect.top) / zoom;
+      const canvasRect = canvasRef.current.getBoundingClientRect();
+      let x = (offset.x - canvasRect.left) / zoom;
+      let y = (offset.y - canvasRect.top) / zoom;
 
-        // Account for element size and constrain to bounds
-        const halfWidth = 50; // half of default width 100px
-        const halfHeight = 20; // half of default height 40px
+      dispatch(addElement({
+        parentId: component.id,
+        type: item.type,
+        position: { x, y }
+      }));
 
-        // Constrain to canvas bounds
-        x = Math.max(halfWidth, Math.min(x, canvasRef.current.clientWidth - halfWidth));
-        y = Math.max(halfHeight, Math.min(y, canvasRef.current.clientHeight - halfHeight));
-
-        dispatch(addElement({
-          parentId: component.id,
-          type: item.type,
-          position: { x, y }
-        }));
-      }
-    },
-    hover: (item: { type: ComponentType }, monitor) => {
-      // Optional: Add hover effect or validation
-      console.log('Hovering with:', item.type);
+      return { dropped: true };
     },
     collect: (monitor) => ({
       isOver: monitor.isOver({ shallow: true }),
-      canDrop: monitor.canDrop(),
     }),
-  }), [zoom, component.id]);
+  });
 
   const bind = useGesture({
     onWheel: ({ event, delta: [_x, dy], ctrlKey }) => {
@@ -106,15 +91,12 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
     setPosition({ x: 0, y: 0 });
   };
 
-  const setRefs = (node: HTMLDivElement | null) => {
-    // First connect the drop target
+  const setRefs = useCallback((node: HTMLDivElement | null) => {
     drop(node);
-    console.log(node);
-    // Then set our canvas ref
     if (node) {
       canvasRef.current = node;
     }
-  };
+  }, [drop]);
 
   return (
     <div className="w-full h-full bg-[#1a1a1a] p-8 overflow-hidden relative">
@@ -141,9 +123,10 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
       </div>
 
       <div 
+        //@ts-ignore
         ref={setRefs}
         {...bind()}
-        className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none ${
+        className={`w-full h-full bg-white rounded relative touch-none select-none ${
           isOver ? 'bg-blue-100 bg-opacity-50' : ''
         } ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`}
         style={{
