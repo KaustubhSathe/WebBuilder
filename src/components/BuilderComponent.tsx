@@ -90,9 +90,37 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
     }
   };
 
+  const handleMouseOver = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Remove hover from all parent builder components
+    const currentTarget = e.currentTarget as HTMLElement;
+    let parent = currentTarget.parentElement;
+
+    while (parent) {
+      const parentBuilderComponent = parent.querySelector(
+        '[data-is-builder-component="true"]',
+      );
+      if (parentBuilderComponent) {
+        parentBuilderComponent.classList.remove("builder-component-hover");
+      }
+      parent = parent.parentElement;
+    }
+
+    // Add hover to current component
+    currentTarget.classList.add("builder-component-hover");
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    (e.currentTarget as HTMLElement).classList.remove(
+      "builder-component-hover",
+    );
+  };
+
   const renderComponent = () => {
     // Create a copy of styles without position properties
-    let { position, left, top, width, height, float, ...otherStyles } =
+    let { position, left, top, width, height, float, margin, padding, ...otherStyles } =
       component.styles || {};
 
     switch (component.type) {
@@ -116,7 +144,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
               </div>
             )}
 
-            <main style={otherStyles}>
+            <main className="w-full h-full">
               {component.children?.map((child) => (
                 <BuilderComponent key={child.id} component={child} />
               ))}
@@ -301,7 +329,10 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
     <div
       //@ts-ignore
       ref={dragRef}
+      data-is-builder-component="true"
       onClick={handleClick}
+      onMouseOver={handleMouseOver}
+      onMouseLeave={handleMouseLeave}
       style={{
         position: component.styles?.position as React.CSSProperties["position"],
         left: component.styles?.left || 0,
@@ -314,13 +345,11 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         cursor: isResizing ? "auto" : "pointer",
         transition: isResizing ? "none" : "all 0.1s ease-out",
         touchAction: "none",
+        margin: component.styles?.margin || "0",
+        padding: component.styles?.padding || "0",
       }}
       className={`
-        ${
-        selectedComponent === component.id
-          ? "border-2 border-blue-500"
-          : "hover:border-2 hover:border-blue-200"
-      }
+        ${selectedComponent === component.id ? "border-2 border-blue-500" : ""}
         transition-all duration-200
       `}
     >

@@ -37,3 +37,7 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+.builder-component-hover {
+  border: 2px solid #bfdbfe; /* blue-200 */
+}

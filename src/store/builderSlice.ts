@@ -135,12 +135,22 @@ const builderSlice = createSlice({
         if (newParent) {
           newParent.children.push(component);
         }
+        console.log("newParent", newParent);
       }
 
       // Update position
       if (component.styles) {
         component.styles.left = `${position.x}px`;
         component.styles.top = `${position.y}px`;
+
+        // If position is absolute, update the top and left styles
+        if (component.styles.position === "absolute") {
+          component.styles.top = `${position.y}px`;
+          component.styles.left = `${position.x}px`;
+          // Remove bottom and right if they exist
+          delete component.styles.bottom;
+          delete component.styles.right;
+        }
       }
     },
     updateElementSize: (
