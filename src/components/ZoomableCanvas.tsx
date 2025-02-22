@@ -16,11 +16,22 @@ import BuilderComponent from "./BuilderComponent";
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
 }
+// find the parent of a component
+// this is a recursive function that will return the parent of the component
+// root is the root of the component tree
+// node is the component to find the parent of
+const findParent = (root: Component, node: Component): Component | null => {
+  for (const child of root.children) {
+    if (child.children.some((c) => c.id === node.id)) return root;
+    const found = findParent(child, node);
+    if (found) return found;
+  }
+  return null;
+};
 
 const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
   const dispatch = useDispatch();
   const component = useSelector((state: RootState) => state.builder.component);
-  console.log(component);
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -65,6 +76,7 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
             canvasRect,
             excludeId,
           );
+          console.log(childResult);
           return childResult || child;
         }
       }
@@ -72,6 +84,24 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
 
     // If no children contain the point, return the root if it contains the point
     return root;
+  };
+
+  const getAbsolutePosition = (child: Component): { x: number; y: number } => {
+    let x = parseInt(child.styles?.left?.replace("px", "") || "0", 10);
+    let y = parseInt(child.styles?.top?.replace("px", "") || "0", 10);
+
+    // Get parent's ID from the component tree
+    let parent = findParent(component, child);
+    console.log(parent);
+    while (parent) {
+      x += parseInt(parent.styles?.left?.replace("px", "") || "0", 10);
+      y += parseInt(parent.styles?.top?.replace("px", "") || "0", 10);
+
+      parent = findParent(component, parent);
+      console.log(parent);
+    }
+
+    return { x, y };
   };
 
   const [{ isOver }, drop] = useDrop({
@@ -113,17 +143,12 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
       );
       if (!targetComponent) return;
 
-      // Calculate position relative to target component
-      const targetLeft = parseInt(
-        targetComponent.styles?.left?.replace("px", "") || "0",
-        10,
-      );
-      const targetTop = parseInt(
-        targetComponent.styles?.top?.replace("px", "") || "0",
-        10,
-      );
-      const relativeX = x - targetLeft;
-      const relativeY = y - targetTop;
+      // Get absolute position of target component
+      const targetAbsPos = getAbsolutePosition(targetComponent);
+
+      // Calculate position relative to target component using absolute positions
+      const relativeX = x - targetAbsPos.x;
+      const relativeY = y - targetAbsPos.y;
 
       if (monitor.getItemType() === "component") {
         dispatch(addElement({

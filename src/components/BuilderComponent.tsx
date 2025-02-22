@@ -93,6 +93,9 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
   const handleMouseOver = (e: React.MouseEvent) => {
     e.stopPropagation();
 
+    // If this is the selected component, return early
+    if (selectedComponent === component.id) return;
+
     // Remove hover from all parent builder components
     const currentTarget = e.currentTarget as HTMLElement;
     let parent = currentTarget.parentElement;
@@ -120,17 +123,23 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
   const renderComponent = () => {
     // Create a copy of styles without position properties
-    let { position, left, top, width, height, float, margin, padding, ...otherStyles } =
-      component.styles || {};
+    let {
+      position,
+      left,
+      top,
+      width,
+      height,
+      float,
+      margin,
+      padding,
+      ...otherStyles
+    } = component.styles || {};
 
     switch (component.type) {
       case "main":
         return (
           <div
-            onClick={(e) => {
-              e.stopPropagation();
-              dispatch(setSelectedComponent(component.id));
-            }}
+            onClick={handleClick}
             className={`w-full h-full relative ${
               selectedComponent === component.id
                 ? "border-2 border-blue-500"
@@ -330,6 +339,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       //@ts-ignore
       ref={dragRef}
       data-is-builder-component="true"
+      data-component-id={component.id}
       onClick={handleClick}
       onMouseOver={handleMouseOver}
       onMouseLeave={handleMouseLeave}

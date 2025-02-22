@@ -1,35 +1,38 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Provider, useDispatch } from 'react-redux';
-import { store } from '../../store/store';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { projectService } from '@/services/projectService';
-import type { Project } from '@/types/project';
-import ZoomableCanvas from '@/components/ZoomableCanvas';
-import ElementsDrawer from '@/components/ElementsDrawer';
-import PagesSidebar from '@/components/PagesSidebar';
-import PageSelector from '@/components/PageSelector';
-import StyleEditor from '@/components/StyleEditor';
-import { setSelectedComponent } from '@/store/builderSlice';
+import React, { useEffect, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { Provider, useDispatch } from "react-redux";
+import { store } from "../../store/store";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { projectService } from "@/services/projectService";
+import type { Project } from "@/types/project";
+import ZoomableCanvas from "@/components/ZoomableCanvas";
+import ElementsDrawer from "@/components/ElementsDrawer";
+import PagesSidebar from "@/components/PagesSidebar";
+import PageSelector from "@/components/PageSelector";
+import StyleEditor from "@/components/StyleEditor";
+import { setSelectedComponent } from "@/store/builderSlice";
+import NavigatorSidebar from "@/components/NavigatorSidebar";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
   const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
   const [isPagesSidebarOpen, setIsPagesSidebarOpen] = useState(false);
+  const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Check if clicked element is a sidebar icon or button
     const target = e.target as HTMLElement;
-    const sidebarButton = target.closest('.left-sidebar');
-    const rightSidebar = target.closest('.right-sidebar');
-    const canvas = target.closest('.zoomable-canvas');
-    
+    const sidebarButton = target.closest(".left-sidebar");
+    const rightSidebar = target.closest(".right-sidebar");
+    const canvas = target.closest(".zoomable-canvas");
+
     // If clicked outside canvas and not on a sidebar button, deselect component
     if (!canvas && !sidebarButton && !rightSidebar) {
+      console.log("deselecting component");
       dispatch(setSelectedComponent(null));
     }
 
@@ -39,17 +42,27 @@ function BuilderCanvas() {
     if (isPagesSidebarOpen) {
       setIsPagesSidebarOpen(false);
     }
+    if (isNavigatorOpen) {
+      setIsNavigatorOpen(false);
+    }
   };
 
   const handleElementsClick = () => {
     setIsPagesSidebarOpen(false);
+    setIsNavigatorOpen(false);
     setIsElementsDrawerOpen(!isElementsDrawerOpen);
   };
 
   const handlePagesClick = () => {
     setIsElementsDrawerOpen(false);
-    console.log('pages clicked', isPagesSidebarOpen);
+    setIsNavigatorOpen(false);
     setIsPagesSidebarOpen(!isPagesSidebarOpen);
+  };
+
+  const handleNavigatorClick = () => {
+    setIsElementsDrawerOpen(false);
+    setIsPagesSidebarOpen(false);
+    setIsNavigatorOpen(!isNavigatorOpen);
   };
 
   return (
@@ -57,7 +70,7 @@ function BuilderCanvas() {
       {/* Top Navigation */}
       <nav className="h-[35px] bg-[#2c2c2c] border-b border-[#3c3c3c] flex items-center">
         {/* Menu Button */}
-        <button 
+        <button
           className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors border-r border-[#3c3c3c]"
           title="Menu"
         >
@@ -65,7 +78,7 @@ function BuilderCanvas() {
         </button>
 
         {/* Preview Button */}
-        <button 
+        <button
           className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
           title="Preview"
         >
@@ -76,7 +89,7 @@ function BuilderCanvas() {
         <div className="flex-1 flex justify-center items-center">
           <PageSelector />
           <div className="flex items-center ml-2">
-            <button 
+            <button
               className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
               title="Responsive"
             >
@@ -88,7 +101,7 @@ function BuilderCanvas() {
         {/* Right Side Actions */}
         <div className="flex items-center">
           {/* Changes Saved Indicator */}
-          <button 
+          <button
             className="flex items-center justify-center text-green-500 hover:text-green-400 transition-colors px-2"
             title="Changes Saved"
           >
@@ -96,7 +109,7 @@ function BuilderCanvas() {
           </button>
 
           {/* Comments */}
-          <button 
+          <button
             className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
             title="Comments"
           >
@@ -104,7 +117,7 @@ function BuilderCanvas() {
           </button>
 
           {/* Share */}
-          <button 
+          <button
             className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
             title="Share"
           >
@@ -112,7 +125,7 @@ function BuilderCanvas() {
           </button>
 
           {/* Publish */}
-          <button 
+          <button
             className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-colors px-4 h-[26px] rounded ml-2 mr-3 text-sm"
             title="Publish"
           >
@@ -126,9 +139,9 @@ function BuilderCanvas() {
         {/* Left Sidebar */}
         <div className="left-sidebar w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
           {/* Add Elements Button */}
-          <button 
+          <button
             className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
-              isElementsDrawerOpen ? 'bg-[#3c3c3c] text-gray-200' : ''
+              isElementsDrawerOpen ? "bg-[#3c3c3c] text-gray-200" : ""
             }`}
             title="Add Elements"
             onClick={handleElementsClick}
@@ -137,9 +150,9 @@ function BuilderCanvas() {
           </button>
 
           {/* Pages Button */}
-          <button 
+          <button
             className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
-              isPagesSidebarOpen ? 'bg-[#3c3c3c] text-gray-200' : ''
+              isPagesSidebarOpen ? "bg-[#3c3c3c] text-gray-200" : ""
             }`}
             title="Pages"
             onClick={handlePagesClick}
@@ -148,15 +161,18 @@ function BuilderCanvas() {
           </button>
 
           {/* Navigator Button */}
-          <button 
-            className="left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+          <button
+            className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
+              isNavigatorOpen ? "bg-[#3c3c3c] text-gray-200" : ""
+            }`}
             title="Navigator"
+            onClick={handleNavigatorClick}
           >
             <span className="material-icons text-[20px]">account_tree</span>
           </button>
 
           {/* Components Button */}
-          <button 
+          <button
             className="left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
             title="Saved Components"
           >
@@ -164,15 +180,21 @@ function BuilderCanvas() {
           </button>
 
           {/* Elements Drawer */}
-          <ElementsDrawer 
-            isOpen={isElementsDrawerOpen} 
-            onClose={() => setIsElementsDrawerOpen(false)} 
+          <ElementsDrawer
+            isOpen={isElementsDrawerOpen}
+            onClose={() => setIsElementsDrawerOpen(false)}
           />
 
           {/* Pages Sidebar */}
-          <PagesSidebar 
-            isOpen={isPagesSidebarOpen} 
-            onClose={() => setIsPagesSidebarOpen(false)} 
+          <PagesSidebar
+            isOpen={isPagesSidebarOpen}
+            onClose={() => setIsPagesSidebarOpen(false)}
+          />
+
+          {/* Add NavigatorSidebar */}
+          <NavigatorSidebar
+            isOpen={isNavigatorOpen}
+            onClose={() => setIsNavigatorOpen(false)}
           />
         </div>
 
@@ -214,28 +236,28 @@ export default function BuilderPage() {
         // Check auth
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          router.push('/');
+          router.push("/");
           return;
         }
 
         // Get project ID from URL
-        const projectId = searchParams.get('project_id');
+        const projectId = searchParams.get("project_id");
         if (!projectId) {
-          router.push('/dashboard');
+          router.push("/dashboard");
           return;
         }
 
         // Fetch project
         const projects = await projectService.getProjects(projectId);
         if (projects.length === 0) {
-          router.push('/dashboard');
+          router.push("/dashboard");
           return;
         }
 
         setProject(projects[0]);
       } catch (error) {
-        console.error('Error:', error);
-        router.push('/dashboard');
+        console.error("Error:", error);
+        router.push("/dashboard");
       } finally {
         setLoading(false);
       }
@@ -261,4 +283,4 @@ export default function BuilderPage() {
       </DndProvider>
     </Provider>
   );
-} 
+}

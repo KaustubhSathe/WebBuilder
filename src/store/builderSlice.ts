@@ -135,7 +135,6 @@ const builderSlice = createSlice({
         if (newParent) {
           newParent.children.push(component);
         }
-        console.log("newParent", newParent);
       }
 
       // Update position
