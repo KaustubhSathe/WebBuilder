@@ -1,22 +1,26 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Component, BuilderState, ComponentType } from '../types/builder';
-import { v4 as uuidv4 } from 'uuid';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { BuilderState, Component, ComponentType } from "../types/builder";
+import { v4 as uuidv4 } from "uuid";
 
 const initialState: BuilderState = {
   component: {
-    id: 'root',
-    type: 'main',
+    id: "root",
+    type: "main",
     children: [],
     styles: {
-      position: 'relative',
-      width: '100%',
-      height: '100%',
+      position: "relative",
+      width: "100%",
+      height: "100%",
     },
   },
   selectedComponent: null,
 };
 
-const findComponentById = (root: Component, id: string): Component | null => {
+// Move findComponentById outside the slice and export it
+export const findComponentById = (
+  root: Component,
+  id: string,
+): Component | null => {
   if (root.id === id) return root;
   for (const child of root.children) {
     const found = findComponentById(child, id);
@@ -25,8 +29,25 @@ const findComponentById = (root: Component, id: string): Component | null => {
   return null;
 };
 
+// Helper function to remove component from its current parent
+const removeComponentFromParent = (
+  root: Component,
+  componentId: string,
+): boolean => {
+  for (let i = 0; i < root.children.length; i++) {
+    if (root.children[i].id === componentId) {
+      root.children.splice(i, 1);
+      return true;
+    }
+    if (removeComponentFromParent(root.children[i], componentId)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const builderSlice = createSlice({
-  name: 'builder',
+  name: "builder",
   initialState,
   reducers: {
     setComponent: (state, action: PayloadAction<Component>) => {
@@ -37,7 +58,7 @@ const builderSlice = createSlice({
     },
     deleteComponent: (state, action: PayloadAction<string>) => {
       const deleteFromChildren = (children: Component[]): Component[] => {
-        return children.filter(child => {
+        return children.filter((child) => {
           if (child.id === action.payload) return false;
           child.children = deleteFromChildren(child.children);
           return true;
@@ -57,23 +78,26 @@ const builderSlice = createSlice({
         state.selectedComponent = elementId;
       }
     },
-    addElement: (state, action: PayloadAction<{
-      parentId: string;
-      type: ComponentType;
-      position: { x: number; y: number };
-    }>) => {
+    addElement: (
+      state,
+      action: PayloadAction<{
+        parentId: string;
+        type: ComponentType;
+        position: { x: number; y: number };
+      }>,
+    ) => {
       const { parentId, type, position } = action.payload;
-      
+
       const newComponent: Component = {
         id: uuidv4(),
         type,
         children: [],
         styles: {
-          position: 'absolute',
+          position: "absolute",
           left: `${position.x}px`,
           top: `${position.y}px`,
-          width: '100px',
-          height: '40px',
+          width: "100px",
+          height: "40px",
         },
         position: {
           x: position.x,
@@ -87,23 +111,45 @@ const builderSlice = createSlice({
         state.selectedComponent = newComponent.id; // Select the new component
       }
     },
-    moveElement: (state, action: PayloadAction<{
-      id: string;
-      position: { x: number; y: number };
-    }>) => {
-      const { id, position } = action.payload;
-      const element = findComponentById(state.component, id);
-      if (element) {
-        if (element.styles) {
-          element.styles.left = `${position.x}px`;
-          element.styles.top = `${position.y}px`;
+    moveElement: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        position: { x: number; y: number };
+        newParentId?: string;
+      }>,
+    ) => {
+      const { id, position, newParentId } = action.payload;
+
+      // First find and store the component
+      const component = findComponentById(state.component, id);
+      if (!component) return;
+
+      // If there's a new parent, remove from old parent and add to new parent
+      if (newParentId && newParentId !== id) {
+        // Remove from old parent
+        removeComponentFromParent(state.component, id);
+
+        // Add to new parent
+        const newParent = findComponentById(state.component, newParentId);
+        if (newParent) {
+          newParent.children.push(component);
         }
       }
+
+      // Update position
+      if (component.styles) {
+        component.styles.left = `${position.x}px`;
+        component.styles.top = `${position.y}px`;
+      }
     },
-    updateElementSize: (state, action: PayloadAction<{
-      id: string;
-      size: { width: number; height: number };
-    }>) => {
+    updateElementSize: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        size: { width: number; height: number };
+      }>,
+    ) => {
       const { id, size } = action.payload;
       const element = findComponentById(state.component, id);
       if (element && element.styles) {
@@ -111,10 +157,13 @@ const builderSlice = createSlice({
         element.styles.height = `${size.height}px`;
       }
     },
-    updateComponent: (state, action: PayloadAction<{ 
-      id: string; 
-      updates: Partial<Component> 
-    }>) => {
+    updateComponent: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        updates: Partial<Component>;
+      }>,
+    ) => {
       const component = findComponentById(state.component, action.payload.id);
       if (component) {
         Object.assign(component, action.payload.updates);
@@ -134,4 +183,4 @@ export const {
   updateComponent,
 } = builderSlice.actions;
 
-export default builderSlice.reducer; 
+export default builderSlice.reducer;
