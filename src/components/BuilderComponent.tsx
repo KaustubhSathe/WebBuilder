@@ -128,10 +128,17 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       left,
       top,
       width,
+      minWidth,
+      maxWidth,
       height,
+      minHeight,
+      maxHeight,
       float,
       margin,
-      padding,
+      marginTop,
+      marginRight,
+      marginBottom,
+      marginLeft,
       ...otherStyles
     } = component.styles || {};
 
@@ -350,13 +357,20 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         float: component.styles?.float as React.CSSProperties["float"] ||
           "none",
         width: component.styles?.width || "100px",
+        minWidth: component.styles?.minWidth,
+        maxWidth: component.styles?.maxWidth,
         height: component.styles?.height || "40px",
+        minHeight: component.styles?.minHeight,
+        maxHeight: component.styles?.maxHeight,
         opacity: isDragging ? 0.5 : 1,
         cursor: isResizing ? "auto" : "pointer",
         transition: isResizing ? "none" : "all 0.1s ease-out",
         touchAction: "none",
-        margin: component.styles?.margin || "0",
-        padding: component.styles?.padding || "0",
+        margin: component.styles?.margin || "auto",
+        marginTop: component.styles?.marginTop || "auto",
+        marginRight: component.styles?.marginRight || "auto",
+        marginBottom: component.styles?.marginBottom || "auto",
+        marginLeft: component.styles?.marginLeft || "auto",
       }}
       className={`
         ${selectedComponent === component.id ? "border-2 border-blue-500" : ""}

@@ -15,6 +15,7 @@ const UNIT_OPTIONS = [
   { value: 'rem', label: 'rem' },
   { value: '%', label: '%' },
   { value: 'auto', label: 'auto' },
+  { value: 'inherit', label: 'inherit' },
 ];
 
 const NumberUnitInput: React.FC<NumberUnitInputProps> = ({ label, value, onChange }) => {

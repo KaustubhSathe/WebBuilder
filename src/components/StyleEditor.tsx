@@ -115,6 +115,22 @@ const CLEAR_OPTIONS = [
   { value: "both", label: "Both" },
 ];
 
+const SpacingInput: React.FC<{
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}> = ({ label, value, onChange }) => (
+  <div className="flex items-center gap-2">
+    <span className="text-xs text-gray-400 w-8">{label}</span>
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="flex-1 bg-[#1a1a1a] text-gray-200 text-sm px-2 py-1 rounded border border-[#3c3c3c] focus:outline-none focus:border-blue-500"
+    />
+  </div>
+);
+
 const StyleEditor: React.FC = () => {
   const dispatch = useDispatch();
   const [openCategories, setOpenCategories] = useState({
@@ -237,9 +253,49 @@ const StyleEditor: React.FC = () => {
                 onChange={(value) => handleStyleChange("margin", value)}
               />
               <NumberUnitInput
+                label="Margin Top"
+                value={selectedComponent?.styles?.marginTop || ""}
+                onChange={(value) => handleStyleChange("marginTop", value)}
+              />
+              <NumberUnitInput
+                label="Margin Right"
+                value={selectedComponent?.styles?.marginRight || ""}
+                onChange={(value) => handleStyleChange("marginRight", value)}
+              />
+              <NumberUnitInput
+                label="Margin Bottom"
+                value={selectedComponent?.styles?.marginBottom || ""}
+                onChange={(value) => handleStyleChange("marginBottom", value)}
+              />
+              <NumberUnitInput
+                label="Margin Left"
+                value={selectedComponent?.styles?.marginLeft || ""}
+                onChange={(value) => handleStyleChange("marginLeft", value)}
+              />
+              <NumberUnitInput
                 label="Padding"
                 value={selectedComponent?.styles?.padding || ""}
                 onChange={(value) => handleStyleChange("padding", value)}
+              />
+              <NumberUnitInput
+                label="Padding Top"
+                value={selectedComponent?.styles?.paddingTop || ""}
+                onChange={(value) => handleStyleChange("paddingTop", value)}
+              />
+              <NumberUnitInput
+                label="Padding Right"
+                value={selectedComponent?.styles?.paddingRight || ""}
+                onChange={(value) => handleStyleChange("paddingRight", value)}
+              />
+              <NumberUnitInput
+                label="Padding Bottom"
+                value={selectedComponent?.styles?.paddingBottom || ""}
+                onChange={(value) => handleStyleChange("paddingBottom", value)}
+              />
+              <NumberUnitInput
+                label="Padding Left"
+                value={selectedComponent?.styles?.paddingLeft || ""}
+                onChange={(value) => handleStyleChange("paddingLeft", value)}
               />
             </div>
           </StyleCategory>

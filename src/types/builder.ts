@@ -12,6 +12,14 @@ export interface Component {
     padding?: string;
     margin?: string;
     fontSize?: string;
+    marginTop?: string;
+    marginRight?: string;
+    marginBottom?: string;
+    marginLeft?: string;
+    paddingTop?: string;
+    paddingRight?: string;
+    paddingBottom?: string;
+    paddingLeft?: string;
     [key: string]: string | undefined;
   };
   position?: {

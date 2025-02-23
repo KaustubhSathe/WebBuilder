@@ -97,7 +97,6 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
     // also set the ComponentTree to the page's component_tree
     // setComponent is the function to set the component, first find the page in the pages array
     const page = pages.find((page) => page.id === pageId);
-    console.log(page);
     if (page) {
       dispatch(setComponent(page.component_tree));
     }
