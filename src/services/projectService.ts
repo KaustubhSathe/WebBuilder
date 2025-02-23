@@ -12,6 +12,8 @@ export const projectService = {
         Authorization: `Bearer ${session.access_token}`,
       },
     });
+    console.log(functionData);
+    console.log(functionError);
 
     if (functionError) throw functionError;
     return functionData.project;
@@ -27,6 +29,7 @@ export const projectService = {
       },
       ...(projectId ? { query: { project_id: projectId } } : {}),
     });
+    console.log(functionData);
 
     if (functionError) throw functionError;
     return functionData?.projects || [];
