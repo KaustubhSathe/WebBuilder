@@ -6,10 +6,10 @@ export interface Page {
   id: string;
   name: string;
   path: string;
-  isHome?: boolean;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
+  is_home?: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
   component_tree: Component;
 }
 
@@ -36,9 +36,9 @@ const initialState: PagesState = {
       id: "1",
       name: "Home",
       path: "/",
-      isHome: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      is_home: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       component_tree: createEmptyCanvas(),
     },
   ],
@@ -49,16 +49,8 @@ const pagesSlice = createSlice({
   name: "pages",
   initialState,
   reducers: {
-    addPage: (state, action: PayloadAction<{ name: string }>) => {
-      const path = "/" + action.payload.name.toLowerCase().replace(/\s+/g, "-");
-      const newPage: Page = {
-        id: uuidv4(),
-        name: action.payload.name,
-        path,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        component_tree: createEmptyCanvas(),
-      };
+    addPage: (state, action: PayloadAction<Page>) => {
+      const newPage: Page = action.payload;
       state.pages.push(newPage);
     },
     deletePage: (state, action: PayloadAction<string>) => {
@@ -77,7 +69,7 @@ const pagesSlice = createSlice({
       const page = state.pages.find((p) => p.id === action.payload.pageId);
       if (page) {
         page.component_tree = action.payload.component_tree;
-        page.updatedAt = new Date().toISOString();
+        page.updated_at = new Date().toISOString();
       }
     },
     addElementToCanvas: (
@@ -110,7 +102,7 @@ const pagesSlice = createSlice({
       };
 
       findParentAndAddElement(page.component_tree);
-      page.updatedAt = new Date().toISOString();
+      page.updated_at = new Date().toISOString();
     },
     setPagesFromServer: (state, action: PayloadAction<Page[]>) => {
       state.pages = action.payload;

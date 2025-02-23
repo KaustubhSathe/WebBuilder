@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "serve": "deno run --allow-net --allow-env --watch index.ts"
+  },
+  "imports": {
+    "http/server": "https://deno.land/std@0.177.0/http/server.ts",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.21.0"
+  }
+} 

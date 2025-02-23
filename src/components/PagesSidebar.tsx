@@ -2,24 +2,15 @@
 
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addPage, deletePage, setSelectedPage } from "@/store/pagesSlice";
+import { addPage, deletePage, Page, setSelectedPage } from "@/store/pagesSlice";
 import type { RootState } from "@/store/store";
+import { projectService } from "@/services/projectService";
+import { setComponent } from "@/store/builderSlice";
 
 interface PagesSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-interface Page {
-  id: string;
-  name: string;
-  path: string;
-  isHome?: boolean;
-}
-
-const SAMPLE_PAGES: Page[] = [
-  { id: "1", name: "Home", path: "/", isHome: true },
-];
 
 const PageItem: React.FC<{
   page: Page;
@@ -43,11 +34,11 @@ const PageItem: React.FC<{
     >
       <div className="flex items-center gap-2">
         <span className="material-icons text-[18px]">
-          {page.isHome ? "home" : "description"}
+          {page.is_home ? "home" : "description"}
         </span>
         {page.name}
       </div>
-      {!page.isHome && onDelete && (
+      {!page.is_home && onDelete && (
         <div className="opacity-0 group-hover:opacity-100">
           <button
             className="p-1 hover:bg-[#4c4c4c] rounded text-red-400"
@@ -70,14 +61,31 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
   const selectedPageId = useSelector((state: RootState) =>
     state.pages.selectedPageId
   );
+  const project = useSelector((state: RootState) =>
+    state.project.currentProject
+  );
   const [isAddingPage, setIsAddingPage] = useState(false);
   const [newPageName, setNewPageName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddPage = () => {
-    if (!newPageName.trim()) return;
-    dispatch(addPage({ name: newPageName.trim() }));
-    setIsAddingPage(false);
-    setNewPageName("");
+  const handleAddPage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPageName.trim() || !project) return;
+
+    setIsLoading(true);
+    try {
+      const newPage = await projectService.addPage(
+        project.id,
+        newPageName.trim(),
+      );
+      dispatch(addPage(newPage));
+      setIsAddingPage(false);
+      setNewPageName("");
+    } catch (error) {
+      console.error("Error creating page:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeletePage = (pageId: string) => {
@@ -86,6 +94,13 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
 
   const handleSelectPage = (pageId: string) => {
     dispatch(setSelectedPage(pageId));
+    // also set the ComponentTree to the page's component_tree
+    // setComponent is the function to set the component, first find the page in the pages array
+    const page = pages.find((page) => page.id === pageId);
+    console.log(page);
+    if (page) {
+      dispatch(setComponent(page.component_tree));
+    }
   };
 
   return (
@@ -117,7 +132,7 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
                     page={page}
                     isSelected={selectedPageId === page.id}
                     onSelect={() => handleSelectPage(page.id)}
-                    onDelete={!page.isHome
+                    onDelete={!page.is_home
                       ? () => handleDeletePage(page.id)
                       : undefined}
                   />
@@ -128,10 +143,7 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
               {isAddingPage
                 ? (
                   <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleAddPage();
-                    }}
+                    onSubmit={handleAddPage}
                     className="p-2"
                   >
                     <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#3c3c3c] rounded overflow-hidden">
@@ -142,11 +154,13 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
                         placeholder="Page name"
                         className="flex-1 bg-transparent px-2 py-1 text-sm text-gray-200 focus:outline-none"
                         autoFocus
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
                         onClick={() => setIsAddingPage(false)}
                         className="p-1 text-gray-400 hover:text-gray-300 hover:bg-[#2c2c2c]"
+                        disabled={isLoading}
                       >
                         <span className="material-icons text-[18px]">
                           close

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Provider, useDispatch } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "../../store/store";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -15,11 +15,14 @@ import ElementsDrawer from "@/components/ElementsDrawer";
 import PagesSidebar from "@/components/PagesSidebar";
 import PageSelector from "@/components/PageSelector";
 import StyleEditor from "@/components/StyleEditor";
-import { setSelectedComponent } from "@/store/builderSlice";
+import { setComponent, setSelectedComponent } from "@/store/builderSlice";
 import { setCurrentProject } from "@/store/projectSlice";
 import { setPagesFromServer, setSelectedPage } from "@/store/pagesSlice";
 import NavigatorSidebar from "@/components/NavigatorSidebar";
 import ProjectDropdown from "@/components/ProjectDropdown";
+import LoadingBar from "@/components/LoadingBar";
+import { RootState } from "@/store/store";
+import toast from "react-hot-toast";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -237,54 +240,88 @@ function BuilderPageContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const project = useSelector((state: RootState) =>
+    state.project.currentProject
+  );
+  const pages = useSelector((state: RootState) => state.pages.pages);
 
   useEffect(() => {
     const checkUserAndProject = async () => {
       try {
-        // Check auth
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           router.push("/");
           return;
         }
 
-        // Get project ID from URL
         const projectId = searchParams.get("project_id");
         if (!projectId) {
           router.push("/dashboard");
           return;
         }
 
-        // Fetch project
         const projects = await projectService.getProjects(projectId);
         if (projects.length === 0) {
           router.push("/dashboard");
           return;
         }
 
-        const project = projects[0];
-        dispatch(setCurrentProject(project));
-        dispatch(setPagesFromServer(project.pages || []));
-        // Also set the home page as the first page after finding the home page
-        const homePage = project.pages?.find((page) => page.isHome);
-        if (homePage) {
-          dispatch(setSelectedPage(homePage.id));
-        }
+        dispatch(setCurrentProject(projects[0]));
       } catch (error) {
         console.error("Error:", error);
         router.push("/dashboard");
-      } finally {
-        setLoading(false);
       }
     };
 
     checkUserAndProject();
   }, [router, searchParams, dispatch]);
 
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+
+        if (!project?.id) return;
+
+        const saveToast = toast.loading("Saving project...");
+        try {
+          console.log("Saving project:", project.id, pages);
+          await projectService.saveProject(project.id, pages);
+          toast.success("Project saved successfully", {
+            id: saveToast,
+            duration: 2000,
+          });
+        } catch (error) {
+          console.error("Error saving project:", error);
+          toast.error("Failed to save project", {
+            id: saveToast,
+            duration: 3000,
+          });
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [project?.id, pages]);
+
+  const handleLoadingComplete = () => {
+    if (project) {
+      dispatch(setPagesFromServer(project.pages || []));
+      const homePage = project.pages?.find((page) => page.is_home);
+      if (homePage) {
+        dispatch(setSelectedPage(homePage.id));
+        // also set Component to home page component tree
+        dispatch(setComponent(homePage.component_tree));
+      }
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
-        <div className="text-gray-400">Loading project...</div>
+        <LoadingBar onComplete={handleLoadingComplete} />
       </div>
     );
   }

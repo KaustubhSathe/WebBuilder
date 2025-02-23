@@ -50,8 +50,16 @@ const builderSlice = createSlice({
   name: "builder",
   initialState,
   reducers: {
-    setComponent: (state, action: PayloadAction<Component>) => {
-      state.component = action.payload;
+    setComponent: {
+      reducer: (
+        state,
+        action: PayloadAction<{ component: Component; updatePage?: boolean }>,
+      ) => {
+        state.component = action.payload.component;
+      },
+      prepare: (component: Component, updatePage = true) => {
+        return { payload: { component, updatePage } };
+      },
     },
     setSelectedComponent: (state, action: PayloadAction<string | null>) => {
       state.selectedComponent = action.payload;
@@ -180,6 +188,41 @@ const builderSlice = createSlice({
     },
   },
 });
+
+// Create a middleware to sync component updates with the selected page
+export const builderMiddleware =
+  (store: any) => (next: any) => (action: any) => {
+    const result = next(action);
+
+    // List of actions that modify the component tree
+    const componentModifyingActions = [
+      "builder/setComponent",
+      "builder/deleteComponent",
+      "builder/addElement",
+      "builder/moveElement",
+      "builder/updateElementSize",
+      "builder/updateComponent",
+    ];
+
+    if (componentModifyingActions.includes(action.type)) {
+      const state = store.getState();
+      const selectedPageId = state.pages.selectedPageId;
+      if (selectedPageId) {
+        // Get the updated component tree after the action has been processed
+        const updatedComponent = state.builder.component;
+
+        store.dispatch({
+          type: "pages/updateCanvas",
+          payload: {
+            pageId: selectedPageId,
+            component_tree: updatedComponent,
+          },
+        });
+      }
+    }
+
+    return result;
+  };
 
 export const {
   setComponent,
