@@ -76,7 +76,6 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
             canvasRect,
             excludeId,
           );
-          console.log(childResult);
           return childResult || child;
         }
       }
@@ -92,13 +91,11 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
 
     // Get parent's ID from the component tree
     let parent = findParent(component, child);
-    console.log(parent);
     while (parent) {
       x += parseInt(parent.styles?.left?.replace("px", "") || "0", 10);
       y += parseInt(parent.styles?.top?.replace("px", "") || "0", 10);
 
       parent = findParent(component, parent);
-      console.log(parent);
     }
 
     return { x, y };

@@ -9,13 +9,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { projectService } from "@/services/projectService";
 import type { Project } from "@/types/project";
+import type { Page } from "@/store/pagesSlice";
 import ZoomableCanvas from "@/components/ZoomableCanvas";
 import ElementsDrawer from "@/components/ElementsDrawer";
 import PagesSidebar from "@/components/PagesSidebar";
 import PageSelector from "@/components/PageSelector";
 import StyleEditor from "@/components/StyleEditor";
 import { setSelectedComponent } from "@/store/builderSlice";
+import { setCurrentProject } from "@/store/projectSlice";
+import { setPagesFromServer, setSelectedPage } from "@/store/pagesSlice";
 import NavigatorSidebar from "@/components/NavigatorSidebar";
+import ProjectDropdown from "@/components/ProjectDropdown";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -32,7 +36,6 @@ function BuilderCanvas() {
 
     // If clicked outside canvas and not on a sidebar button, deselect component
     if (!canvas && !sidebarButton && !rightSidebar) {
-      console.log("deselecting component");
       dispatch(setSelectedComponent(null));
     }
 
@@ -69,13 +72,8 @@ function BuilderCanvas() {
     <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* Top Navigation */}
       <nav className="h-[35px] bg-[#2c2c2c] border-b border-[#3c3c3c] flex items-center">
-        {/* Menu Button */}
-        <button
-          className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors border-r border-[#3c3c3c]"
-          title="Menu"
-        >
-          <span className="material-icons text-[20px]">menu</span>
-        </button>
+        {/* Menu Button with Project Dropdown */}
+        <ProjectDropdown />
 
         {/* Preview Button */}
         <button
@@ -225,10 +223,20 @@ function BuilderCanvas() {
 }
 
 export default function BuilderPage() {
+  return (
+    <Provider store={store}>
+      <DndProvider backend={HTML5Backend}>
+        <BuilderPageContent />
+      </DndProvider>
+    </Provider>
+  );
+}
+
+function BuilderPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const checkUserAndProject = async () => {
@@ -254,7 +262,14 @@ export default function BuilderPage() {
           return;
         }
 
-        setProject(projects[0]);
+        const project = projects[0];
+        dispatch(setCurrentProject(project));
+        dispatch(setPagesFromServer(project.pages || []));
+        // Also set the home page as the first page after finding the home page
+        const homePage = project.pages?.find((page) => page.isHome);
+        if (homePage) {
+          dispatch(setSelectedPage(homePage.id));
+        }
       } catch (error) {
         console.error("Error:", error);
         router.push("/dashboard");
@@ -264,7 +279,7 @@ export default function BuilderPage() {
     };
 
     checkUserAndProject();
-  }, [router, searchParams]);
+  }, [router, searchParams, dispatch]);
 
   if (loading) {
     return (
@@ -274,13 +289,5 @@ export default function BuilderPage() {
     );
   }
 
-  if (!project) return null;
-
-  return (
-    <Provider store={store}>
-      <DndProvider backend={HTML5Backend}>
-        <BuilderCanvas />
-      </DndProvider>
-    </Provider>
-  );
+  return <BuilderCanvas />;
 }

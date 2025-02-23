@@ -51,7 +51,6 @@ const DraggableItem: React.FC<
   >(() => ({
     type: "component",
     item: () => {
-      console.log("Drag beginning:", element);
       return element;
     },
     end: () => {

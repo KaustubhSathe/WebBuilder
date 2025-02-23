@@ -112,6 +112,10 @@ const pagesSlice = createSlice({
       findParentAndAddElement(page.component_tree);
       page.updatedAt = new Date().toISOString();
     },
+    setPagesFromServer: (state, action: PayloadAction<Page[]>) => {
+      state.pages = action.payload;
+      state.selectedPageId = action.payload[0]?.id || null;
+    },
   },
 });
 
@@ -121,6 +125,7 @@ export const {
   setSelectedPage,
   updateCanvas,
   addElementToCanvas,
+  setPagesFromServer,
 } = pagesSlice.actions;
 
 export default pagesSlice.reducer;

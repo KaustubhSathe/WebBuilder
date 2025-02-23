@@ -1,3 +1,5 @@
+import type { Page } from "@/store/pagesSlice";
+
 export interface Project {
   id: string;
   name: string;
@@ -7,4 +9,5 @@ export interface Project {
   updated_at: string;
   deleted_at?: string | null;
   owner_id: string;
-} 
+  pages?: Page[];
+}

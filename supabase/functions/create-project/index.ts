@@ -61,8 +61,7 @@ serve(async (req: Request) => {
     }
 
     const { name, description } = await req.json();
-    console.log("Creating project with:", { name, description, user_id });
-
+    
     // Create project
     const projectData = {
       name,
@@ -71,8 +70,7 @@ serve(async (req: Request) => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    console.log("Project data:", projectData);
-
+    
     const { data: project, error } = await supabase
       .from("projects")
       .insert([projectData])
@@ -93,33 +91,20 @@ serve(async (req: Request) => {
       );
     }
 
-    // Create initial home page
-    const { data: page, error: pageError } = await supabase
-      .from("pages")
-      .insert([{
-        project_id: project.id,
-        name: "Home",
-        path: "/",
-        is_home: true,
-        component_tree: JSON.stringify({
-          id: "root",
-          type: "main",
-          styles: {
-            width: "100%",
-            height: "100%",
-            padding: "0",
-            margin: "0",
-          },
-          children: [],
-        }),
-      }])
-      .select("*")
+    // After creating project and page, fetch the complete data
+    const { data: projectWithPages, error: fetchError } = await supabase
+      .from("projects")
+      .select(`
+        *,
+        pages:pages(*)
+      `)
+      .eq("id", project.id)
       .single();
 
-    if (pageError) {
-      console.error("Page creation error:", pageError);
+    if (fetchError) {
+      console.error("Error fetching project with pages:", fetchError);
       return new Response(
-        JSON.stringify({ error: pageError.message }),
+        JSON.stringify({ error: fetchError.message }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -128,7 +113,7 @@ serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ project, pages: [page] }),
+      JSON.stringify({ project: projectWithPages }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

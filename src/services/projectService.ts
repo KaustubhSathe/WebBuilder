@@ -1,19 +1,18 @@
-import { supabase } from '@/lib/supabase';
-import type { Project } from '@/types/project';
+import { supabase } from "@/lib/supabase";
+import type { Project } from "@/types/project";
 
 export const projectService = {
   async createProject(name: string, description?: string): Promise<Project> {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    if (!session) throw new Error("Not authenticated");
 
-    const { data: functionData, error: functionError } = await supabase.functions.invoke('create-project', {
-      body: { name, description },
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    });
-    console.log(functionData);
-    console.log(functionError);
+    const { data: functionData, error: functionError } = await supabase
+      .functions.invoke("create-project", {
+        body: { name, description },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
     if (functionError) throw functionError;
     return functionData.project;
@@ -21,15 +20,17 @@ export const projectService = {
 
   async getProjects(projectId?: string): Promise<Project[]> {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    if (!session) throw new Error("Not authenticated");
 
-    const { data: functionData, error: functionError } = await supabase.functions.invoke('get-projects', {
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      ...(projectId ? { query: { project_id: projectId } } : {}),
-    });
-    console.log(functionData);
+    const { data: functionData, error: functionError } = await supabase
+      .functions.invoke(
+        projectId ? `get-projects?project_id=${projectId}` : "get-projects",
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        },
+      );
 
     if (functionError) throw functionError;
     return functionData?.projects || [];
@@ -37,15 +38,18 @@ export const projectService = {
 
   async deleteProject(projectId: string): Promise<void> {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    if (!session) throw new Error("Not authenticated");
 
-    const { error: functionError } = await supabase.functions.invoke('delete-project', {
-      body: { project_id: projectId },
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
+    const { error: functionError } = await supabase.functions.invoke(
+      "delete-project",
+      {
+        body: { project_id: projectId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       },
-    });
+    );
 
     if (functionError) throw functionError;
   },
-}; 
+};
