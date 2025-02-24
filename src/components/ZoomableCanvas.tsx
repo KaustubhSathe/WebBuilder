@@ -15,6 +15,7 @@ import BuilderComponent from "./BuilderComponent";
 
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
+  isCommentsOpen?: boolean;
 }
 // find the parent of a component
 // this is a recursive function that will return the parent of the component
@@ -29,7 +30,7 @@ const findParent = (root: Component, node: Component): Component | null => {
   return null;
 };
 
-const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
+const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
   const dispatch = useDispatch();
   const component = useSelector((state: RootState) => state.builder.component);
   const [zoom, setZoom] = useState(1);
@@ -156,7 +157,10 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
       } else if (monitor.getItemType() === "placed-component" && item.id) {
         dispatch(moveElement({
           id: item.id,
-          position: { x: { value: relativeX, unit: "px" }, y: { value: relativeY, unit: "px" } },
+          position: {
+            x: { value: relativeX, unit: "px" },
+            y: { value: relativeY, unit: "px" },
+          },
           newParentId: targetComponent.id,
         }));
       }
@@ -219,55 +223,72 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
   };
 
   return (
-    <div className="w-full h-full bg-[#1a1a1a] p-8 overflow-hidden relative">
-      {/* Zoom Controls */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-10">
-        <button
-          onClick={handleZoomOut}
-          className="text-gray-400 hover:text-gray-200 transition-colors"
-        >
-          <span className="material-icons text-[18px]">remove</span>
-        </button>
-        <button
-          onClick={handleReset}
-          className="text-gray-400 hover:text-gray-200 transition-colors px-2 text-sm"
-        >
-          {Math.round(zoom * 100)}%
-        </button>
-        <button
-          onClick={handleZoomIn}
-          className="text-gray-400 hover:text-gray-200 transition-colors"
-        >
-          <span className="material-icons text-[18px]">add</span>
-        </button>
-      </div>
-
+    <div className="relative w-full h-full">
+      {/* Canvas Content */}
       <div
-        ref={(node) => {
-          drop(node);
-          canvasRef.current = node;
-        }}
-        {...bind()}
-        className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none
-            ${isOver ? "bg-opacity-90" : ""}
-            ${
-          isDragging
-            ? "cursor-grabbing"
-            : isOver
-            ? "cursor-grabbing"
-            : "cursor-default"
+        className={`zoomable-canvas w-full h-full bg-white overflow-auto ${
+          isCommentsOpen ? "cursor-comment" : ""
         }`}
-        style={{
-          transform:
-            `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
-          transformOrigin: "center center",
-          transition: "transform 0.1s ease-out",
-        }}
-        onClick={() => dispatch(setSelectedComponent(null))}
       >
-        <div className="absolute inset-0 border-2 border-gray-300">
-          <BuilderComponent component={component} />
+        <div className="w-full h-full bg-[#1a1a1a] p-8 overflow-hidden relative">
+          {/* Zoom Controls */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-10">
+            <button
+              onClick={handleZoomOut}
+              className="text-gray-400 hover:text-gray-200 transition-colors"
+            >
+              <span className="material-icons text-[18px]">remove</span>
+            </button>
+            <button
+              onClick={handleReset}
+              className="text-gray-400 hover:text-gray-200 transition-colors px-2 text-sm"
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+            <button
+              onClick={handleZoomIn}
+              className="text-gray-400 hover:text-gray-200 transition-colors"
+            >
+              <span className="material-icons text-[18px]">add</span>
+            </button>
+          </div>
+
+          <div
+            ref={(node) => {
+              drop(node);
+              canvasRef.current = node;
+            }}
+            {...bind()}
+            className={`w-full h-full bg-white rounded relative touch-none select-none
+                ${isOver ? "bg-opacity-90" : ""}
+                ${
+              isDragging
+                ? "cursor-grabbing"
+                : isOver
+                ? "cursor-grabbing"
+                : "cursor-default"
+            }`}
+            style={{
+              transform:
+                `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
+              transformOrigin: "center center",
+              transition: "transform 0.1s ease-out",
+            }}
+            onClick={() => dispatch(setSelectedComponent(null))}
+          >
+            <div className="absolute inset-0 border-2 border-gray-300">
+              <BuilderComponent component={component} />
+            </div>
+          </div>
         </div>
+
+        {/* Overlay Layer */}
+        {isCommentsOpen && (
+          <div
+            className="absolute inset-0 bg-transparent cursor-comment z-50"
+            aria-label="Comments Mode Active"
+          />
+        )}
       </div>
     </div>
   );

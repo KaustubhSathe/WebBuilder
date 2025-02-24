@@ -26,12 +26,14 @@ import toast from "react-hot-toast";
 import { generatePreview } from "@/utils/previewGenerator";
 import SaveIndicator from "@/components/SaveIndicator";
 import { markSaved, setSaving } from "@/store/saveStateSlice";
+import CommentsSidebar from "@/components/CommentsSidebar";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
   const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
   const [isPagesSidebarOpen, setIsPagesSidebarOpen] = useState(false);
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
+  const [isCommentsSidebarOpen, setIsCommentsSidebarOpen] = useState(false);
 
   const component = useSelector((state: RootState) => state.builder.component);
 
@@ -74,6 +76,16 @@ function BuilderCanvas() {
     setIsElementsDrawerOpen(false);
     setIsPagesSidebarOpen(false);
     setIsNavigatorOpen(!isNavigatorOpen);
+  };
+
+  const handleCommentsClick = () => {
+    setIsCommentsSidebarOpen(!isCommentsSidebarOpen);
+    // Close other sidebars when comments are opened
+    if (!isCommentsSidebarOpen) {
+      setIsElementsDrawerOpen(false);
+      setIsPagesSidebarOpen(false);
+      setIsNavigatorOpen(false);
+    }
   };
 
   const handlePreview = () => {
@@ -121,7 +133,12 @@ function BuilderCanvas() {
 
           {/* Comments */}
           <button
-            className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
+            onClick={handleCommentsClick}
+            className={`flex items-center justify-center transition-colors px-2 ${
+              isCommentsSidebarOpen
+                ? "text-blue-400 hover:text-blue-300"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
             title="Comments"
           >
             <span className="material-icons text-[20px]">comment</span>
@@ -147,89 +164,102 @@ function BuilderCanvas() {
 
       {/* Main Content */}
       <div className="flex h-[calc(100vh-35px)]" onClick={handleCanvasClick}>
-        {/* Left Sidebar */}
-        <div className="left-sidebar w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
-          {/* Add Elements Button */}
-          <button
-            className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
-              isElementsDrawerOpen ? "bg-[#3c3c3c] text-gray-200" : ""
-            }`}
-            title="Add Elements"
-            onClick={handleElementsClick}
-          >
-            <span className="material-icons text-[20px]">add</span>
-          </button>
+        {/* Left Sidebar - Hide when comments are open */}
+        {!isCommentsSidebarOpen && (
+          <div className="left-sidebar w-10 bg-[#2c2c2c] border-r border-[#3c3c3c] relative">
+            {/* Add Elements Button */}
+            <button
+              className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
+                isElementsDrawerOpen ? "bg-[#3c3c3c] text-gray-200" : ""
+              }`}
+              title="Add Elements"
+              onClick={handleElementsClick}
+            >
+              <span className="material-icons text-[20px]">add</span>
+            </button>
 
-          {/* Pages Button */}
-          <button
-            className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
-              isPagesSidebarOpen ? "bg-[#3c3c3c] text-gray-200" : ""
-            }`}
-            title="Pages"
-            onClick={handlePagesClick}
-          >
-            <span className="material-icons text-[20px]">article</span>
-          </button>
+            {/* Pages Button */}
+            <button
+              className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
+                isPagesSidebarOpen ? "bg-[#3c3c3c] text-gray-200" : ""
+              }`}
+              title="Pages"
+              onClick={handlePagesClick}
+            >
+              <span className="material-icons text-[20px]">article</span>
+            </button>
 
-          {/* Navigator Button */}
-          <button
-            className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
-              isNavigatorOpen ? "bg-[#3c3c3c] text-gray-200" : ""
-            }`}
-            title="Navigator"
-            onClick={handleNavigatorClick}
-          >
-            <span className="material-icons text-[20px]">account_tree</span>
-          </button>
+            {/* Navigator Button */}
+            <button
+              className={`left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors ${
+                isNavigatorOpen ? "bg-[#3c3c3c] text-gray-200" : ""
+              }`}
+              title="Navigator"
+              onClick={handleNavigatorClick}
+            >
+              <span className="material-icons text-[20px]">account_tree</span>
+            </button>
 
-          {/* Components Button */}
-          <button
-            className="left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
-            title="Saved Components"
-          >
-            <span className="material-icons text-[20px]">widgets</span>
-          </button>
+            {/* Components Button */}
+            <button
+              className="left-sidebar-btn w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] transition-colors"
+              title="Saved Components"
+            >
+              <span className="material-icons text-[20px]">widgets</span>
+            </button>
 
-          {/* Elements Drawer */}
-          <ElementsDrawer
-            isOpen={isElementsDrawerOpen}
-            onClose={() => setIsElementsDrawerOpen(false)}
-          />
+            {/* Elements Drawer */}
+            <ElementsDrawer
+              isOpen={isElementsDrawerOpen}
+              onClose={() => setIsElementsDrawerOpen(false)}
+            />
 
-          {/* Pages Sidebar */}
-          <PagesSidebar
-            isOpen={isPagesSidebarOpen}
-            onClose={() => setIsPagesSidebarOpen(false)}
-          />
+            {/* Pages Sidebar */}
+            <PagesSidebar
+              isOpen={isPagesSidebarOpen}
+              onClose={() => setIsPagesSidebarOpen(false)}
+            />
 
-          {/* Add NavigatorSidebar */}
-          <NavigatorSidebar
-            isOpen={isNavigatorOpen}
-            onClose={() => setIsNavigatorOpen(false)}
-          />
-        </div>
+            {/* Add NavigatorSidebar */}
+            <NavigatorSidebar
+              isOpen={isNavigatorOpen}
+              onClose={() => setIsNavigatorOpen(false)}
+            />
+          </div>
+        )}
 
         {/* Canvas */}
-        <ZoomableCanvas />
-
-        {/* Right Sidebar */}
-        <div className="right-sidebar w-[380px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
-          {/* Tabs */}
-          <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
-            <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500 mx-1">
-              Style
-            </button>
-            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
-              Settings
-            </button>
-            <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
-              Interactions
-            </button>
-          </div>
-
-          {/* Style Editor */}
-          <StyleEditor />
+        <div className="flex-1 relative">
+          <ZoomableCanvas isCommentsOpen={isCommentsSidebarOpen} />
         </div>
+
+        {/* Right Sidebar - Show either style editor or comments */}
+        {isCommentsSidebarOpen
+          ? (
+            <CommentsSidebar
+              isOpen={isCommentsSidebarOpen}
+              onClose={() => setIsCommentsSidebarOpen(false)}
+            />
+          )
+          : (
+            <div className="right-sidebar w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
+              {/* Tabs */}
+              <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
+                <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500 mx-1">
+                  Style
+                </button>
+                <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
+                  Settings
+                </button>
+                <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
+                  Interactions
+                </button>
+              </div>
+
+              {/* Style Editor */}
+              <StyleEditor />
+            </div>
+          )}
       </div>
     </div>
   );

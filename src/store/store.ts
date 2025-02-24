@@ -4,9 +4,6 @@ import pagesReducer from "./pagesSlice";
 import projectReducer from "./projectSlice";
 import saveStateReducer from "./saveStateSlice";
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
-
 const saveStateMiddleware: Middleware = (store) => (next) => (action: any) => {
   const result = next(action);
 
@@ -38,3 +35,13 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([builderMiddleware, saveStateMiddleware]),
 });
+
+// Define RootState type with explicit reducer types
+export type RootState = {
+  builder: ReturnType<typeof builderReducer>;
+  pages: ReturnType<typeof pagesReducer>;
+  project: ReturnType<typeof projectReducer>;
+  saveState: ReturnType<typeof saveStateReducer>;
+};
+
+export type AppDispatch = typeof store.dispatch;
