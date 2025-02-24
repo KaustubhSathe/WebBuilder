@@ -24,6 +24,8 @@ import LoadingBar from "@/components/LoadingBar";
 import { RootState } from "@/store/store";
 import toast from "react-hot-toast";
 import { generatePreview } from "@/utils/previewGenerator";
+import SaveIndicator from "@/components/SaveIndicator";
+import { markSaved, setSaving } from "@/store/saveStateSlice";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -115,12 +117,7 @@ function BuilderCanvas() {
         {/* Right Side Actions */}
         <div className="flex items-center">
           {/* Changes Saved Indicator */}
-          <button
-            className="flex items-center justify-center text-green-500 hover:text-green-400 transition-colors px-2"
-            title="Changes Saved"
-          >
-            <span className="material-icons text-[20px]">check_circle</span>
-          </button>
+          <SaveIndicator />
 
           {/* Comments */}
           <button
@@ -296,9 +293,12 @@ function BuilderPageContent() {
 
         if (!project?.id) return;
 
+        dispatch(setSaving(true));
         const saveToast = toast.loading("Saving project...");
+
         try {
           await projectService.saveProject(project.id, pages);
+          dispatch(markSaved());
           toast.success("Project saved successfully", {
             id: saveToast,
             duration: 2000,
@@ -309,13 +309,15 @@ function BuilderPageContent() {
             id: saveToast,
             duration: 3000,
           });
+        } finally {
+          dispatch(setSaving(false));
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [project?.id, pages]);
+  }, [project?.id, pages, dispatch]);
 
   const handleLoadingComplete = () => {
     if (project) {
