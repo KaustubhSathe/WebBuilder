@@ -366,11 +366,10 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         cursor: isResizing ? "auto" : "pointer",
         transition: isResizing ? "none" : "all 0.1s ease-out",
         touchAction: "none",
-        margin: component.styles?.margin || "auto",
-        marginTop: component.styles?.marginTop || "auto",
-        marginRight: component.styles?.marginRight || "auto",
-        marginBottom: component.styles?.marginBottom || "auto",
-        marginLeft: component.styles?.marginLeft || "auto",
+        marginTop: component.styles?.marginTop,
+        marginRight: component.styles?.marginRight,
+        marginBottom: component.styles?.marginBottom,
+        marginLeft: component.styles?.marginLeft,
       }}
       className={`
         ${selectedComponent === component.id ? "border-2 border-blue-500" : ""}

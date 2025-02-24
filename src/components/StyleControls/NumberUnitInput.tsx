@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Select from './Select';
+import React from "react";
+import Select from "./Select";
 
 interface NumberUnitInputProps {
   label: string;
@@ -10,33 +10,40 @@ interface NumberUnitInputProps {
 }
 
 const UNIT_OPTIONS = [
-  { value: 'px', label: 'px' },
-  { value: 'em', label: 'em' },
-  { value: 'rem', label: 'rem' },
-  { value: '%', label: '%' },
-  { value: 'auto', label: 'auto' },
-  { value: 'inherit', label: 'inherit' },
+  { value: "px", label: "px" },
+  { value: "em", label: "em" },
+  { value: "rem", label: "rem" },
+  { value: "%", label: "%" },
+  { value: "auto", label: "auto" },
+  { value: "inherit", label: "inherit" },
+  { value: "none", label: "none" },
 ];
 
-const NumberUnitInput: React.FC<NumberUnitInputProps> = ({ label, value, onChange }) => {
+const NumberUnitInput: React.FC<NumberUnitInputProps> = (
+  { label, value, onChange },
+) => {
   const parseValue = (val: string) => {
-    if (!val || val === 'auto') return { number: '', unit: 'auto' };
+    if (!val || val === "auto" || val === "none") {
+      return { number: "", unit: val || "none" };
+    }
     const number = parseFloat(val);
-    const unit = val.replace(number.toString(), '');
-    return { number: number.toString(), unit: unit || 'px' };
+    const unit = val.replace(number.toString(), "");
+    return { number: number.toString(), unit: unit || "px" };
   };
 
   const { number, unit } = parseValue(value);
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (unit === 'auto') return;
+    if (unit === "auto" || unit === "none") return;
     const newValue = e.target.value + unit;
     onChange(newValue);
   };
 
   const handleUnitChange = (newUnit: string) => {
-    if (newUnit === 'auto') {
-      onChange('auto');
+    if (newUnit === "none") {
+      onChange(""); // This will remove the CSS property
+    } else if (newUnit === "auto") {
+      onChange("auto");
     } else {
       onChange(number + newUnit);
     }
@@ -50,9 +57,11 @@ const NumberUnitInput: React.FC<NumberUnitInputProps> = ({ label, value, onChang
           type="number"
           value={number}
           onChange={handleNumberChange}
-          disabled={unit === 'auto'}
+          disabled={unit === "auto" || unit === "none"}
           className={`w-20 bg-[#1a1a1a] text-gray-300 text-xs rounded border border-[#3c3c3c] px-2 py-1.5 focus:outline-none focus:border-blue-500 ${
-            unit === 'auto' ? 'opacity-50 cursor-not-allowed' : ''
+            (unit === "auto" || unit === "none")
+              ? "opacity-50 cursor-not-allowed"
+              : ""
           }`}
         />
         <Select
@@ -67,4 +76,4 @@ const NumberUnitInput: React.FC<NumberUnitInputProps> = ({ label, value, onChang
   );
 };
 
-export default NumberUnitInput; 
+export default NumberUnitInput;

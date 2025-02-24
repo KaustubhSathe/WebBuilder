@@ -23,12 +23,15 @@ import ProjectDropdown from "@/components/ProjectDropdown";
 import LoadingBar from "@/components/LoadingBar";
 import { RootState } from "@/store/store";
 import toast from "react-hot-toast";
+import { generatePreview } from "@/utils/previewGenerator";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
   const [isElementsDrawerOpen, setIsElementsDrawerOpen] = useState(false);
   const [isPagesSidebarOpen, setIsPagesSidebarOpen] = useState(false);
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
+
+  const component = useSelector((state: RootState) => state.builder.component);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Check if clicked element is a sidebar icon or button
@@ -71,6 +74,15 @@ function BuilderCanvas() {
     setIsNavigatorOpen(!isNavigatorOpen);
   };
 
+  const handlePreview = () => {
+    const previewHTML = generatePreview(component);
+    const previewWindow = window.open("", "_blank");
+    if (previewWindow) {
+      previewWindow.document.write(previewHTML);
+      previewWindow.document.close();
+    }
+  };
+
   return (
     <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* Top Navigation */}
@@ -80,6 +92,7 @@ function BuilderCanvas() {
 
         {/* Preview Button */}
         <button
+          onClick={handlePreview}
           className="w-10 h-[35px] flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors"
           title="Preview"
         >

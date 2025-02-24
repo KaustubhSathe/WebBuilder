@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { BuilderState, Component, ComponentType } from "../types/builder";
 import { v4 as uuidv4 } from "uuid";
+import { generateComponentId } from "@/utils/idGenerator";
 
 const initialState: BuilderState = {
   component: {
@@ -8,7 +9,7 @@ const initialState: BuilderState = {
     type: "main",
     children: [],
     styles: {
-      position: "relative",
+      position: "static",
       width: "100%",
       height: "100%",
     },
@@ -97,7 +98,7 @@ const builderSlice = createSlice({
       const { parentId, type, position } = action.payload;
 
       const newComponent: Component = {
-        id: uuidv4(),
+        id: generateComponentId(type),
         type,
         children: [],
         styles: {
@@ -116,7 +117,7 @@ const builderSlice = createSlice({
       const parent = findComponentById(state.component, parentId);
       if (parent) {
         parent.children.push(newComponent);
-        state.selectedComponent = newComponent.id; // Select the new component
+        state.selectedComponent = newComponent.id;
       }
     },
     moveElement: (
@@ -182,6 +183,7 @@ const builderSlice = createSlice({
       }>,
     ) => {
       const component = findComponentById(state.component, action.payload.id);
+      console.log("action", action.payload.updates);
       if (component) {
         Object.assign(component, action.payload.updates);
       }

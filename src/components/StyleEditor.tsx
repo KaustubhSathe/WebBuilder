@@ -168,7 +168,8 @@ const StyleEditor: React.FC = () => {
 
   const handleStyleChange = (property: string, value: string) => {
     if (!selectedComponent) return;
-
+    console.log("value", value);
+    console.log("property", property);
     dispatch(updateComponent({
       id: selectedComponent.id,
       updates: {
@@ -248,11 +249,6 @@ const StyleEditor: React.FC = () => {
           >
             <div className="space-y-4">
               <NumberUnitInput
-                label="Margin"
-                value={selectedComponent?.styles?.margin || ""}
-                onChange={(value) => handleStyleChange("margin", value)}
-              />
-              <NumberUnitInput
                 label="Margin Top"
                 value={selectedComponent?.styles?.marginTop || ""}
                 onChange={(value) => handleStyleChange("marginTop", value)}
@@ -271,11 +267,6 @@ const StyleEditor: React.FC = () => {
                 label="Margin Left"
                 value={selectedComponent?.styles?.marginLeft || ""}
                 onChange={(value) => handleStyleChange("marginLeft", value)}
-              />
-              <NumberUnitInput
-                label="Padding"
-                value={selectedComponent?.styles?.padding || ""}
-                onChange={(value) => handleStyleChange("padding", value)}
               />
               <NumberUnitInput
                 label="Padding Top"

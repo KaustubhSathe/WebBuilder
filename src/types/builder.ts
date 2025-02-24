@@ -33,39 +33,39 @@ export interface BuilderState {
   selectedComponent: string | null;
 }
 
-export type ComponentType = 
-  | 'section' 
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'h4'
-  | 'h5'
-  | 'h6'
-  | 'p'
-  | 'main'
-  | 'a'
-  | 'text'
-  | 'blockquote'
-  | 'rich-text'
-  | 'div' 
-  | 'list' 
-  | 'list-item'
-  | 'button' 
-  | 'image'
-  | 'input'
-  | 'video'
-  | 'youtube'
-  | 'form'
-  | 'label'
-  | 'textarea'
-  | 'file'
-  | 'checkbox'
-  | 'radio'
-  | 'select'
-  | 'form-button';
+export type ComponentType =
+  | "section"
+  | "h1"
+  | "h2"
+  | "h3"
+  | "h4"
+  | "h5"
+  | "h6"
+  | "p"
+  | "main"
+  | "a"
+  | "text"
+  | "blockquote"
+  | "rich-text"
+  | "div"
+  | "list"
+  | "list-item"
+  | "button"
+  | "image"
+  | "input"
+  | "video"
+  | "youtube"
+  | "form"
+  | "label"
+  | "textarea"
+  | "file"
+  | "checkbox"
+  | "radio"
+  | "select"
+  | "form-button";
 
 export interface DraggableComponent {
   type: ComponentType;
   label: string;
   icon: string;
-} 
+}
