@@ -41,51 +41,69 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
   };
 
   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
-    const currentStyles = component.styles || {};
-    const currentWidth = parseInt(currentStyles.width || "100", 10);
-    const currentHeight = parseInt(currentStyles.height || "40", 10);
-    const currentX = parseInt(
-      String(component.styles?.left || "0").replace("px", ""),
-      10,
-    );
-    const currentY = parseInt(
-      String(component.styles?.top || "0").replace("px", ""),
-      10,
-    );
+    const currentStyles = component.styles;
 
-    let newWidth = currentWidth;
-    let newHeight = currentHeight;
-    let newX = currentX;
-    let newY = currentY;
+    // Parse current values and units
+    const parseStyleValue = (value: string) => {
+      const match = value.match(/^(-?\d+\.?\d*)(.*)$/);
+      return match
+        ? { value: parseFloat(match[1]), unit: match[2] || "px" }
+        : { value: 0, unit: "px" };
+    };
+
+    const width = parseStyleValue(currentStyles.width);
+    const height = parseStyleValue(currentStyles.height);
+    const left = parseStyleValue(currentStyles.left || "0px");
+    const top = parseStyleValue(currentStyles.top || "0px");
+
+    let newWidth = width;
+    let newHeight = height;
+    let newX = left;
+    let newY = top;
 
     switch (direction) {
       case "right":
-        newWidth = Math.max(100, currentWidth + deltaX);
+        newWidth = { value: width.value + deltaX, unit: width.unit };
         break;
       case "left":
         const widthChange = deltaX;
-        newWidth = Math.max(100, currentWidth - widthChange);
-        newX = currentX + widthChange;
+        newWidth = { value: width.value - widthChange, unit: width.unit };
+        newX = { value: left.value + widthChange, unit: left.unit };
         break;
       case "bottom":
-        newHeight = Math.max(40, currentHeight + deltaY);
+        newHeight = { value: height.value + deltaY, unit: height.unit };
         break;
       case "top":
         const heightChange = deltaY;
-        newHeight = Math.max(40, currentHeight - heightChange);
-        newY = currentY + heightChange;
+        newHeight = { value: height.value - heightChange, unit: height.unit };
+        newY = { value: top.value + heightChange, unit: top.unit };
         break;
     }
 
     dispatch(updateElementSize({
       id: component.id,
-      size: { width: newWidth, height: newHeight },
+      size: {
+        width: newWidth,
+        height: newHeight,
+      },
     }));
 
-    if (newX !== currentX || newY !== currentY) {
+    // Helper function to compare position values
+    const hasPositionChanged = (
+      pos1: { value: number; unit: string },
+      pos2: { value: number; unit: string },
+    ) => {
+      return pos1.value !== pos2.value || pos1.unit !== pos2.unit;
+    };
+
+    // Compare both x and y positions properly
+    if (hasPositionChanged(newX, left) || hasPositionChanged(newY, top)) {
       dispatch(moveElement({
         id: component.id,
-        position: { x: newX, y: newY },
+        position: {
+          x: newX,
+          y: newY,
+        },
       }));
     }
   };

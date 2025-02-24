@@ -47,6 +47,16 @@ const removeComponentFromParent = (
   return false;
 };
 
+interface Size {
+  width: { value: number; unit: string };
+  height: { value: number; unit: string };
+}
+
+interface Position {
+  x: { value: number; unit: string };
+  y: { value: number; unit: string };
+}
+
 const builderSlice = createSlice({
   name: "builder",
   initialState,
@@ -124,7 +134,7 @@ const builderSlice = createSlice({
       state,
       action: PayloadAction<{
         id: string;
-        position: { x: number; y: number };
+        position: Position;
         newParentId?: string;
       }>,
     ) => {
@@ -136,7 +146,6 @@ const builderSlice = createSlice({
 
       // If there's a new parent, remove from old parent and add to new parent
       if (newParentId && newParentId !== id) {
-        console.log("newParentId", newParentId);
         // Remove from old parent
         removeComponentFromParent(state.component, id);
 
@@ -149,31 +158,25 @@ const builderSlice = createSlice({
 
       // Update position
       if (component.styles) {
-        component.styles.left = `${position.x}px`;
-        component.styles.top = `${position.y}px`;
-
-        // If position is absolute, update the top and left styles
-        if (component.styles.position === "absolute") {
-          component.styles.top = `${position.y}px`;
-          component.styles.left = `${position.x}px`;
-          // Remove bottom and right if they exist
-          delete component.styles.bottom;
-          delete component.styles.right;
-        }
+        component.styles.position = "absolute";
+        component.styles.left = `${position.x.value}px`;
+        component.styles.top = `${position.y.value}px`;
+        delete component.styles.bottom;
+        delete component.styles.right;
       }
     },
     updateElementSize: (
       state,
       action: PayloadAction<{
         id: string;
-        size: { width: number; height: number };
+        size: Size;
       }>,
     ) => {
       const { id, size } = action.payload;
       const element = findComponentById(state.component, id);
       if (element && element.styles) {
-        element.styles.width = `${size.width}px`;
-        element.styles.height = `${size.height}px`;
+        element.styles.width = `${size.width.value}px`;
+        element.styles.height = `${size.height.value}px`;
       }
     },
     updateComponent: (

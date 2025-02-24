@@ -4,9 +4,9 @@ export interface Component {
   content?: string;
   src?: string;
   children: Component[];
-  styles?: {
-    width?: string;
-    height?: string;
+  styles: {
+    width: string;
+    height: string;
     backgroundColor?: string;
     color?: string;
     padding?: string;

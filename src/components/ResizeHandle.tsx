@@ -41,7 +41,19 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({
 
       const deltaX = e.clientX - startPos.x;
       const deltaY = e.clientY - startPos.y;
-      onResize(deltaX, deltaY);
+
+      // Only pass relevant delta based on handle position
+      switch (position) {
+        case "top":
+        case "bottom":
+          onResize(0, deltaY); // Only pass Y delta
+          break;
+        case "left":
+        case "right":
+          onResize(deltaX, 0); // Only pass X delta
+          break;
+      }
+
       setStartPos({ x: e.clientX, y: e.clientY });
     };
 
@@ -68,7 +80,7 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [isResizing, onResize, onResizeEnd, startPos]);
+  }, [isResizing, onResize, onResizeEnd, startPos, position]);
 
   const getPosition = () => {
     switch (position) {

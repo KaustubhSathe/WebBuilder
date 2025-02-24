@@ -156,7 +156,7 @@ const ZoomableCanvas: React.FC<ZoomableCanvasProps> = () => {
       } else if (monitor.getItemType() === "placed-component" && item.id) {
         dispatch(moveElement({
           id: item.id,
-          position: { x: relativeX, y: relativeY },
+          position: { x: { value: relativeX, unit: "px" }, y: { value: relativeY, unit: "px" } },
           newParentId: targetComponent.id,
         }));
       }
