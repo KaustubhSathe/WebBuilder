@@ -98,7 +98,7 @@ const builderSlice = createSlice({
       const { parentId, type, position } = action.payload;
 
       const newComponent: Component = {
-        id: generateComponentId(type),
+        id: generateComponentId(),
         type,
         children: [],
         styles: {
@@ -136,6 +136,7 @@ const builderSlice = createSlice({
 
       // If there's a new parent, remove from old parent and add to new parent
       if (newParentId && newParentId !== id) {
+        console.log("newParentId", newParentId);
         // Remove from old parent
         removeComponentFromParent(state.component, id);
 
@@ -183,7 +184,6 @@ const builderSlice = createSlice({
       }>,
     ) => {
       const component = findComponentById(state.component, action.payload.id);
-      console.log("action", action.payload.updates);
       if (component) {
         Object.assign(component, action.payload.updates);
       }

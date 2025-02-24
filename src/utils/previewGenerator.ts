@@ -16,7 +16,6 @@ const generateCSS = (component: Component): string => {
 };
 
 const getAllCSS = (component: Component): string => {
-    console.log("component", component);
     let css = generateCSS(component);
 
     // Recursively get CSS for all children

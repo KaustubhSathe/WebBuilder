@@ -1,10 +1,5 @@
-let counter = 1;
+import { v4 as uuidv4 } from "uuid";
 
-export const generateComponentId = (prefix: string): string => {
-    return `${prefix}_${counter++}`;
-};
-
-// Reset counter (useful for testing)
-export const resetIdCounter = () => {
-    counter = 1;
+export const generateComponentId = (): string => {
+    return uuidv4().replace(/-/g, "");
 };

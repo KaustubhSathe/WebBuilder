@@ -298,7 +298,6 @@ function BuilderPageContent() {
 
         const saveToast = toast.loading("Saving project...");
         try {
-          console.log("Saving project:", project.id, pages);
           await projectService.saveProject(project.id, pages);
           toast.success("Project saved successfully", {
             id: saveToast,

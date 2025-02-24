@@ -168,8 +168,7 @@ const StyleEditor: React.FC = () => {
 
   const handleStyleChange = (property: string, value: string) => {
     if (!selectedComponent) return;
-    console.log("value", value);
-    console.log("property", property);
+    
     dispatch(updateComponent({
       id: selectedComponent.id,
       updates: {
