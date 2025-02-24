@@ -12,6 +12,8 @@ import {
 } from "../store/builderSlice";
 import { RootState } from "../store/store";
 import BuilderComponent from "./BuilderComponent";
+import CommentBubble from "./CommentBubble";
+import CommentBox from "./CommentBox";
 
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
@@ -37,6 +39,20 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [commentBox, setCommentBox] = useState<
+    { id: string; x: number; y: number } | null
+  >(null);
+  const [comments, setComments] = useState<
+    Array<
+      {
+        id: string;
+        x: number;
+        y: number;
+        userInitials: string;
+        content?: string;
+      }
+    >
+  >([]);
 
   const findComponentAtPosition = (
     root: Component,
@@ -222,14 +238,62 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
     setPosition({ x: 0, y: 0 });
   };
 
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    if (!isCommentsOpen) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // If there's an existing temporary comment, remove it first
+    if (commentBox) {
+      setComments((prev) =>
+        prev.filter((comment) => comment.id !== commentBox.id)
+      );
+      setCommentBox(null);
+      return;
+    }
+
+    const newCommentId = Date.now().toString();
+
+    // Add temporary bubble immediately
+    setComments((prev) => [...prev, {
+      id: newCommentId,
+      x,
+      y,
+      userInitials: "AS", // Get from user data
+    }]);
+
+    setCommentBox({ id: newCommentId, x, y });
+  };
+
+  const handleCommentSubmit = (content: string) => {
+    if (!commentBox) return;
+
+    // Update the existing comment with content
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment.id === commentBox.id ? { ...comment, content } : comment
+      )
+    );
+
+    setCommentBox(null);
+  };
+
+  const handleCommentCancel = () => {
+    if (!commentBox) return;
+
+    // Remove the temporary bubble
+    setComments((prev) =>
+      prev.filter((comment) => comment.id !== commentBox.id)
+    );
+    setCommentBox(null);
+  };
+
   return (
     <div className="relative w-full h-full">
       {/* Canvas Content */}
-      <div
-        className={`zoomable-canvas w-full h-full bg-white overflow-auto ${
-          isCommentsOpen ? "cursor-comment" : ""
-        }`}
-      >
+      <div className={`zoomable-canvas w-full h-full bg-white overflow-auto`}>
         <div className="w-full h-full bg-[#1a1a1a] p-8 overflow-hidden relative">
           {/* Zoom Controls */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-10">
@@ -282,14 +346,34 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
           </div>
         </div>
 
-        {/* Overlay Layer */}
-        {isCommentsOpen && (
-          <div
-            className="absolute inset-0 bg-transparent cursor-comment z-50"
-            aria-label="Comments Mode Active"
-          />
-        )}
+        {/* Comment Bubbles */}
+        {isCommentsOpen &&
+          comments.map((comment) => (
+            <CommentBubble
+              key={comment.id}
+              position={{ x: comment.x, y: comment.y }}
+              userInitials={comment.userInitials}
+            />
+          ))}
       </div>
+
+      {/* Overlay Layer - Captures clicks when comments mode is active */}
+      {isCommentsOpen && (
+        <div
+          className="absolute inset-0 bg-transparent cursor-comment z-50"
+          onClick={handleCanvasClick}
+          aria-label="Comments Mode Active"
+        />
+      )}
+
+      {/* Comment Box */}
+      {isCommentsOpen && commentBox && (
+        <CommentBox
+          position={commentBox}
+          onSubmit={handleCommentSubmit}
+          onCancel={handleCommentCancel}
+        />
+      )}
     </div>
   );
 };
