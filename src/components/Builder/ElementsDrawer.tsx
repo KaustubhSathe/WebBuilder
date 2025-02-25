@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
-import { DraggableComponent } from "../types/builder";
+import { DraggableComponent } from "../../types/builder";
 
 interface ComponentsDrawerProps {
   isOpen: boolean;

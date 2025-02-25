@@ -3,7 +3,8 @@ import builderReducer, { builderMiddleware } from "./builderSlice";
 import pagesReducer from "./pagesSlice";
 import projectReducer from "./projectSlice";
 import saveStateReducer from "./saveStateSlice";
-
+import commentsReducer from "./commentsSlice";
+import userReducer from "./userSlice";
 const saveStateMiddleware: Middleware = (store) => (next) => (action: any) => {
   const result = next(action);
 
@@ -31,6 +32,7 @@ export const store = configureStore({
     pages: pagesReducer,
     project: projectReducer,
     saveState: saveStateReducer,
+    comments: commentsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([builderMiddleware, saveStateMiddleware]),
@@ -42,6 +44,8 @@ export type RootState = {
   pages: ReturnType<typeof pagesReducer>;
   project: ReturnType<typeof projectReducer>;
   saveState: ReturnType<typeof saveStateReducer>;
+  comments: ReturnType<typeof commentsReducer>;
+  user: ReturnType<typeof userReducer>;
 };
 
 export type AppDispatch = typeof store.dispatch;

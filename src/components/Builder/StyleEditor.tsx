@@ -5,9 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Component } from "@/types/builder";
 import { updateComponent } from "@/store/builderSlice";
-import Select from "./StyleControls/Select";
-import ColorPicker from "./StyleControls/ColorPicker";
-import NumberUnitInput from "./StyleControls/NumberUnitInput";
+import Select from "@/components/StyleControls/Select";
+import ColorPicker from "@/components/StyleControls/ColorPicker";
+import NumberUnitInput from "@/components/StyleControls/NumberUnitInput";
 
 const COMPONENT_LABELS: Record<string, string> = {
   main: "Main Container",

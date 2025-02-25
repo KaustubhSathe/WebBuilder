@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { Component } from "../types/builder";
-import { deleteComponent, updateComponent } from "../store/builderSlice";
+import { Component } from "../../types/builder";
+import { deleteComponent, updateComponent } from "../../store/builderSlice";
 
 const ComponentToolbar: React.FC<{ component: Component }> = (
   { component },

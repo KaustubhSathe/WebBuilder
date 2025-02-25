@@ -8,25 +8,23 @@ import { store } from "../../store/store";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { projectService } from "@/services/projectService";
-import type { Project } from "@/types/project";
-import type { Page } from "@/store/pagesSlice";
-import ZoomableCanvas from "@/components/ZoomableCanvas";
-import ElementsDrawer from "@/components/ElementsDrawer";
-import PagesSidebar from "@/components/PagesSidebar";
-import PageSelector from "@/components/PageSelector";
-import StyleEditor from "@/components/StyleEditor";
+import ZoomableCanvas from "@/components/Builder/ZoomableCanvas";
+import ElementsDrawer from "@/components/Builder/ElementsDrawer";
+import PagesSidebar from "@/components/Builder/PagesSidebar";
+import PageSelector from "@/components/Builder/PageSelector";
+import StyleEditor from "@/components/Builder/StyleEditor";
 import { setComponent, setSelectedComponent } from "@/store/builderSlice";
 import { setCurrentProject } from "@/store/projectSlice";
 import { setPagesFromServer, setSelectedPage } from "@/store/pagesSlice";
-import NavigatorSidebar from "@/components/NavigatorSidebar";
-import ProjectDropdown from "@/components/ProjectDropdown";
-import LoadingBar from "@/components/LoadingBar";
+import NavigatorSidebar from "@/components/Builder/NavigatorSidebar";
+import ProjectDropdown from "@/components/Layout/ProjectDropdown";
+import LoadingBar from "@/components/Utils/LoadingBar";
 import { RootState } from "@/store/store";
 import toast from "react-hot-toast";
 import { generatePreview } from "@/utils/previewGenerator";
-import SaveIndicator from "@/components/SaveIndicator";
+import SaveIndicator from "@/components/Utils/SaveIndicator";
 import { markSaved, setSaving } from "@/store/saveStateSlice";
-import CommentsSidebar from "@/components/CommentsSidebar";
+import CommentsSidebar from "@/components/Comments/CommentsSidebar";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -265,16 +263,6 @@ function BuilderCanvas() {
   );
 }
 
-export default function BuilderPage() {
-  return (
-    <Provider store={store}>
-      <DndProvider backend={HTML5Backend}>
-        <BuilderPageContent />
-      </DndProvider>
-    </Provider>
-  );
-}
-
 function BuilderPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -371,4 +359,14 @@ function BuilderPageContent() {
   }
 
   return <BuilderCanvas />;
+}
+
+export default function BuilderPage() {
+  return (
+    <Provider store={store}>
+      <DndProvider backend={HTML5Backend}>
+        <BuilderPageContent />
+      </DndProvider>
+    </Provider>
+  );
 }

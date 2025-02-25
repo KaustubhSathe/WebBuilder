@@ -45,3 +45,28 @@ body {
 .cursor-comment {
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='none'><path d='M28 6H8C5.79086 6 4 7.79086 4 10V22C4 24.2091 5.79086 26 8 26H12L8 30L13 26H28C30.2091 26 32 24.2091 32 22V10C32 7.79086 30.2091 6 28 6Z' fill='%234B5563' stroke='white' stroke-width='2'/><path d='M14 18H22M18 14V22' stroke='white' stroke-width='2'/></svg>") 8 24, auto;
 }
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3c3c3c;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4c4c4c;
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3c3c3c #1a1a1a;
+}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Project } from '@/types/project';
 import { projectService } from '@/services/projectService';
-import CreateProjectModal from '@/components/CreateProjectModal';
+import CreateProjectModal from '@/components/Utils/CreateProjectModal';
 
 export default function DashboardPage() {
   const router = useRouter();
