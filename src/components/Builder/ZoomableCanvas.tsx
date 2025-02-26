@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Component, DraggableComponent } from "../../types/builder";
 import {
   addElement,
+  deleteComponent,
   moveElement,
   setSelectedComponent,
 } from "../../store/builderSlice";
@@ -19,7 +20,6 @@ import { supabase } from "@/lib/supabase";
 import { getInitials } from "@/utils/utils";
 import { CommentData } from "@/services/commentService";
 import { User } from "@supabase/supabase-js";
-import { calculateDistance } from "react-use-gesture/dist/utils/math";
 
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
@@ -54,6 +54,9 @@ const ZoomableCanvas = (
   const dispatch = useDispatch();
   const [user, setUser] = useState<User | null>(null);
   const component = useSelector((state: RootState) => state.builder.component);
+  const selectedComponent = useSelector((state: RootState) =>
+    state.builder.selectedComponent
+  );
   const project = useSelector((state: RootState) =>
     state.project.currentProject
   );
@@ -82,6 +85,31 @@ const ZoomableCanvas = (
     };
     getUser();
   }, []);
+
+  // Add keyboard event handler for delete key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if Delete key is pressed and there's a selected component
+      if (e.key === "Delete" && selectedComponent) {
+        // Prevent default browser behavior
+        e.preventDefault();
+
+        // Delete the selected component
+        dispatch(deleteComponent(selectedComponent));
+
+        // Clear the selection
+        dispatch(setSelectedComponent(null));
+      }
+    };
+
+    // Add event listener
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dispatch, selectedComponent]);
 
   const findComponentAtPosition = (
     root: Component,

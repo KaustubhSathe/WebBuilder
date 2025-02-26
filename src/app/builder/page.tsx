@@ -13,7 +13,7 @@ import ElementsDrawer from "@/components/Builder/ElementsDrawer";
 import PagesSidebar from "@/components/Builder/PagesSidebar";
 import PageSelector from "@/components/Builder/PageSelector";
 import StyleEditor from "@/components/Builder/StyleEditor";
-import { setComponent, setSelectedComponent } from "@/store/builderSlice";
+import { deleteComponent, setComponent, setSelectedComponent } from "@/store/builderSlice";
 import { setCurrentProject } from "@/store/projectSlice";
 import { setPagesFromServer, setSelectedPage } from "@/store/pagesSlice";
 import NavigatorSidebar from "@/components/Builder/NavigatorSidebar";
