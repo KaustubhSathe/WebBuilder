@@ -92,7 +92,7 @@ const CommentsSidebar = ({ isOpen, onClose }: CommentsSidebarProps) => {
   return (
     <>
       {isOpen && (
-        <div className="w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
+        <div className="w-[300px] fixed right-0 h-full z-[3000] cursor-normal bg-[#2c2c2c] border-l border-[#3c3c3c]">
           <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between p-3 border-b border-[#3c3c3c]">

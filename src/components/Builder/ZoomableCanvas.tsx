@@ -16,15 +16,24 @@ import CommentBubble from "../Comments/CommentBubble";
 import CommentBox from "../Comments/CommentBox";
 import { addComment, removeComment } from "@/store/commentsSlice";
 import { supabase } from "@/lib/supabase";
-import { setUser } from "@/store/userSlice";
 import { getInitials } from "@/utils/utils";
 import { CommentData } from "@/services/commentService";
 import { User } from "@supabase/supabase-js";
+import { calculateDistance } from "react-use-gesture/dist/utils/math";
 
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
   isCommentsOpen?: boolean;
+  responsiveMode: "desktop" | "tablet" | "mobile"; // Current device viewport mode
 }
+
+// Predefined canvas dimensions for different device viewports (in pixels)
+const CANVAS_SIZES = {
+  desktop: { width: 1920, height: 1080 }, // Standard desktop layout
+  tablet: { width: 768, height: 1024 }, // Vertical tablet layout
+  mobile: { width: 375, height: 667 }, // Mobile phone layout
+};
+
 // find the parent of a component
 // this is a recursive function that will return the parent of the component
 // root is the root of the component tree
@@ -38,7 +47,9 @@ const findParent = (root: Component, node: Component): Component | null => {
   return null;
 };
 
-const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
+const ZoomableCanvas = (
+  { isCommentsOpen, responsiveMode }: ZoomableCanvasProps,
+) => {
   const dispatch = useDispatch();
   const [user, setUser] = useState<User | null>(null);
   const component = useSelector((state: RootState) => state.builder.component);
@@ -59,6 +70,9 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
   const [selectedComment, setSelectedComment] = useState<CommentData | null>(
     null,
   );
+
+  // Current canvas dimensions based on the selected responsive mode
+  const canvasSize = CANVAS_SIZES[responsiveMode];
 
   useEffect(() => {
     const getUser = async () => {
@@ -156,10 +170,14 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
       };
 
       // Calculate final position, accounting for grab offset
-      const x =
-        (offset.x - canvasRect.left - position.x * zoom - grabOffset.x) / zoom;
-      const y = (offset.y - canvasRect.top - position.y * zoom - grabOffset.y) /
+      let x = (offset.x - canvasRect.left - position.x * zoom - grabOffset.x) /
         zoom;
+      let y = (offset.y - canvasRect.top - position.y * zoom - grabOffset.y) /
+        zoom;
+
+      // Apply boundary constraints
+      x = Math.max(0, Math.min(x, canvasSize.width - 100)); // 100 is minimum component width
+      y = Math.max(0, Math.min(y, canvasSize.height - 40)); // 40 is minimum component height
 
       // Find the component at drop position, excluding the dragged component
       const targetComponent = findComponentAtPosition(
@@ -249,7 +267,7 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
 
   const handleReset = () => {
     setZoom(1);
-    setPosition({ x: 0, y: 0 });
+    setPosition({ x: 100, y: 100 });
   };
 
   const handleCommentBubbleClick = (
@@ -322,27 +340,36 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
   return (
     <div className="relative w-full h-full">
       {/* Canvas Content */}
-      <div className={`zoomable-canvas w-full h-full bg-white overflow-auto`}>
-        <div className="w-full h-full bg-[#1a1a1a] p-8 overflow-hidden relative">
+      <div className={`w-full h-full`}>
+        <div
+          className="w-full h-full bg-[#1a1a1a] overflow-hidden relative"
+          {...bind()}
+        >
           {/* Zoom Controls */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-10">
+          <div className="absolute top-4 left-[calc((100vw-300px)/2)] -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-10">
             <button
               onClick={handleZoomOut}
-              className="text-gray-400 hover:text-gray-200 transition-colors"
+              className="text-gray-400 hover:text-gray-200 transition-colors flex items-center justify-center"
             >
-              <span className="material-icons text-[18px]">remove</span>
+              <span className="material-icons text-[18px] mb-auto mt-auto">
+                remove
+              </span>
             </button>
             <button
               onClick={handleReset}
-              className="text-gray-400 hover:text-gray-200 transition-colors px-2 text-sm"
+              className="text-gray-400 hover:text-gray-200 transition-colors px-2 text-sm flex items-center justify-center"
             >
-              {Math.round(zoom * 100)}%
+              <span className="mb-auto mt-auto text-center items-center justify-center">
+                {Math.round(zoom * 100)}%
+              </span>
             </button>
             <button
               onClick={handleZoomIn}
-              className="text-gray-400 hover:text-gray-200 transition-colors"
+              className="text-gray-400 hover:text-gray-200 transition-colors flex items-center justify-center"
             >
-              <span className="material-icons text-[18px]">add</span>
+              <span className="material-icons text-[18px] mb-auto mt-auto">
+                add
+              </span>
             </button>
           </div>
 
@@ -351,8 +378,7 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
               drop(node);
               canvasRef.current = node;
             }}
-            {...bind()}
-            className={`w-full h-full bg-white rounded relative touch-none select-none
+            className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none
                 ${isOver ? "bg-opacity-90" : ""}
                 ${
               isDragging
@@ -366,6 +392,8 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
                 `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
               transformOrigin: "center center",
               transition: "transform 0.1s ease-out",
+              width: `${canvasSize.width}px`,
+              height: `${canvasSize.height}px`,
             }}
             onClick={() => dispatch(setSelectedComponent(null))}
           >

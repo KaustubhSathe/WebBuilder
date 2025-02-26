@@ -32,6 +32,10 @@ function BuilderCanvas() {
   const [isPagesSidebarOpen, setIsPagesSidebarOpen] = useState(false);
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
   const [isCommentsSidebarOpen, setIsCommentsSidebarOpen] = useState(false);
+  const [responsiveMode, setResponsiveMode] = useState<
+    "desktop" | "tablet" | "mobile"
+  >("desktop");
+  const [isResponsiveMenuOpen, setIsResponsiveMenuOpen] = useState(false);
 
   const component = useSelector((state: RootState) => state.builder.component);
 
@@ -115,12 +119,74 @@ function BuilderCanvas() {
         <div className="flex-1 flex justify-center items-center">
           <PageSelector />
           <div className="flex items-center ml-2">
-            <button
-              className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
-              title="Responsive"
-            >
-              <span className="material-icons text-[20px]">laptop</span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setIsResponsiveMenuOpen(!isResponsiveMenuOpen)}
+                className="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors px-2"
+                title="Responsive"
+              >
+                <span className="material-icons text-[20px]">
+                  {responsiveMode === "desktop"
+                    ? "laptop"
+                    : responsiveMode === "tablet"
+                    ? "tablet"
+                    : "smartphone"}
+                </span>
+              </button>
+
+              {isResponsiveMenuOpen && (
+                <div className="absolute top-full right-0 mt-1 bg-[#2c2c2c] border border-[#3c3c3c] rounded shadow-lg z-50">
+                  <button
+                    className={`flex items-center px-3 py-2 w-full text-left ${
+                      responsiveMode === "desktop"
+                        ? "text-blue-400"
+                        : "text-gray-300"
+                    } hover:bg-[#3c3c3c]`}
+                    onClick={() => {
+                      setResponsiveMode("desktop");
+                      setIsResponsiveMenuOpen(false);
+                    }}
+                  >
+                    <span className="material-icons text-[18px] mr-2">
+                      laptop
+                    </span>
+                    Desktop
+                  </button>
+                  <button
+                    className={`flex items-center px-3 py-2 w-full text-left ${
+                      responsiveMode === "tablet"
+                        ? "text-blue-400"
+                        : "text-gray-300"
+                    } hover:bg-[#3c3c3c]`}
+                    onClick={() => {
+                      setResponsiveMode("tablet");
+                      setIsResponsiveMenuOpen(false);
+                    }}
+                  >
+                    <span className="material-icons text-[18px] mr-2">
+                      tablet
+                    </span>
+                    Tablet
+                  </button>
+                  <button
+                    className={`flex items-center px-3 py-2 w-full text-left ${
+                      responsiveMode === "mobile"
+                        ? "text-blue-400"
+                        : "text-gray-300"
+                    } hover:bg-[#3c3c3c]`}
+                    onClick={() => {
+                      setResponsiveMode("mobile");
+                      setIsResponsiveMenuOpen(false);
+                    }}
+                  >
+                    <span className="material-icons text-[18px] mr-2">
+                      smartphone
+                    </span>
+                    Mobile
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -228,7 +294,10 @@ function BuilderCanvas() {
 
         {/* Canvas */}
         <div className="flex-1 relative">
-          <ZoomableCanvas isCommentsOpen={isCommentsSidebarOpen} />
+          <ZoomableCanvas
+            isCommentsOpen={isCommentsSidebarOpen}
+            responsiveMode={responsiveMode}
+          />
         </div>
 
         {/* Right Sidebar - Show either style editor or comments */}
@@ -240,7 +309,7 @@ function BuilderCanvas() {
             />
           )
           : (
-            <div className="right-sidebar w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
+            <div className="right-sidebar h-full fixed right-0 w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
               {/* Tabs */}
               <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
                 <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500 mx-1">
