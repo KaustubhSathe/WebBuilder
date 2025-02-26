@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -45,6 +45,7 @@ function BuilderCanvas() {
   const [activeTab, setActiveTab] = useState<
     "style" | "settings" | "interactions"
   >("style");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Get interactions from the store once at the component level
   const interactions = useSelector((state: RootState) =>
@@ -323,12 +324,14 @@ function BuilderCanvas() {
         )}
 
         {/* Canvas */}
-        <div className="flex-1 relative">
-          <ZoomableCanvas
-            isCommentsOpen={isCommentsSidebarOpen}
-            responsiveMode={responsiveMode}
-          />
-        </div>
+        {!isFullscreen && (
+          <div className="flex-1 relative">
+            <ZoomableCanvas
+              isCommentsOpen={isCommentsSidebarOpen}
+              responsiveMode={responsiveMode}
+            />
+          </div>
+        )}
 
         {/* Right Sidebar - Show either style editor or comments */}
         {isCommentsSidebarOpen
@@ -379,7 +382,12 @@ function BuilderCanvas() {
               {activeTab === "settings" && (
                 <div className="p-4 text-gray-400">Settings coming soon</div>
               )}
-              {activeTab === "interactions" && <InteractionsEditor />}
+              {activeTab === "interactions" && (
+                <InteractionsEditor
+                  isFullscreen={isFullscreen}
+                  setIsFullscreen={setIsFullscreen}
+                />
+              )}
             </div>
           )}
       </div>
@@ -396,6 +404,13 @@ function BuilderPageContent() {
     state.project.currentProject
   );
   const pages = useSelector((state: RootState) => state.pages.pages);
+  const interactions = useSelector((state: RootState) =>
+    state.builder.component.interactions || ""
+  );
+  
+  useLayoutEffect(() => {
+    eval(interactions);
+  }, [interactions]);
 
   useEffect(() => {
     const checkUserAndProject = async () => {
@@ -469,7 +484,9 @@ function BuilderPageContent() {
         dispatch(setSelectedPage(homePage.id));
         // also set Component to home page component tree
         dispatch(setComponent(homePage.component_tree));
-        dispatch(updateInteractions(homePage.component_tree.interactions || ""));
+        dispatch(
+          updateInteractions(homePage.component_tree.interactions || ""),
+        );
       }
       setLoading(false);
     }
@@ -483,7 +500,11 @@ function BuilderPageContent() {
     );
   }
 
-  return <BuilderCanvas />;
+  return (
+    <>
+      <BuilderCanvas />
+    </>
+  );
 }
 
 export default function BuilderPage() {

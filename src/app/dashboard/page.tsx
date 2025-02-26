@@ -114,7 +114,7 @@ export default function DashboardPage() {
                 <tr 
                   key={project.id}
                   className="hover:bg-[#2c2c2c] transition-colors cursor-pointer border-b border-[#3c3c3c] last:border-b-0"
-                  onClick={() => router.push(`/builder?project_id=${project.id}`)}
+                  onClick={() => window.open(`/builder?project_id=${project.id}`, '_blank')}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">

@@ -382,7 +382,8 @@ const ZoomableCanvas = (
       <div className={`w-full h-full`}>
         <div className="w-full h-full bg-[#1a1a1a] overflow-hidden relative">
           {/* Zoom Controls */}
-          <div className="absolute top-4 left-[calc((100vw-300px)/2)] -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-10">
+          <div className="absolute top-4 left-[calc((100vw-300px)/2)]
+           -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-[5]">
             <button
               onClick={handleZoomOut}
               className="text-gray-400 hover:text-gray-200 transition-colors flex items-center justify-center"

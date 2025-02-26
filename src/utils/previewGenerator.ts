@@ -26,7 +26,7 @@ const getAllCSS = (component: Component): string => {
   return css;
 };
 
-const generateHTML = (component: Component): string => {
+export const generateHTML = (component: Component): string => {
   const tag = component.type === "text" ? "span" : component.type;
 
   // Handle void elements

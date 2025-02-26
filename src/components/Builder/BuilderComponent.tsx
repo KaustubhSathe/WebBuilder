@@ -178,7 +178,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
               </div>
             )}
 
-            <main className="w-full h-full">
+            <main id={component.id} className="w-full h-full">
               {component.children?.map((child) => (
                 <BuilderComponent key={child.id} component={child} />
               ))}
@@ -189,6 +189,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "section":
         return (
           <section
+            id={component.id}
             style={otherStyles}
             className="min-h-[100px] rounded-lg border border-slate-200"
           >
@@ -201,6 +202,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "div":
         return (
           <div
+            id={component.id}
             style={otherStyles}
             className="h-full w-full border border-slate-200"
           >
@@ -212,32 +214,33 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
       // Typography components
       case "h1":
-        return <h1 style={otherStyles}>{component.content}</h1>;
+        return <h1 id={component.id} style={otherStyles}>{component.content}</h1>;
       case "h2":
-        return <h2 style={otherStyles}>{component.content}</h2>;
+        return <h2 id={component.id} style={otherStyles}>{component.content}</h2>;
       case "h3":
-        return <h3 style={otherStyles}>{component.content}</h3>;
+        return <h3 id={component.id} style={otherStyles}>{component.content}</h3>;
       case "h4":
-        return <h4 style={otherStyles}>{component.content}</h4>;
+        return <h4 id={component.id} style={otherStyles}>{component.content}</h4>;
       case "h5":
-        return <h5 style={otherStyles}>{component.content}</h5>;
+        return <h5 id={component.id} style={otherStyles}>{component.content}</h5>;
       case "h6":
-        return <h6 style={otherStyles}>{component.content}</h6>;
+        return <h6 id={component.id} style={otherStyles}>{component.content}</h6>;
       case "p":
-        return <p style={otherStyles}>{component.content}</p>;
+        return <p id={component.id} style={otherStyles}>{component.content}</p>;
       case "a":
         return (
-          <a href={component.content} style={otherStyles}>
+          <a href={component.content} id={component.id} style={otherStyles}>
             {component.content}
           </a>
         );
       case "text":
-        return <span style={otherStyles}>{component.content}</span>;
+        return <span id={component.id} style={otherStyles}>{component.content}</span>;
       case "blockquote":
-        return <blockquote style={otherStyles}>{component.content}</blockquote>;
+        return <blockquote id={component.id} style={otherStyles}>{component.content}</blockquote>;
       case "rich-text":
         return (
           <div
+            id={component.id}
             style={otherStyles}
             dangerouslySetInnerHTML={{ __html: component.content || "" }}
           />
@@ -246,19 +249,19 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       // List components
       case "list":
         return (
-          <ul style={otherStyles} className="list-disc list-inside">
+          <ul id={component.id} style={otherStyles} className="list-disc list-inside">
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
             ))}
           </ul>
         );
       case "list-item":
-        return <li style={otherStyles}>{component.content}</li>;
+        return <li id={component.id} style={otherStyles}>{component.content}</li>;
 
       // Form components
       case "form":
         return (
-          <form style={otherStyles} className="space-y-4">
+          <form id={component.id} style={otherStyles} className="space-y-4">
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
             ))}
@@ -267,6 +270,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "input":
         return (
           <input
+            id={component.id}
             type="text"
             style={otherStyles}
             placeholder={component.content}
@@ -276,16 +280,18 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "textarea":
         return (
           <textarea
+            id={component.id}
             style={otherStyles}
             placeholder={component.content}
             className="border rounded px-3 py-2"
           />
         );
       case "label":
-        return <label style={otherStyles}>{component.content}</label>;
+        return <label id={component.id} style={otherStyles}>{component.content}</label>;
       case "button":
         return (
           <button
+            id={component.id}
             style={otherStyles}
             className="px-4 py-2 rounded text-white"
           >
@@ -293,22 +299,24 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
           </button>
         );
       case "checkbox":
-        return <input type="checkbox" style={otherStyles} />;
+        return <input id={component.id} type="checkbox" style={otherStyles} />;
       case "radio":
-        return <input type="radio" style={otherStyles} />;
+        return <input id={component.id} type="radio" style={otherStyles} />;
       case "select":
         return (
           <select
+            id={component.id}
             style={otherStyles}
             className="border rounded px-3 py-2"
           />
         );
       case "file":
-        return <input type="file" style={otherStyles} />;
+        return <input id={component.id} type="file" style={otherStyles} />;
       case "form-button":
         return (
           <button
             type="submit"
+            id={component.id}
             style={otherStyles}
             className="px-4 py-2 rounded bg-blue-500 text-white"
           >
@@ -320,6 +328,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "image":
         return (
           <img
+            id={component.id}
             src={component.src}
             alt={component.content}
             style={otherStyles}
@@ -329,6 +338,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "video":
         return (
           <video
+            id={component.id}
             src={component.src}
             controls
             style={otherStyles}
@@ -338,6 +348,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       case "youtube":
         return (
           <iframe
+            id={component.id}
             src={component.src}
             style={otherStyles}
             className="rounded-lg"
@@ -348,7 +359,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
       default:
         return (
-          <div style={otherStyles}>
+          <div id={component.id} style={otherStyles}>
             {component.content || `Unknown component type: ${component.type}`}
           </div>
         );
