@@ -15,11 +15,14 @@ const PageSelector = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handlePageChange = (pageId: string) => {
-    dispatch(setSelectedPage(pageId));
-    // Sync component tree with selected page
-    const page = pages.find((page) => page.id === pageId);
-    if (page) {
+    const page = pages.find((p) => p.id === pageId);
+
+    if (page && page.component_tree) {
+      // First set the component tree from the selected page
       dispatch(setComponent(page.component_tree));
+
+      // Then update the selected page ID
+      dispatch(setSelectedPage(pageId));
     }
   };
 

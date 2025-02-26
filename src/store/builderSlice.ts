@@ -191,6 +191,9 @@ const builderSlice = createSlice({
         Object.assign(component, action.payload.updates);
       }
     },
+    updateInteractions: (state, action: PayloadAction<string>) => {
+      state.component.interactions = action.payload;
+    },
   },
 });
 
@@ -199,7 +202,7 @@ export const builderMiddleware =
   (store: any) => (next: any) => (action: any) => {
     const result = next(action);
 
-    // List of actions that modify the component tree
+    // List of actions that modify the component tree or interactions
     const componentModifyingActions = [
       "builder/setComponent",
       "builder/deleteComponent",
@@ -207,6 +210,7 @@ export const builderMiddleware =
       "builder/moveElement",
       "builder/updateElementSize",
       "builder/updateComponent",
+      "builder/updateInteractions",
     ];
 
     if (componentModifyingActions.includes(action.type)) {
@@ -238,6 +242,7 @@ export const {
   moveElement,
   updateElementSize,
   updateComponent,
+  updateInteractions,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;

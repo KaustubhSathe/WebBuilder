@@ -46,7 +46,10 @@ const generateHTML = (component: Component): string => {
   return `<${tag} id="${component.id}">${content}${children}</${tag}>`;
 };
 
-export const generatePreview = (component: Component): string => {
+export const generatePreview = (
+  component: Component,
+  interactions: string,
+): string => {
   return `
 <!DOCTYPE html>
 <html>
@@ -72,6 +75,10 @@ export const generatePreview = (component: Component): string => {
 </head>
 <body>
   ${generateHTML(component)}
+  
+  <script>
+    ${interactions}
+  </script>
 </body>
 </html>`;
 };

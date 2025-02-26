@@ -13,7 +13,12 @@ import ElementsDrawer from "@/components/Builder/ElementsDrawer";
 import PagesSidebar from "@/components/Builder/PagesSidebar";
 import PageSelector from "@/components/Builder/PageSelector";
 import StyleEditor from "@/components/Builder/StyleEditor";
-import { deleteComponent, setComponent, setSelectedComponent } from "@/store/builderSlice";
+import {
+  deleteComponent,
+  setComponent,
+  setSelectedComponent,
+  updateInteractions,
+} from "@/store/builderSlice";
 import { setCurrentProject } from "@/store/projectSlice";
 import { setPagesFromServer, setSelectedPage } from "@/store/pagesSlice";
 import NavigatorSidebar from "@/components/Builder/NavigatorSidebar";
@@ -25,6 +30,7 @@ import { generatePreview } from "@/utils/previewGenerator";
 import SaveIndicator from "@/components/Utils/SaveIndicator";
 import { markSaved, setSaving } from "@/store/saveStateSlice";
 import CommentsSidebar from "@/components/Comments/CommentsSidebar";
+import InteractionsEditor from "@/components/Builder/InteractionsEditor";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -36,7 +42,14 @@ function BuilderCanvas() {
     "desktop" | "tablet" | "mobile" | "none"
   >("none");
   const [isResponsiveMenuOpen, setIsResponsiveMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<
+    "style" | "settings" | "interactions"
+  >("style");
 
+  // Get interactions from the store once at the component level
+  const interactions = useSelector((state: RootState) =>
+    state.builder.component.interactions || ""
+  );
   const component = useSelector((state: RootState) => state.builder.component);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
@@ -91,7 +104,8 @@ function BuilderCanvas() {
   };
 
   const handlePreview = () => {
-    const previewHTML = generatePreview(component);
+    // Don't call useSelector here - use the value from the component scope
+    const previewHTML = generatePreview(component, interactions);
     const previewWindow = window.open("", "_blank");
     if (previewWindow) {
       previewWindow.document.write(previewHTML);
@@ -328,19 +342,44 @@ function BuilderCanvas() {
             <div className="right-sidebar h-full fixed right-0 w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
               {/* Tabs */}
               <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
-                <button className="flex-1 h-full flex items-center justify-center text-gray-200 text-sm border-b-2 border-blue-500 mx-1">
+                <button
+                  className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
+                    activeTab === "style"
+                      ? "text-gray-200 border-b-2 border-blue-500"
+                      : "text-gray-400 hover:text-gray-200 transition-colors"
+                  }`}
+                  onClick={() => setActiveTab("style")}
+                >
                   Style
                 </button>
-                <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
+                <button
+                  className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
+                    activeTab === "settings"
+                      ? "text-gray-200 border-b-2 border-blue-500"
+                      : "text-gray-400 hover:text-gray-200 transition-colors"
+                  }`}
+                  onClick={() => setActiveTab("settings")}
+                >
                   Settings
                 </button>
-                <button className="flex-1 h-full flex items-center justify-center text-gray-400 hover:text-gray-200 text-sm transition-colors mx-1">
+                <button
+                  className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
+                    activeTab === "interactions"
+                      ? "text-gray-200 border-b-2 border-blue-500"
+                      : "text-gray-400 hover:text-gray-200 transition-colors"
+                  }`}
+                  onClick={() => setActiveTab("interactions")}
+                >
                   Interactions
                 </button>
               </div>
 
-              {/* Style Editor */}
-              <StyleEditor />
+              {/* Content based on active tab */}
+              {activeTab === "style" && <StyleEditor />}
+              {activeTab === "settings" && (
+                <div className="p-4 text-gray-400">Settings coming soon</div>
+              )}
+              {activeTab === "interactions" && <InteractionsEditor />}
             </div>
           )}
       </div>
@@ -430,6 +469,7 @@ function BuilderPageContent() {
         dispatch(setSelectedPage(homePage.id));
         // also set Component to home page component tree
         dispatch(setComponent(homePage.component_tree));
+        dispatch(updateInteractions(homePage.component_tree.interactions || ""));
       }
       setLoading(false);
     }

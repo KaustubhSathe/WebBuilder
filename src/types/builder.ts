@@ -4,6 +4,7 @@ export interface Component {
   content?: string;
   src?: string;
   children: Component[];
+  interactions?: string | "";
   styles: {
     width: string;
     height: string;

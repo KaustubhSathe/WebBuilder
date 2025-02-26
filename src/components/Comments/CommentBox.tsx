@@ -41,7 +41,6 @@ const CommentBox = (
                 content,
                 position,
             );
-            console.log(newComment);
             dispatch(addComment(newComment));
             onSubmit?.(content);
             toast.success("Comment added successfully");
