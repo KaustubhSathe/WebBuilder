@@ -56,6 +56,9 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
     { id: string; x: number; y: number } | null
   >(null);
   const comments = useSelector((state: RootState) => state.comments.comments);
+  const [selectedComment, setSelectedComment] = useState<CommentData | null>(
+    null,
+  );
 
   useEffect(() => {
     const getUser = async () => {
@@ -249,39 +252,56 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
     setPosition({ x: 0, y: 0 });
   };
 
+  const handleCommentBubbleClick = (
+    e: React.MouseEvent,
+    comment: CommentData,
+  ) => {
+    e.stopPropagation(); // Prevent canvas click
+    setSelectedComment(comment);
+  };
+
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (!isCommentsOpen) return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // If there's an existing temporary comment, remove it first
-    if (commentBox) {
-      dispatch(removeComment(commentBox.id));
-      setCommentBox(null);
-      return;
+    // If clicking outside bubbles/boxes, clear selection
+    const target = e.target as HTMLElement;
+    if (!target.closest(".comment-bubble") && !target.closest(".comment-box")) {
+      setSelectedComment(null);
     }
 
-    const newCommentId = Date.now().toString();
+    // Only create new comment if not clicking on existing elements
+    if (target.classList.contains("cursor-comment")) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-    // Add temporary bubble immediately
-    dispatch(addComment({
-      id: newCommentId,
-      content: "",
-      position_x: x,
-      position_y: y,
-      project_id: project?.id,
-      page_id: selectedPage?.id,
-      user: user,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      is_resolved: false,
-      parent_id: null,
-      replies: [],
-    }));
+      // If there's an existing temporary comment, remove it first
+      if (commentBox) {
+        dispatch(removeComment(commentBox.id));
+        setCommentBox(null);
+        return;
+      }
 
-    setCommentBox({ id: newCommentId, x, y });
+      const newCommentId = Date.now().toString();
+
+      // Add temporary bubble immediately
+      dispatch(addComment({
+        id: newCommentId,
+        content: "",
+        position_x: x,
+        position_y: y,
+        project_id: project?.id,
+        page_id: selectedPage?.id,
+        user: user,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_resolved: false,
+        parent_id: null,
+        replies: [],
+      }));
+
+      setCommentBox({ id: newCommentId, x, y });
+    }
   };
 
   const handleCommentSubmit = () => {
@@ -366,6 +386,7 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
               userInitials={getInitials(
                 comment.user?.user_metadata?.name || "Unknown",
               )}
+              onClick={(e) => handleCommentBubbleClick(e, comment)}
             />
           );
         })}
@@ -385,6 +406,18 @@ const ZoomableCanvas = ({ isCommentsOpen }: ZoomableCanvasProps) => {
           position={commentBox}
           onSubmit={handleCommentSubmit}
           onCancel={handleCommentCancel}
+          onClose={() => setCommentBox(null)}
+        />
+      )}
+
+      {selectedComment && isCommentsOpen && (
+        <CommentBox
+          position={{
+            x: selectedComment.position_x,
+            y: selectedComment.position_y,
+          }}
+          comment={selectedComment}
+          onClose={() => setSelectedComment(null)}
         />
       )}
     </div>
