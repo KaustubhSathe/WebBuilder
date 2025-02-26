@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useGesture } from "react-use-gesture";
-import { useDrop } from "react-dnd";
+import { DropTargetMonitor, useDrop } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { Component, DraggableComponent } from "../../types/builder";
 import {
@@ -24,14 +24,15 @@ import { calculateDistance } from "react-use-gesture/dist/utils/math";
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
   isCommentsOpen?: boolean;
-  responsiveMode: "desktop" | "tablet" | "mobile"; // Current device viewport mode
+  responsiveMode: "desktop" | "tablet" | "mobile" | "none"; // Current device viewport mode
 }
 
 // Predefined canvas dimensions for different device viewports (in pixels)
 const CANVAS_SIZES = {
-  desktop: { width: 1920, height: 1080 }, // Standard desktop layout
-  tablet: { width: 768, height: 1024 }, // Vertical tablet layout
-  mobile: { width: 375, height: 667 }, // Mobile phone layout
+  desktop: { width: "1920", height: "1080" }, // Standard desktop layout
+  tablet: { width: "768", height: "1024" }, // Vertical tablet layout
+  mobile: { width: "375", height: "667" }, // Mobile phone layout
+  none: { width: "", height: "" }, // No canvas
 };
 
 // find the parent of a component
@@ -146,75 +147,85 @@ const ZoomableCanvas = (
     return { x, y };
   };
 
+  const handleDrop = (
+    item: DraggableComponent & { id?: string },
+    monitor: DropTargetMonitor,
+  ) => {
+    if (!monitor.isOver({ shallow: true })) return;
+
+    const offset = monitor.getClientOffset();
+    const sourceOffset = monitor.getSourceClientOffset();
+    const initialOffset = monitor.getInitialClientOffset();
+    const initialSourceOffset = monitor.getInitialSourceClientOffset();
+
+    if (
+      !offset || !initialOffset || !initialSourceOffset || !canvasRef.current
+    ) {
+      return;
+    }
+
+    const canvasRect = canvasRef.current.getBoundingClientRect();
+
+    // Calculate the offset from grab point to component's top-left
+    const grabOffset = {
+      x: initialOffset.x - initialSourceOffset.x,
+      y: initialOffset.y - initialSourceOffset.y,
+    };
+
+    // Calculate final position, accounting for canvas position, zoom, and pan
+    let x = (offset.x - canvasRect.left - position.x * zoom - grabOffset.x) /
+      zoom;
+    let y = (offset.y - canvasRect.top - position.y * zoom - grabOffset.y) /
+      zoom;
+
+    // Apply boundary constraints if using responsive mode
+    if (responsiveMode !== "none" && canvasSize.width && canvasSize.height) {
+      const width = parseInt(canvasSize.width);
+      const height = parseInt(canvasSize.height);
+      x = Math.max(0, Math.min(x, width - 100)); // 100 is minimum component width
+      y = Math.max(0, Math.min(y, height - 40)); // 40 is minimum component height
+    }
+
+    // Find the component at drop position, excluding the dragged component
+    const targetComponent = findComponentAtPosition(
+      component,
+      x,
+      y,
+      canvasRect,
+      item.id,
+    );
+    if (!targetComponent) return;
+
+    // Get absolute position of target component
+    const targetAbsPos = getAbsolutePosition(targetComponent);
+
+    // Calculate position relative to target component using absolute positions
+    const relativeX = x - targetAbsPos.x;
+    const relativeY = y - targetAbsPos.y;
+
+    if (monitor.getItemType() === "component") {
+      dispatch(addElement({
+        parentId: targetComponent.id,
+        type: item.type,
+        position: { x: relativeX, y: relativeY },
+      }));
+    } else if (monitor.getItemType() === "placed-component" && item.id) {
+      dispatch(moveElement({
+        id: item.id,
+        position: {
+          x: { value: relativeX, unit: "px" },
+          y: { value: relativeY, unit: "px" },
+        },
+        newParentId: targetComponent.id,
+      }));
+    }
+
+    return { dropped: true };
+  };
+
   const [{ isOver }, drop] = useDrop({
     accept: ["component", "placed-component"],
-    drop: (item: DraggableComponent & { id?: string }, monitor) => {
-      if (!monitor.isOver({ shallow: true })) return;
-
-      const offset = monitor.getClientOffset();
-      const initialOffset = monitor.getInitialClientOffset();
-      const initialSourceOffset = monitor.getInitialSourceClientOffset();
-
-      if (
-        !offset || !initialOffset || !initialSourceOffset || !canvasRef.current
-      ) {
-        return;
-      }
-
-      const canvasRect = canvasRef.current.getBoundingClientRect();
-
-      // Calculate the offset from grab point to component's top-left
-      const grabOffset = {
-        x: initialOffset.x - initialSourceOffset.x,
-        y: initialOffset.y - initialSourceOffset.y,
-      };
-
-      // Calculate final position, accounting for grab offset
-      let x = (offset.x - canvasRect.left - position.x * zoom - grabOffset.x) /
-        zoom;
-      let y = (offset.y - canvasRect.top - position.y * zoom - grabOffset.y) /
-        zoom;
-
-      // Apply boundary constraints
-      x = Math.max(0, Math.min(x, canvasSize.width - 100)); // 100 is minimum component width
-      y = Math.max(0, Math.min(y, canvasSize.height - 40)); // 40 is minimum component height
-
-      // Find the component at drop position, excluding the dragged component
-      const targetComponent = findComponentAtPosition(
-        component,
-        x,
-        y,
-        canvasRect,
-        item.id,
-      );
-      if (!targetComponent) return;
-
-      // Get absolute position of target component
-      const targetAbsPos = getAbsolutePosition(targetComponent);
-
-      // Calculate position relative to target component using absolute positions
-      const relativeX = x - targetAbsPos.x;
-      const relativeY = y - targetAbsPos.y;
-
-      if (monitor.getItemType() === "component") {
-        dispatch(addElement({
-          parentId: targetComponent.id,
-          type: item.type,
-          position: { x: relativeX, y: relativeY },
-        }));
-      } else if (monitor.getItemType() === "placed-component" && item.id) {
-        dispatch(moveElement({
-          id: item.id,
-          position: {
-            x: { value: relativeX, unit: "px" },
-            y: { value: relativeY, unit: "px" },
-          },
-          newParentId: targetComponent.id,
-        }));
-      }
-
-      return { dropped: true };
-    },
+    drop: handleDrop,
     collect: (monitor) => ({
       isOver: monitor.isOver({ shallow: true }),
     }),
@@ -267,7 +278,7 @@ const ZoomableCanvas = (
 
   const handleReset = () => {
     setZoom(1);
-    setPosition({ x: 100, y: 100 });
+    setPosition({ x: 110, y: 110 });
   };
 
   const handleCommentBubbleClick = (
@@ -341,10 +352,7 @@ const ZoomableCanvas = (
     <div className="relative w-full h-full">
       {/* Canvas Content */}
       <div className={`w-full h-full`}>
-        <div
-          className="w-full h-full bg-[#1a1a1a] overflow-hidden relative"
-          {...bind()}
-        >
+        <div className="w-full h-full bg-[#1a1a1a] overflow-hidden relative">
           {/* Zoom Controls */}
           <div className="absolute top-4 left-[calc((100vw-300px)/2)] -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-10">
             <button
@@ -378,6 +386,7 @@ const ZoomableCanvas = (
               drop(node);
               canvasRef.current = node;
             }}
+            {...bind()}
             className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none
                 ${isOver ? "bg-opacity-90" : ""}
                 ${
@@ -392,8 +401,8 @@ const ZoomableCanvas = (
                 `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
               transformOrigin: "center center",
               transition: "transform 0.1s ease-out",
-              width: `${canvasSize.width}px`,
-              height: `${canvasSize.height}px`,
+              width: responsiveMode === "none" ? "" : `${canvasSize.width}px`,
+              height: responsiveMode === "none" ? "" : `${canvasSize.height}px`,
             }}
             onClick={() => dispatch(setSelectedComponent(null))}
           >

@@ -1,53 +1,53 @@
 import type { Component } from "@/types/builder";
 
 const generateCSS = (component: Component): string => {
-    if (!component.styles) return "";
+  if (!component.styles) return "";
 
-    const cssRules = Object.entries(component.styles)
-        .map(([key, value]) => {
-            // Convert camelCase to kebab-case
-            const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-            return `${cssKey}: ${value};`;
-        })
-        .filter((rule) => rule) // Remove empty rules
-        .join("\n    ");
+  const cssRules = Object.entries(component.styles)
+    .map(([key, value]) => {
+      // Convert camelCase to kebab-case
+      const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
+      return `${cssKey}: ${value};`;
+    })
+    .filter((rule) => rule) // Remove empty rules
+    .join("\n    ");
 
-    return cssRules ? `#${component.id} {\n    ${cssRules}\n  }` : "";
+  return cssRules ? `#${component.id} {\n    ${cssRules}\n  }` : "";
 };
 
 const getAllCSS = (component: Component): string => {
-    let css = generateCSS(component);
+  let css = generateCSS(component);
 
-    // Recursively get CSS for all children
-    for (const child of component.children) {
-        css += "\n" + getAllCSS(child);
-    }
+  // Recursively get CSS for all children
+  for (const child of component.children) {
+    css += "\n" + getAllCSS(child);
+  }
 
-    return css;
+  return css;
 };
 
 const generateHTML = (component: Component): string => {
-    const tag = component.type === "text" ? "span" : component.type;
+  const tag = component.type === "text" ? "span" : component.type;
 
-    // Handle void elements
-    const voidElements = ["img", "input", "br", "hr"];
-    if (voidElements.includes(tag)) {
-        return `<${tag} id="${component.id}"${
-            component.src ? ` src="${component.src}"` : ""
-        }/>`;
-    }
+  // Handle void elements
+  const voidElements = ["img", "input", "br", "hr"];
+  if (voidElements.includes(tag)) {
+    return `<${tag} id="${component.id}"${
+      component.src ? ` src="${component.src}"` : ""
+    }/>`;
+  }
 
-    const children = component.children
-        .map((child) => generateHTML(child))
-        .join("\n");
+  const children = component.children
+    .map((child) => generateHTML(child))
+    .join("\n");
 
-    const content = component.content || "";
+  const content = component.content || "";
 
-    return `<${tag} id="${component.id}">${content}${children}</${tag}>`;
+  return `<${tag} id="${component.id}">${content}${children}</${tag}>`;
 };
 
 export const generatePreview = (component: Component): string => {
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>

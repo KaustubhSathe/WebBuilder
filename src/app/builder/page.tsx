@@ -33,8 +33,8 @@ function BuilderCanvas() {
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
   const [isCommentsSidebarOpen, setIsCommentsSidebarOpen] = useState(false);
   const [responsiveMode, setResponsiveMode] = useState<
-    "desktop" | "tablet" | "mobile"
-  >("desktop");
+    "desktop" | "tablet" | "mobile" | "none"
+  >("none");
   const [isResponsiveMenuOpen, setIsResponsiveMenuOpen] = useState(false);
 
   const component = useSelector((state: RootState) => state.builder.component);
@@ -135,7 +135,7 @@ function BuilderCanvas() {
               </button>
 
               {isResponsiveMenuOpen && (
-                <div className="absolute top-full right-0 mt-1 bg-[#2c2c2c] border border-[#3c3c3c] rounded shadow-lg z-50">
+                <div className="absolute top-full right-0 mt-1 bg-[#2c2c2c] border border-[#3c3c3c] rounded shadow-lg z-[5000]">
                   <button
                     className={`flex items-center px-3 py-2 w-full text-left ${
                       responsiveMode === "desktop"
@@ -183,6 +183,22 @@ function BuilderCanvas() {
                       smartphone
                     </span>
                     Mobile
+                  </button>
+                  <button
+                    className={`flex items-center px-3 py-2 w-full text-left ${
+                      responsiveMode === "none"
+                        ? "text-blue-400"
+                        : "text-gray-300"
+                    } hover:bg-[#3c3c3c]`}
+                    onClick={() => {
+                      setResponsiveMode("none");
+                      setIsResponsiveMenuOpen(false);
+                    }}
+                  >
+                    <span className="material-icons text-[18px] mr-2">
+                      fullscreen
+                    </span>
+                    None
                   </button>
                 </div>
               )}
