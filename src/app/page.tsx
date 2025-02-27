@@ -13,7 +13,7 @@ export default function LoginPage() {
       try {
         const {
           data: { session },
-          _,
+          error: _error,
         } = await supabase.auth.getSession();
         if (session) {
           router.push("/dashboard");
