@@ -6,6 +6,7 @@ import { generateComponentId } from "@/utils/idGenerator";
 const initialState: BuilderState = {
   component: {
     id: "root",
+    customAttributes: {},
     type: "main",
     children: [],
     styles: {
@@ -72,7 +73,7 @@ const builderSlice = createSlice({
         return { payload: { component, updatePage } };
       },
     },
-    setSelectedComponent: (state, action: PayloadAction<string | null>) => {
+    setSelectedComponent: (state, action: PayloadAction<Component | null>) => {
       state.selectedComponent = action.payload;
     },
     deleteComponent: (state, action: PayloadAction<string>) => {
@@ -85,7 +86,7 @@ const builderSlice = createSlice({
       };
 
       state.component.children = deleteFromChildren(state.component.children);
-      if (state.selectedComponent === action.payload) {
+      if (state.selectedComponent?.id === action.payload) {
         state.selectedComponent = null;
       }
     },
@@ -94,7 +95,7 @@ const builderSlice = createSlice({
       // Only set selected if element exists in the tree
       const element = findComponentById(state.component, elementId);
       if (element) {
-        state.selectedComponent = elementId;
+        state.selectedComponent = element;
       }
     },
     addComponent: (
@@ -111,6 +112,7 @@ const builderSlice = createSlice({
         id: generateComponentId(),
         type,
         children: [],
+        customAttributes: {},
         styles: {
           position: "absolute",
           left: `${position.x}px`,
@@ -118,16 +120,12 @@ const builderSlice = createSlice({
           width: "100px",
           height: "40px",
         },
-        position: {
-          x: position.x,
-          y: position.y,
-        },
       };
 
       const parent = findComponentById(state.component, parentId);
       if (parent) {
         parent.children.push(newComponent);
-        state.selectedComponent = newComponent.id;
+        state.selectedComponent = newComponent;
       }
     },
     moveComponent: (
@@ -189,6 +187,10 @@ const builderSlice = createSlice({
       const component = findComponentById(state.component, action.payload.id);
       if (component) {
         Object.assign(component, action.payload.updates);
+        // If we're updating the currently selected component, update it in the state
+        if (state.selectedComponent?.id === action.payload.id) {
+          state.selectedComponent = component;
+        }
       }
     },
     updateInteractions: (state, action: PayloadAction<string>) => {
@@ -221,7 +223,6 @@ export const builderMiddleware =
         const updatedComponent = state.builder.component;
         console.log("Updated component:", updatedComponent);
         console.log("Selected page ID:", selectedPageId);
-
 
         store.dispatch({
           type: "pages/updateCanvas",

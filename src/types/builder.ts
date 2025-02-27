@@ -23,15 +23,14 @@ export interface Component {
     paddingLeft?: string;
     [key: string]: string | undefined;
   };
-  position?: {
-    x: number;
-    y: number;
+  customAttributes: {
+    [key: string]: string | undefined;
   };
 }
 
 export interface BuilderState {
   component: Component;
-  selectedComponent: string | null;
+  selectedComponent: Component | null;
 }
 
 export type ComponentType =

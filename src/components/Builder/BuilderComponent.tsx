@@ -37,7 +37,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(setSelectedComponent(component.id));
+    dispatch(setSelectedComponent(component));
   };
 
   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
@@ -112,7 +112,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
     e.stopPropagation();
 
     // If this is the selected component, return early
-    if (selectedComponent === component.id) return;
+    if (selectedComponent?.id === component.id) return;
 
     // Remove hover from all parent builder components
     const currentTarget = e.currentTarget as HTMLElement;
@@ -166,13 +166,13 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
           <div
             onClick={handleClick}
             className={`w-full h-full relative ${
-              selectedComponent === component.id
+              selectedComponent?.id === component.id
                 ? "border-2 border-blue-500"
                 : "hover:border-2 hover:border-blue-200"
             }`}
           >
             {/* Component Type Tooltip */}
-            {selectedComponent === component.id && (
+            {selectedComponent?.id === component.id && (
               <div className="absolute top-0 left-0 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-br z-50 whitespace-nowrap">
                 Main Container
               </div>
@@ -205,6 +205,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
             id={component.id}
             style={otherStyles}
             className="h-full w-full border border-slate-200"
+            {...component.customAttributes}
           >
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
@@ -401,12 +402,12 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         marginLeft: component.styles?.marginLeft,
       }}
       className={`
-        ${selectedComponent === component.id ? "border-2 border-blue-500" : ""}
+        ${selectedComponent?.id === component.id ? "border-2 border-blue-500" : ""}
         transition-all duration-200
       `}
     >
       {renderComponent()}
-      {selectedComponent === component.id && !isDragging && (
+      {selectedComponent?.id === component.id && !isDragging && (
         <>
           <ComponentToolbar component={component} />
           <ResizeHandle

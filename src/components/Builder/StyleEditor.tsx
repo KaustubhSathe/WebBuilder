@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Component } from "@/types/builder";
 import { updateComponent } from "@/store/builderSlice";
 import Select from "@/components/StyleControls/Select";
 import ColorPicker from "@/components/StyleControls/ColorPicker";
@@ -115,24 +114,9 @@ const CLEAR_OPTIONS = [
   { value: "both", label: "Both" },
 ];
 
-const SpacingInput: React.FC<{
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}> = ({ label, value, onChange }) => (
-  <div className="flex items-center gap-2">
-    <span className="text-xs text-gray-400 w-8">{label}</span>
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="flex-1 bg-[#1a1a1a] text-gray-200 text-sm px-2 py-1 rounded border border-[#3c3c3c] focus:outline-none focus:border-blue-500"
-    />
-  </div>
-);
-
 const StyleEditor: React.FC = () => {
   const dispatch = useDispatch();
+  const selectedComponent = useSelector((state: RootState) => state.builder.selectedComponent);
   const [openCategories, setOpenCategories] = useState({
     layout: true,
     spacing: false,
@@ -150,25 +134,10 @@ const StyleEditor: React.FC = () => {
     }));
   };
 
-  const selectedComponent = useSelector((state: RootState) => {
-    const selectedId = state.builder.selectedComponent;
-    if (!selectedId) return null;
-
-    const findComponent = (component: Component): Component | null => {
-      if (component.id === selectedId) return component;
-      for (const child of component.children) {
-        const found = findComponent(child);
-        if (found) return found;
-      }
-      return null;
-    };
-
-    return findComponent(state.builder.component);
-  });
-
+ 
   const handleStyleChange = (property: string, value: string) => {
     if (!selectedComponent) return;
-    
+
     dispatch(updateComponent({
       id: selectedComponent.id,
       updates: {
@@ -182,8 +151,10 @@ const StyleEditor: React.FC = () => {
 
   if (!selectedComponent) {
     return (
-      <div className="p-4 text-gray-400 text-sm">
-        No element selected
+      <div className="h-full flex justify-center mt-4">
+        <div className="text-gray-400 text-sm">
+          No component selected
+        </div>
       </div>
     );
   }
@@ -200,7 +171,7 @@ const StyleEditor: React.FC = () => {
               ? "videocam"
               : selectedComponent.type === "youtube"
               ? "play_circle"
-              : selectedComponent.type.startsWith("h")
+              : selectedComponent?.type.startsWith("h")
               ? "title"
               : selectedComponent.type === "p"
               ? "text_fields"

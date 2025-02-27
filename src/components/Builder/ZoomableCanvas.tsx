@@ -95,7 +95,7 @@ const ZoomableCanvas = (
         e.preventDefault();
 
         // Delete the selected component
-        dispatch(deleteComponent(selectedComponent));
+        dispatch(deleteComponent(selectedComponent.id));
 
         // Clear the selection
         dispatch(setSelectedComponent(null));

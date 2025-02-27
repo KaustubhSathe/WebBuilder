@@ -28,7 +28,7 @@ const ComponentTreeItem: React.FC<ComponentTreeItemProps> = (
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        dispatch(setSelectedComponent(component.id));
+        dispatch(setSelectedComponent(component));
     };
 
     const toggleExpand = (e: React.MouseEvent) => {
@@ -44,7 +44,7 @@ const ComponentTreeItem: React.FC<ComponentTreeItemProps> = (
                 className={`
                     flex items-center h-7 cursor-pointer
                     ${
-                    selectedComponent === component.id
+                    selectedComponent?.id === component.id
                         ? "bg-blue-500/20 text-blue-400"
                         : "text-gray-400 hover:bg-[#3c3c3c] hover:text-gray-200"
                 }

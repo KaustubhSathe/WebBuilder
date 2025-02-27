@@ -17,6 +17,7 @@ import {
   deleteComponent,
   setComponent,
   setSelectedComponent,
+  updateComponent,
   updateInteractions,
 } from "@/store/builderSlice";
 import { setCurrentProject } from "@/store/projectSlice";
@@ -32,6 +33,7 @@ import { markSaved, setSaving } from "@/store/saveStateSlice";
 import CommentsSidebar from "@/components/Comments/CommentsSidebar";
 import InteractionsEditor from "@/components/Builder/InteractionsEditor";
 import { deploymentService } from "@/services/deploymentService";
+import SettingsEditor from "@/components/Builder/SettingsEditor";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -440,9 +442,7 @@ function BuilderCanvas() {
 
               {/* Content based on active tab */}
               {activeTab === "style" && <StyleEditor />}
-              {activeTab === "settings" && (
-                <div className="p-4 text-gray-400">Settings coming soon</div>
-              )}
+              {activeTab === "settings" && <SettingsEditor />}
               {activeTab === "interactions" && (
                 <InteractionsEditor
                   isFullscreen={isFullscreen}
