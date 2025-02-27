@@ -48,7 +48,7 @@ export const generateHTML = (component: Component): string => {
 
 export const generatePreview = (
   component: Component,
-  interactions: string,
+  interactions: string
 ): string => {
   return `
 <!DOCTYPE html>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DragSourceMonitor, useDrag } from "react-dnd";
+import { useDrag } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { Component } from "@/types/builder";
 import {
@@ -12,28 +12,31 @@ import {
 import { RootState } from "@/store/store";
 import ComponentToolbar from "./ComponentToolbar";
 import ResizeHandle from "./ResizeHandle";
-
+import Image from "next/image";
 interface BuilderComponentProps {
   component: Component;
 }
 
-const BuilderComponent: React.FC<BuilderComponentProps> = (
-  { component }: BuilderComponentProps,
-) => {
+const BuilderComponent: React.FC<BuilderComponentProps> = ({
+  component,
+}: BuilderComponentProps) => {
   const dispatch = useDispatch();
-  const selectedComponent = useSelector((state: RootState) =>
-    state.builder.selectedComponent
+  const selectedComponent = useSelector(
+    (state: RootState) => state.builder.selectedComponent
   );
   const [isResizing, setIsResizing] = useState(false);
 
-  const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: "placed-component",
-    item: { id: component.id, type: component.type },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
+  const [{ isDragging }, dragRef] = useDrag(
+    () => ({
+      type: "placed-component",
+      item: { id: component.id, type: component.type },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+      canDrag: () => !isResizing,
     }),
-    canDrag: () => !isResizing,
-  }), [component.id, component.type, isResizing]);
+    [component.id, component.type, isResizing]
+  );
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -80,31 +83,35 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         break;
     }
 
-    dispatch(updateComponentSize({
-      id: component.id,
-      size: {
-        width: newWidth,
-        height: newHeight,
-      },
-    }));
+    dispatch(
+      updateComponentSize({
+        id: component.id,
+        size: {
+          width: newWidth,
+          height: newHeight,
+        },
+      })
+    );
 
     // Helper function to compare position values
     const hasPositionChanged = (
       pos1: { value: number; unit: string },
-      pos2: { value: number; unit: string },
+      pos2: { value: number; unit: string }
     ) => {
       return pos1.value !== pos2.value || pos1.unit !== pos2.unit;
     };
 
     // Compare both x and y positions properly
     if (hasPositionChanged(newX, left) || hasPositionChanged(newY, top)) {
-      dispatch(moveComponent({
-        id: component.id,
-        position: {
-          x: newX,
-          y: newY,
-        },
-      }));
+      dispatch(
+        moveComponent({
+          id: component.id,
+          position: {
+            x: newX,
+            y: newY,
+          },
+        })
+      );
     }
   };
 
@@ -120,7 +127,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
     while (parent) {
       const parentBuilderComponent = parent.querySelector(
-        '[data-is-builder-component="true"]',
+        '[data-is-builder-component="true"]'
       );
       if (parentBuilderComponent) {
         parentBuilderComponent.classList.remove("builder-component-hover");
@@ -135,28 +142,28 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
   const handleMouseLeave = (e: React.MouseEvent) => {
     e.stopPropagation();
     (e.currentTarget as HTMLElement).classList.remove(
-      "builder-component-hover",
+      "builder-component-hover"
     );
   };
 
   const renderComponent = () => {
     // Create a copy of styles without position properties
-    let {
-      position,
-      left,
-      top,
-      width,
-      minWidth,
-      maxWidth,
-      height,
-      minHeight,
-      maxHeight,
-      float,
-      margin,
-      marginTop,
-      marginRight,
-      marginBottom,
-      marginLeft,
+    const {
+      position: _position,
+      left: _left,
+      top: _top,
+      width: _width,
+      minWidth: _minWidth,
+      maxWidth: _maxWidth,
+      height: _height,
+      minHeight: _minHeight,
+      maxHeight: _maxHeight,
+      float: _float,
+      margin: _margin,
+      marginTop: _marginTop,
+      marginRight: _marginRight,
+      marginBottom: _marginBottom,
+      marginLeft: _marginLeft,
       ...otherStyles
     } = component.styles || {};
 
@@ -178,7 +185,11 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
               </div>
             )}
 
-            <main id={component.id} className="w-full h-full" style={otherStyles}>
+            <main
+              id={component.id}
+              className="w-full h-full"
+              style={otherStyles}
+            >
               {component.children?.map((child) => (
                 <BuilderComponent key={child.id} component={child} />
               ))}
@@ -215,19 +226,47 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
       // Typography components
       case "h1":
-        return <h1 id={component.id} style={otherStyles}>{component.content}</h1>;
+        return (
+          <h1 id={component.id} style={otherStyles}>
+            {component.content}
+          </h1>
+        );
       case "h2":
-        return <h2 id={component.id} style={otherStyles}>{component.content}</h2>;
+        return (
+          <h2 id={component.id} style={otherStyles}>
+            {component.content}
+          </h2>
+        );
       case "h3":
-        return <h3 id={component.id} style={otherStyles}>{component.content}</h3>;
+        return (
+          <h3 id={component.id} style={otherStyles}>
+            {component.content}
+          </h3>
+        );
       case "h4":
-        return <h4 id={component.id} style={otherStyles}>{component.content}</h4>;
+        return (
+          <h4 id={component.id} style={otherStyles}>
+            {component.content}
+          </h4>
+        );
       case "h5":
-        return <h5 id={component.id} style={otherStyles}>{component.content}</h5>;
+        return (
+          <h5 id={component.id} style={otherStyles}>
+            {component.content}
+          </h5>
+        );
       case "h6":
-        return <h6 id={component.id} style={otherStyles}>{component.content}</h6>;
+        return (
+          <h6 id={component.id} style={otherStyles}>
+            {component.content}
+          </h6>
+        );
       case "p":
-        return <p id={component.id} style={otherStyles}>{component.content}</p>;
+        return (
+          <p id={component.id} style={otherStyles}>
+            {component.content}
+          </p>
+        );
       case "a":
         return (
           <a href={component.content} id={component.id} style={otherStyles}>
@@ -235,9 +274,17 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
           </a>
         );
       case "text":
-        return <span id={component.id} style={otherStyles}>{component.content}</span>;
+        return (
+          <span id={component.id} style={otherStyles}>
+            {component.content}
+          </span>
+        );
       case "blockquote":
-        return <blockquote id={component.id} style={otherStyles}>{component.content}</blockquote>;
+        return (
+          <blockquote id={component.id} style={otherStyles}>
+            {component.content}
+          </blockquote>
+        );
       case "rich-text":
         return (
           <div
@@ -250,14 +297,22 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       // List components
       case "list":
         return (
-          <ul id={component.id} style={otherStyles} className="list-disc list-inside">
+          <ul
+            id={component.id}
+            style={otherStyles}
+            className="list-disc list-inside"
+          >
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
             ))}
           </ul>
         );
       case "list-item":
-        return <li id={component.id} style={otherStyles}>{component.content}</li>;
+        return (
+          <li id={component.id} style={otherStyles}>
+            {component.content}
+          </li>
+        );
 
       // Form components
       case "form":
@@ -288,7 +343,11 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
           />
         );
       case "label":
-        return <label id={component.id} style={otherStyles}>{component.content}</label>;
+        return (
+          <label id={component.id} style={otherStyles}>
+            {component.content}
+          </label>
+        );
       case "button":
         return (
           <button
@@ -328,7 +387,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
       // Media components
       case "image":
         return (
-          <img
+          <Image
             id={component.id}
             src={component.src}
             alt={component.content}
@@ -373,7 +432,6 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
   return (
     <div
-      //@ts-ignore
       ref={dragRef}
       data-is-builder-component="true"
       data-component-id={component.id}
@@ -384,8 +442,8 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         position: component.styles?.position as React.CSSProperties["position"],
         left: component.styles?.left || 0,
         top: component.styles?.top || 0,
-        float: component.styles?.float as React.CSSProperties["float"] ||
-          "none",
+        float:
+          (component.styles?.float as React.CSSProperties["float"]) || "none",
         width: component.styles?.width || "100px",
         minWidth: component.styles?.minWidth,
         maxWidth: component.styles?.maxWidth,

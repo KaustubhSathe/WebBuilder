@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useGesture } from "react-use-gesture";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
@@ -48,17 +48,18 @@ const findParent = (root: Component, node: Component): Component | null => {
   return null;
 };
 
-const ZoomableCanvas = (
-  { isCommentsOpen, responsiveMode }: ZoomableCanvasProps,
-) => {
+const ZoomableCanvas = ({
+  isCommentsOpen,
+  responsiveMode,
+}: ZoomableCanvasProps) => {
   const dispatch = useDispatch();
   const [user, setUser] = useState<User | null>(null);
   const component = useSelector((state: RootState) => state.builder.component);
-  const selectedComponent = useSelector((state: RootState) =>
-    state.builder.selectedComponent
+  const selectedComponent = useSelector(
+    (state: RootState) => state.builder.selectedComponent
   );
-  const project = useSelector((state: RootState) =>
-    state.project.currentProject
+  const project = useSelector(
+    (state: RootState) => state.project.currentProject
   );
   const selectedPage = useSelector((state: RootState) =>
     state.pages.pages.find((p) => p.id === state.pages.selectedPageId)
@@ -67,12 +68,14 @@ const ZoomableCanvas = (
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [commentBox, setCommentBox] = useState<
-    { id: string; x: number; y: number } | null
-  >(null);
+  const [commentBox, setCommentBox] = useState<{
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
   const comments = useSelector((state: RootState) => state.comments.comments);
   const [selectedComment, setSelectedComment] = useState<CommentData | null>(
-    null,
+    null
   );
 
   // Current canvas dimensions based on the selected responsive mode
@@ -80,7 +83,9 @@ const ZoomableCanvas = (
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
     };
     getUser();
@@ -116,7 +121,7 @@ const ZoomableCanvas = (
     x: number,
     y: number,
     canvasRect: DOMRect,
-    excludeId?: string,
+    excludeId?: string
   ): Component | null => {
     if (root.id === excludeId) return null;
     // Check children first (reverse order to check front-to-back)
@@ -129,26 +134,21 @@ const ZoomableCanvas = (
         const top = parseInt(child.styles.top?.replace("px", "") || "0", 10);
         const width = parseInt(
           child.styles.width?.replace("px", "") || "0",
-          10,
+          10
         );
         const height = parseInt(
           child.styles.height?.replace("px", "") || "0",
-          10,
+          10
         );
 
-        if (
-          x >= left &&
-          x <= left + width &&
-          y >= top &&
-          y <= top + height
-        ) {
+        if (x >= left && x <= left + width && y >= top && y <= top + height) {
           // Check if any of this child's children contain the point
           const childResult = findComponentAtPosition(
             child,
             x,
             y,
             canvasRect,
-            excludeId,
+            excludeId
           );
           return childResult || child;
         }
@@ -177,17 +177,19 @@ const ZoomableCanvas = (
 
   const handleDrop = (
     item: DraggableComponent & { id?: string },
-    monitor: DropTargetMonitor,
+    monitor: DropTargetMonitor
   ) => {
     if (!monitor.isOver({ shallow: true })) return;
 
     const offset = monitor.getClientOffset();
-    const sourceOffset = monitor.getSourceClientOffset();
     const initialOffset = monitor.getInitialClientOffset();
     const initialSourceOffset = monitor.getInitialSourceClientOffset();
 
     if (
-      !offset || !initialOffset || !initialSourceOffset || !canvasRef.current
+      !offset ||
+      !initialOffset ||
+      !initialSourceOffset ||
+      !canvasRef.current
     ) {
       return;
     }
@@ -201,10 +203,10 @@ const ZoomableCanvas = (
     };
 
     // Calculate final position, accounting for canvas position, zoom, and pan
-    let x = (offset.x - canvasRect.left - position.x * zoom - grabOffset.x) /
-      zoom;
-    let y = (offset.y - canvasRect.top - position.y * zoom - grabOffset.y) /
-      zoom;
+    let x =
+      (offset.x - canvasRect.left - position.x * zoom - grabOffset.x) / zoom;
+    let y =
+      (offset.y - canvasRect.top - position.y * zoom - grabOffset.y) / zoom;
 
     // Apply boundary constraints if using responsive mode
     if (responsiveMode !== "none" && canvasSize.width && canvasSize.height) {
@@ -220,7 +222,7 @@ const ZoomableCanvas = (
       x,
       y,
       canvasRect,
-      item.id,
+      item.id
     );
     if (!targetComponent) return;
 
@@ -232,20 +234,24 @@ const ZoomableCanvas = (
     const relativeY = y - targetAbsPos.y;
 
     if (monitor.getItemType() === "component") {
-      dispatch(addComponent({
-        parentId: targetComponent.id,
-        type: item.type,
-        position: { x: relativeX, y: relativeY },
-      }));
+      dispatch(
+        addComponent({
+          parentId: targetComponent.id,
+          type: item.type,
+          position: { x: relativeX, y: relativeY },
+        })
+      );
     } else if (monitor.getItemType() === "placed-component" && item.id) {
-      dispatch(moveComponent({
-        id: item.id,
-        position: {
-          x: { value: relativeX, unit: "px" },
-          y: { value: relativeY, unit: "px" },
-        },
-        newParentId: targetComponent.id,
-      }));
+      dispatch(
+        moveComponent({
+          id: item.id,
+          position: {
+            x: { value: relativeX, unit: "px" },
+            y: { value: relativeY, unit: "px" },
+          },
+          newParentId: targetComponent.id,
+        })
+      );
     }
 
     return { dropped: true };
@@ -293,7 +299,7 @@ const ZoomableCanvas = (
       eventOptions: {
         passive: false,
       },
-    },
+    }
   );
 
   const handleZoomIn = () => {
@@ -311,7 +317,7 @@ const ZoomableCanvas = (
 
   const handleCommentBubbleClick = (
     e: React.MouseEvent,
-    comment: CommentData,
+    comment: CommentData
   ) => {
     e.stopPropagation(); // Prevent canvas click
     setSelectedComment(comment);
@@ -342,20 +348,22 @@ const ZoomableCanvas = (
       const newCommentId = Date.now().toString();
 
       // Add temporary bubble immediately
-      dispatch(addComment({
-        id: newCommentId,
-        content: "",
-        position_x: x,
-        position_y: y,
-        project_id: project?.id,
-        page_id: selectedPage?.id,
-        user: user,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_resolved: false,
-        parent_id: null,
-        replies: [],
-      }));
+      dispatch(
+        addComment({
+          id: newCommentId,
+          content: "",
+          position_x: x,
+          position_y: y,
+          project_id: project?.id,
+          page_id: selectedPage?.id,
+          user: user,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_resolved: false,
+          parent_id: null,
+          replies: [],
+        })
+      );
 
       setCommentBox({ id: newCommentId, x, y });
     }
@@ -382,8 +390,10 @@ const ZoomableCanvas = (
       <div className={`w-full h-full`}>
         <div className="w-full h-full bg-[#1a1a1a] overflow-hidden relative">
           {/* Zoom Controls */}
-          <div className="absolute top-4 left-[calc((100vw-300px)/2)]
-           -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-[5]">
+          <div
+            className="absolute top-4 left-[calc((100vw-300px)/2)]
+           -translate-x-1/2 flex items-center gap-2 bg-[#2c2c2c] rounded px-2 py-1 z-[5]"
+          >
             <button
               onClick={handleZoomOut}
               className="text-gray-400 hover:text-gray-200 transition-colors flex items-center justify-center"
@@ -419,15 +429,14 @@ const ZoomableCanvas = (
             className={`zoomable-canvas w-full h-full bg-white rounded relative touch-none select-none
                 ${isOver ? "bg-opacity-90" : ""}
                 ${
-              isDragging
-                ? "cursor-grabbing"
-                : isOver
-                ? "cursor-grabbing"
-                : "cursor-default"
-            }`}
+                  isDragging
+                    ? "cursor-grabbing"
+                    : isOver
+                      ? "cursor-grabbing"
+                      : "cursor-default"
+                }`}
             style={{
-              transform:
-                `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
+              transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
               transformOrigin: "center center",
               transition: "transform 0.1s ease-out",
               width: responsiveMode === "none" ? "" : `${canvasSize.width}px`,
@@ -450,7 +459,7 @@ const ZoomableCanvas = (
               key={comment.id}
               position={{ x: comment.position_x, y: comment.position_y }}
               userInitials={getInitials(
-                comment.user?.user_metadata?.name || "Unknown",
+                comment.user?.user_metadata?.name || "Unknown"
               )}
               onClick={(e) => handleCommentBubbleClick(e, comment)}
             />

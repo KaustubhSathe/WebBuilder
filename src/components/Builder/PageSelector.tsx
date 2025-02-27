@@ -9,8 +9,8 @@ import type { RootState } from "@/store/store";
 const PageSelector = () => {
   const dispatch = useDispatch();
   const pages = useSelector((state: RootState) => state.pages.pages);
-  const selectedPageId = useSelector((state: RootState) =>
-    state.pages.selectedPageId
+  const selectedPageId = useSelector(
+    (state: RootState) => state.pages.selectedPageId
   );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 

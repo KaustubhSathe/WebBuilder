@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
 interface ColorPickerProps {
   label: string;
@@ -8,7 +8,11 @@ interface ColorPickerProps {
   onChange: (value: string) => void;
 }
 
-const ColorPicker: React.FC<ColorPickerProps> = ({ label, value, onChange }) => {
+const ColorPicker: React.FC<ColorPickerProps> = ({
+  label,
+  value,
+  onChange,
+}) => {
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
@@ -19,13 +23,13 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ label, value, onChange }) => 
       <div className="flex items-center gap-2">
         <input
           type="color"
-          value={value || '#000000'}
+          value={value || "#000000"}
           onChange={handleColorChange}
           className="w-8 h-8 rounded cursor-pointer bg-[#1a1a1a] border border-[#3c3c3c]"
         />
-        <input 
+        <input
           type="text"
-          value={value || ''}
+          value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder="None"
           className="flex-1 bg-[#1a1a1a] text-gray-300 text-xs rounded border border-[#3c3c3c] px-2 py-1.5 focus:outline-none focus:border-blue-500"

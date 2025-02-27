@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,12 +11,15 @@ export default function LoginPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          _,
+        } = await supabase.auth.getSession();
         if (session) {
-          router.push('/dashboard');
+          router.push("/dashboard");
         }
       } catch (error) {
-        console.error('Session check error:', error);
+        console.error("Session check error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -27,8 +30,8 @@ export default function LoginPage() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        router.push('/dashboard');
+      if (event === "SIGNED_IN" && session) {
+        router.push("/dashboard");
       }
     });
 
@@ -39,7 +42,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
+        provider: "github",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -47,7 +50,7 @@ export default function LoginPage() {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error logging in:', error);
+      console.error("Error logging in:", error);
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +60,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -65,7 +68,7 @@ export default function LoginPage() {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error logging in:', error);
+      console.error("Error logging in:", error);
     } finally {
       setIsLoading(false);
     }
@@ -88,44 +91,61 @@ export default function LoginPage() {
             WebBuilder
           </h1>
           <p className="text-base text-gray-400 mb-6 leading-relaxed">
-            Create stunning web interfaces with our intuitive drag-and-drop builder. 
-            Design, customize, and deploy your website in minutes without writing any code.
+            Create stunning web interfaces with our intuitive drag-and-drop
+            builder. Design, customize, and deploy your website in minutes
+            without writing any code.
           </p>
 
           {/* Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center mb-2">
-                <span className="material-icons text-blue-400 text-lg">drag_indicator</span>
+                <span className="material-icons text-blue-400 text-lg">
+                  drag_indicator
+                </span>
               </div>
-              <h3 className="text-gray-200 font-semibold mb-1 text-sm">Drag & Drop</h3>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">
+                Drag & Drop
+              </h3>
               <p className="text-gray-400 text-xs">
                 Intuitive drag-and-drop interface for effortless design
               </p>
             </div>
             <div>
               <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center mb-2">
-                <span className="material-icons text-purple-400 text-lg">widgets</span>
+                <span className="material-icons text-purple-400 text-lg">
+                  widgets
+                </span>
               </div>
-              <h3 className="text-gray-200 font-semibold mb-1 text-sm">Components</h3>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">
+                Components
+              </h3>
               <p className="text-gray-400 text-xs">
                 Pre-built components to speed up your development
               </p>
             </div>
             <div>
               <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center mb-2">
-                <span className="material-icons text-green-400 text-lg">code</span>
+                <span className="material-icons text-green-400 text-lg">
+                  code
+                </span>
               </div>
-              <h3 className="text-gray-200 font-semibold mb-1 text-sm">No Code</h3>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">
+                No Code
+              </h3>
               <p className="text-gray-400 text-xs">
                 Build websites without writing a single line of code
               </p>
             </div>
             <div>
               <div className="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-2">
-                <span className="material-icons text-yellow-400 text-lg">bolt</span>
+                <span className="material-icons text-yellow-400 text-lg">
+                  bolt
+                </span>
               </div>
-              <h3 className="text-gray-200 font-semibold mb-1 text-sm">Fast & Easy</h3>
+              <h3 className="text-gray-200 font-semibold mb-1 text-sm">
+                Fast & Easy
+              </h3>
               <p className="text-gray-400 text-xs">
                 Build and deploy your website in minutes
               </p>
@@ -137,8 +157,12 @@ export default function LoginPage() {
       {/* Right Section */}
       <div className="w-full max-w-md xl:max-w-lg flex flex-col justify-center p-8 lg:p-16 bg-[#1f1f1f] border-l border-gray-800">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-200 mb-2">Get Started</h2>
-          <p className="text-gray-400">Sign in to start building your website</p>
+          <h2 className="text-2xl font-semibold text-gray-200 mb-2">
+            Get Started
+          </h2>
+          <p className="text-gray-400">
+            Sign in to start building your website
+          </p>
         </div>
 
         <div className="space-y-4">

@@ -1,6 +1,11 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  PayloadAction,
+  Store,
+  Dispatch,
+  Action,
+} from "@reduxjs/toolkit";
 import { BuilderState, Component, ComponentType } from "../types/builder";
-import { v4 as uuidv4 } from "uuid";
 import { generateComponentId } from "@/utils/idGenerator";
 
 const initialState: BuilderState = {
@@ -21,7 +26,7 @@ const initialState: BuilderState = {
 // Move findComponentById outside the slice and export it
 export const findComponentById = (
   root: Component,
-  id: string,
+  id: string
 ): Component | null => {
   if (root.id === id) return root;
   for (const child of root.children) {
@@ -34,7 +39,7 @@ export const findComponentById = (
 // Helper function to remove component from its current parent
 const removeComponentFromParent = (
   root: Component,
-  componentId: string,
+  componentId: string
 ): boolean => {
   for (let i = 0; i < root.children.length; i++) {
     if (root.children[i].id === componentId) {
@@ -65,7 +70,7 @@ const builderSlice = createSlice({
     setComponent: {
       reducer: (
         state,
-        action: PayloadAction<{ component: Component; updatePage?: boolean }>,
+        action: PayloadAction<{ component: Component; updatePage?: boolean }>
       ) => {
         state.component = action.payload.component;
       },
@@ -104,7 +109,7 @@ const builderSlice = createSlice({
         parentId: string;
         type: ComponentType;
         position: { x: number; y: number };
-      }>,
+      }>
     ) => {
       const { parentId, type, position } = action.payload;
 
@@ -134,7 +139,7 @@ const builderSlice = createSlice({
         id: string;
         position: Position;
         newParentId?: string;
-      }>,
+      }>
     ) => {
       const { id, position, newParentId } = action.payload;
 
@@ -168,7 +173,7 @@ const builderSlice = createSlice({
       action: PayloadAction<{
         id: string;
         size: Size;
-      }>,
+      }>
     ) => {
       const { id, size } = action.payload;
       const element = findComponentById(state.component, id);
@@ -182,7 +187,7 @@ const builderSlice = createSlice({
       action: PayloadAction<{
         id: string;
         updates: Partial<Component>;
-      }>,
+      }>
     ) => {
       const component = findComponentById(state.component, action.payload.id);
       if (component) {
@@ -201,7 +206,7 @@ const builderSlice = createSlice({
 
 // Create a middleware to sync component updates with the selected page
 export const builderMiddleware =
-  (store: any) => (next: any) => (action: any) => {
+  (store: Store) => (next: Dispatch) => (action: Action) => {
     const result = next(action);
 
     // List of actions that modify the component tree or interactions
@@ -221,8 +226,6 @@ export const builderMiddleware =
       if (selectedPageId) {
         // Get the updated component tree after the action has been processed
         const updatedComponent = state.builder.component;
-        console.log("Updated component:", updatedComponent);
-        console.log("Selected page ID:", selectedPageId);
 
         store.dispatch({
           type: "pages/updateCanvas",

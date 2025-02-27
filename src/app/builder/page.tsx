@@ -52,12 +52,12 @@ function BuilderCanvas() {
   const [isPublishing, setIsPublishing] = useState(false);
 
   // Get interactions from the store once at the component level
-  const interactions = useSelector((state: RootState) =>
-    state.builder.component.interactions || ""
+  const interactions = useSelector(
+    (state: RootState) => state.builder.component.interactions || ""
   );
   const component = useSelector((state: RootState) => state.builder.component);
-  const project = useSelector((state: RootState) =>
-    state.project.currentProject
+  const project = useSelector(
+    (state: RootState) => state.project.currentProject
   );
 
   const handleCanvasClick = (e: React.MouseEvent) => {
@@ -128,10 +128,8 @@ function BuilderCanvas() {
     const publishToast = toast.loading("Publishing project...");
 
     try {
-      const { deploymentUrl, defaultDomain } = await deploymentService
-        .deployToVercel(
-          project.id,
-        );
+      const { deploymentUrl, defaultDomain } =
+        await deploymentService.deployToVercel(project.id);
 
       toast.success(
         <div className="flex flex-col gap-2">
@@ -155,7 +153,7 @@ function BuilderCanvas() {
             </a>
           </div>
         </div>,
-        { id: publishToast, duration: 8000 },
+        { id: publishToast, duration: 8000 }
       );
     } catch (error) {
       console.error("Deployment error:", error);
@@ -195,8 +193,8 @@ function BuilderCanvas() {
                   {responsiveMode === "desktop"
                     ? "laptop"
                     : responsiveMode === "tablet"
-                    ? "tablet"
-                    : "smartphone"}
+                      ? "tablet"
+                      : "smartphone"}
                 </span>
               </button>
 
@@ -307,15 +305,13 @@ function BuilderCanvas() {
             } text-white transition-colors px-4 h-[26px] rounded ml-2 mr-3 text-sm`}
             title="Publish"
           >
-            {isPublishing
-              ? (
-                <span className="material-icons animate-spin text-[18px]">
-                  refresh
-                </span>
-              )
-              : (
-                "Publish"
-              )}
+            {isPublishing ? (
+              <span className="material-icons animate-spin text-[18px]">
+                refresh
+              </span>
+            ) : (
+              "Publish"
+            )}
           </button>
         </div>
       </nav>
@@ -397,60 +393,58 @@ function BuilderCanvas() {
         )}
 
         {/* Right Sidebar - Show either style editor or comments */}
-        {isCommentsSidebarOpen
-          ? (
-            <CommentsSidebar
-              isOpen={isCommentsSidebarOpen}
-              onClose={() => setIsCommentsSidebarOpen(false)}
-            />
-          )
-          : (
-            <div className="right-sidebar h-full fixed right-0 w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
-              {/* Tabs */}
-              <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
-                <button
-                  className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
-                    activeTab === "style"
-                      ? "text-gray-200 border-b-2 border-blue-500"
-                      : "text-gray-400 hover:text-gray-200 transition-colors"
-                  }`}
-                  onClick={() => setActiveTab("style")}
-                >
-                  Style
-                </button>
-                <button
-                  className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
-                    activeTab === "settings"
-                      ? "text-gray-200 border-b-2 border-blue-500"
-                      : "text-gray-400 hover:text-gray-200 transition-colors"
-                  }`}
-                  onClick={() => setActiveTab("settings")}
-                >
-                  Settings
-                </button>
-                <button
-                  className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
-                    activeTab === "interactions"
-                      ? "text-gray-200 border-b-2 border-blue-500"
-                      : "text-gray-400 hover:text-gray-200 transition-colors"
-                  }`}
-                  onClick={() => setActiveTab("interactions")}
-                >
-                  Interactions
-                </button>
-              </div>
-
-              {/* Content based on active tab */}
-              {activeTab === "style" && <StyleEditor />}
-              {activeTab === "settings" && <SettingsEditor />}
-              {activeTab === "interactions" && (
-                <InteractionsEditor
-                  isFullscreen={isFullscreen}
-                  setIsFullscreen={setIsFullscreen}
-                />
-              )}
+        {isCommentsSidebarOpen ? (
+          <CommentsSidebar
+            isOpen={isCommentsSidebarOpen}
+            onClose={() => setIsCommentsSidebarOpen(false)}
+          />
+        ) : (
+          <div className="right-sidebar h-full fixed right-0 w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
+            {/* Tabs */}
+            <div className="flex h-[35px] border-b border-[#3c3c3c] px-2">
+              <button
+                className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
+                  activeTab === "style"
+                    ? "text-gray-200 border-b-2 border-blue-500"
+                    : "text-gray-400 hover:text-gray-200 transition-colors"
+                }`}
+                onClick={() => setActiveTab("style")}
+              >
+                Style
+              </button>
+              <button
+                className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
+                  activeTab === "settings"
+                    ? "text-gray-200 border-b-2 border-blue-500"
+                    : "text-gray-400 hover:text-gray-200 transition-colors"
+                }`}
+                onClick={() => setActiveTab("settings")}
+              >
+                Settings
+              </button>
+              <button
+                className={`flex-1 h-full flex items-center justify-center text-sm mx-1 ${
+                  activeTab === "interactions"
+                    ? "text-gray-200 border-b-2 border-blue-500"
+                    : "text-gray-400 hover:text-gray-200 transition-colors"
+                }`}
+                onClick={() => setActiveTab("interactions")}
+              >
+                Interactions
+              </button>
             </div>
-          )}
+
+            {/* Content based on active tab */}
+            {activeTab === "style" && <StyleEditor />}
+            {activeTab === "settings" && <SettingsEditor />}
+            {activeTab === "interactions" && (
+              <InteractionsEditor
+                isFullscreen={isFullscreen}
+                setIsFullscreen={setIsFullscreen}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -461,12 +455,12 @@ function BuilderPageContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
-  const project = useSelector((state: RootState) =>
-    state.project.currentProject
+  const project = useSelector(
+    (state: RootState) => state.project.currentProject
   );
   const pages = useSelector((state: RootState) => state.pages.pages);
-  const interactions = useSelector((state: RootState) =>
-    state.builder.component.interactions || ""
+  const interactions = useSelector(
+    (state: RootState) => state.builder.component.interactions || ""
   );
 
   useLayoutEffect(() => {
@@ -476,7 +470,9 @@ function BuilderPageContent() {
   useEffect(() => {
     const checkUserAndProject = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!session) {
           router.push("/");
           return;
@@ -546,7 +542,7 @@ function BuilderPageContent() {
         // also set Component to home page component tree
         dispatch(setComponent(homePage.component_tree));
         dispatch(
-          updateInteractions(homePage.component_tree.interactions || ""),
+          updateInteractions(homePage.component_tree.interactions || "")
         );
       }
       setLoading(false);

@@ -18,12 +18,7 @@ const PageItem: React.FC<{
   isSelected: boolean;
   onSelect: () => void;
   onDelete?: () => void;
-}> = ({
-  page,
-  isSelected,
-  onSelect,
-  onDelete,
-}) => {
+}> = ({ page, isSelected, onSelect, onDelete }) => {
   return (
     <div
       onClick={onSelect}
@@ -59,11 +54,11 @@ const PageItem: React.FC<{
 const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const pages = useSelector((state: RootState) => state.pages.pages);
-  const selectedPageId = useSelector((state: RootState) =>
-    state.pages.selectedPageId
+  const selectedPageId = useSelector(
+    (state: RootState) => state.pages.selectedPageId
   );
-  const project = useSelector((state: RootState) =>
-    state.project.currentProject
+  const project = useSelector(
+    (state: RootState) => state.project.currentProject
   );
   const [isAddingPage, setIsAddingPage] = useState(false);
   const [newPageName, setNewPageName] = useState("");
@@ -77,7 +72,7 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
     try {
       const newPage = await projectService.addPage(
         project.id,
-        newPageName.trim(),
+        newPageName.trim()
       );
       dispatch(addPage(newPage));
       setIsAddingPage(false);
@@ -97,7 +92,7 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error("Failed to delete page:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to delete page",
+        error instanceof Error ? error.message : "Failed to delete page"
       );
     }
   };
@@ -141,54 +136,49 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
                     page={page}
                     isSelected={selectedPageId === page.id}
                     onSelect={() => handleSelectPage(page.id)}
-                    onDelete={!page.is_home
-                      ? () => handleDeletePage(page.id)
-                      : undefined}
+                    onDelete={
+                      !page.is_home
+                        ? () => handleDeletePage(page.id)
+                        : undefined
+                    }
                   />
                 ))}
               </div>
 
               {/* Add Page Form */}
-              {isAddingPage
-                ? (
-                  <form
-                    onSubmit={handleAddPage}
-                    className="p-2"
-                  >
-                    <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#3c3c3c] rounded overflow-hidden">
-                      <input
-                        type="text"
-                        value={newPageName}
-                        onChange={(e) => setNewPageName(e.target.value)}
-                        placeholder="Page name"
-                        className="flex-1 bg-transparent px-2 py-1 text-sm text-gray-200 focus:outline-none"
-                        autoFocus
-                        disabled={isLoading}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setIsAddingPage(false)}
-                        className="p-1 text-gray-400 hover:text-gray-300 hover:bg-[#2c2c2c]"
-                        disabled={isLoading}
-                      >
-                        <span className="material-icons text-[18px]">
-                          close
-                        </span>
-                      </button>
-                    </div>
-                  </form>
-                )
-                : (
-                  <div className="p-2">
+              {isAddingPage ? (
+                <form onSubmit={handleAddPage} className="p-2">
+                  <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#3c3c3c] rounded overflow-hidden">
+                    <input
+                      type="text"
+                      value={newPageName}
+                      onChange={(e) => setNewPageName(e.target.value)}
+                      placeholder="Page name"
+                      className="flex-1 bg-transparent px-2 py-1 text-sm text-gray-200 focus:outline-none"
+                      autoFocus
+                      disabled={isLoading}
+                    />
                     <button
-                      onClick={() => setIsAddingPage(true)}
-                      className="w-full flex items-center gap-2 text-gray-400 hover:text-gray-200 px-3 py-2 rounded text-sm hover:bg-[#3c3c3c] transition-colors"
+                      type="button"
+                      onClick={() => setIsAddingPage(false)}
+                      className="p-1 text-gray-400 hover:text-gray-300 hover:bg-[#2c2c2c]"
+                      disabled={isLoading}
                     >
-                      <span className="material-icons text-[18px]">add</span>
-                      Add Page
+                      <span className="material-icons text-[18px]">close</span>
                     </button>
                   </div>
-                )}
+                </form>
+              ) : (
+                <div className="p-2">
+                  <button
+                    onClick={() => setIsAddingPage(true)}
+                    className="w-full flex items-center gap-2 text-gray-400 hover:text-gray-200 px-3 py-2 rounded text-sm hover:bg-[#3c3c3c] transition-colors"
+                  >
+                    <span className="material-icons text-[18px]">add</span>
+                    Add Page
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

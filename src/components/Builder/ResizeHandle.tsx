@@ -18,14 +18,17 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResizing(true);
-    onResizeStart();
-    setStartPos({ x: e.clientX, y: e.clientY });
-  }, [onResizeStart]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setIsResizing(true);
+      onResizeStart();
+      setStartPos({ x: e.clientX, y: e.clientY });
+    },
+    [onResizeStart]
+  );
 
   useEffect(() => {
     if (!isResizing) return;

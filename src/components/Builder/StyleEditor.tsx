@@ -47,9 +47,12 @@ interface StyleCategoryProps {
   children?: React.ReactNode;
 }
 
-const StyleCategory: React.FC<StyleCategoryProps> = (
-  { title, isOpen, onToggle, children },
-) => {
+const StyleCategory: React.FC<StyleCategoryProps> = ({
+  title,
+  isOpen,
+  onToggle,
+  children,
+}) => {
   return (
     <div className="border-b border-[#3c3c3c] last:border-b-0">
       <button
@@ -65,11 +68,7 @@ const StyleCategory: React.FC<StyleCategoryProps> = (
           expand_more
         </span>
       </button>
-      {isOpen && (
-        <div className="px-2 pb-3 overflow-hidden">
-          {children}
-        </div>
-      )}
+      {isOpen && <div className="px-2 pb-3 overflow-hidden">{children}</div>}
     </div>
   );
 };
@@ -116,7 +115,9 @@ const CLEAR_OPTIONS = [
 
 const StyleEditor: React.FC = () => {
   const dispatch = useDispatch();
-  const selectedComponent = useSelector((state: RootState) => state.builder.selectedComponent);
+  const selectedComponent = useSelector(
+    (state: RootState) => state.builder.selectedComponent
+  );
   const [openCategories, setOpenCategories] = useState({
     layout: true,
     spacing: false,
@@ -134,27 +135,26 @@ const StyleEditor: React.FC = () => {
     }));
   };
 
- 
   const handleStyleChange = (property: string, value: string) => {
     if (!selectedComponent) return;
 
-    dispatch(updateComponent({
-      id: selectedComponent.id,
-      updates: {
-        styles: {
-          ...selectedComponent.styles,
-          [property]: value,
+    dispatch(
+      updateComponent({
+        id: selectedComponent.id,
+        updates: {
+          styles: {
+            ...selectedComponent.styles,
+            [property]: value,
+          },
         },
-      },
-    }));
+      })
+    );
   };
 
   if (!selectedComponent) {
     return (
       <div className="h-full flex justify-center mt-4">
-        <div className="text-gray-400 text-sm">
-          No component selected
-        </div>
+        <div className="text-gray-400 text-sm">No component selected</div>
       </div>
     );
   }
@@ -168,20 +168,20 @@ const StyleEditor: React.FC = () => {
             {selectedComponent.type === "image"
               ? "image"
               : selectedComponent.type === "video"
-              ? "videocam"
-              : selectedComponent.type === "youtube"
-              ? "play_circle"
-              : selectedComponent?.type.startsWith("h")
-              ? "title"
-              : selectedComponent.type === "p"
-              ? "text_fields"
-              : selectedComponent.type === "a"
-              ? "link"
-              : selectedComponent.type === "button"
-              ? "smart_button"
-              : selectedComponent.type === "form"
-              ? "dynamic_form"
-              : "widgets"}
+                ? "videocam"
+                : selectedComponent.type === "youtube"
+                  ? "play_circle"
+                  : selectedComponent?.type.startsWith("h")
+                    ? "title"
+                    : selectedComponent.type === "p"
+                      ? "text_fields"
+                      : selectedComponent.type === "a"
+                        ? "link"
+                        : selectedComponent.type === "button"
+                          ? "smart_button"
+                          : selectedComponent.type === "form"
+                            ? "dynamic_form"
+                            : "widgets"}
           </span>
         </div>
         <div>
@@ -318,25 +318,23 @@ const StyleEditor: React.FC = () => {
             onToggle={() => toggleCategory("position")}
           >
             <div className="space-y-4">
-              {selectedComponent?.type === "main"
-                ? (
-                  <div className="text-xs text-gray-400">
-                    Position is locked to static for main container
-                  </div>
-                )
-                : (
-                  <>
-                    <Select
-                      label="Position"
-                      value={selectedComponent?.styles?.position || "static"}
-                      options={POSITION_OPTIONS}
-                      onChange={(value) => handleStyleChange("position", value)}
-                    />
+              {selectedComponent?.type === "main" ? (
+                <div className="text-xs text-gray-400">
+                  Position is locked to static for main container
+                </div>
+              ) : (
+                <>
+                  <Select
+                    label="Position"
+                    value={selectedComponent?.styles?.position || "static"}
+                    options={POSITION_OPTIONS}
+                    onChange={(value) => handleStyleChange("position", value)}
+                  />
 
-                    {/* Position Offset Controls */}
-                    {selectedComponent?.styles?.position &&
-                      selectedComponent.styles.position !== "static" &&
-                      selectedComponent.styles.position !== "sticky" && (
+                  {/* Position Offset Controls */}
+                  {selectedComponent?.styles?.position &&
+                    selectedComponent.styles.position !== "static" &&
+                    selectedComponent.styles.position !== "sticky" && (
                       <div className="space-y-4">
                         <NumberUnitInput
                           label="Top"
@@ -347,13 +345,15 @@ const StyleEditor: React.FC = () => {
                           label="Right"
                           value={selectedComponent?.styles?.right || ""}
                           onChange={(value) =>
-                            handleStyleChange("right", value)}
+                            handleStyleChange("right", value)
+                          }
                         />
                         <NumberUnitInput
                           label="Bottom"
                           value={selectedComponent?.styles?.bottom || ""}
                           onChange={(value) =>
-                            handleStyleChange("bottom", value)}
+                            handleStyleChange("bottom", value)
+                          }
                         />
                         <NumberUnitInput
                           label="Left"
@@ -362,20 +362,20 @@ const StyleEditor: React.FC = () => {
                         />
                       </div>
                     )}
-                    <Select
-                      label="Float"
-                      value={selectedComponent?.styles?.float || "none"}
-                      options={FLOAT_OPTIONS}
-                      onChange={(value) => handleStyleChange("float", value)}
-                    />
-                    <Select
-                      label="Clear"
-                      value={selectedComponent?.styles?.clear || "none"}
-                      options={CLEAR_OPTIONS}
-                      onChange={(value) => handleStyleChange("clear", value)}
-                    />
-                  </>
-                )}
+                  <Select
+                    label="Float"
+                    value={selectedComponent?.styles?.float || "none"}
+                    options={FLOAT_OPTIONS}
+                    onChange={(value) => handleStyleChange("float", value)}
+                  />
+                  <Select
+                    label="Clear"
+                    value={selectedComponent?.styles?.clear || "none"}
+                    options={CLEAR_OPTIONS}
+                    onChange={(value) => handleStyleChange("clear", value)}
+                  />
+                </>
+              )}
             </div>
           </StyleCategory>
 
@@ -397,7 +397,8 @@ const StyleEditor: React.FC = () => {
                 label="Color"
                 value={selectedComponent?.styles?.backgroundColor || ""}
                 onChange={(value) =>
-                  handleStyleChange("backgroundColor", value)}
+                  handleStyleChange("backgroundColor", value)
+                }
               />
             </div>
           </StyleCategory>
@@ -417,25 +418,29 @@ const StyleEditor: React.FC = () => {
                 label="Border Top Left Radius"
                 value={selectedComponent?.styles?.borderTopLeftRadius || ""}
                 onChange={(value) =>
-                  handleStyleChange("borderTopLeftRadius", value)}
+                  handleStyleChange("borderTopLeftRadius", value)
+                }
               />
               <NumberUnitInput
                 label="Border Top Right Radius"
                 value={selectedComponent?.styles?.borderTopRightRadius || ""}
                 onChange={(value) =>
-                  handleStyleChange("borderTopRightRadius", value)}
+                  handleStyleChange("borderTopRightRadius", value)
+                }
               />
               <NumberUnitInput
                 label="Border Bottom Left Radius"
                 value={selectedComponent?.styles?.borderBottomLeftRadius || ""}
                 onChange={(value) =>
-                  handleStyleChange("borderBottomLeftRadius", value)}
+                  handleStyleChange("borderBottomLeftRadius", value)
+                }
               />
               <NumberUnitInput
                 label="Border Bottom Right Radius"
                 value={selectedComponent?.styles?.borderBottomRightRadius || ""}
                 onChange={(value) =>
-                  handleStyleChange("borderBottomRightRadius", value)}
+                  handleStyleChange("borderBottomRightRadius", value)
+                }
               />
             </div>
           </StyleCategory>

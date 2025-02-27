@@ -3,36 +3,27 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import CommentSettings from "./CommentSettings";
 import { CommentData, commentService } from "@/services/commentService";
-import {
-  setComments,
-  setError,
-  setFilterByCurrentPage,
-  setLoading,
-  setShowResolved,
-} from "@/store/commentsSlice";
+import { setComments, setError, setLoading } from "@/store/commentsSlice";
 import toast from "react-hot-toast";
 import { getInitials } from "@/utils/utils";
-
+import Image from "next/image";
 interface CommentsSidebarProps {
   isOpen: boolean;
-  onClose: () => void;
 }
 
-const CommentsSidebar = ({ isOpen, onClose }: CommentsSidebarProps) => {
+const CommentsSidebar = ({ isOpen }: CommentsSidebarProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dispatch = useDispatch();
 
   const { comments, isLoading, error, showResolved, filterByCurrentPage } =
-    useSelector(
-      (state: RootState) => state.comments,
-    );
-  const project = useSelector((state: RootState) =>
-    state.project.currentProject
+    useSelector((state: RootState) => state.comments);
+  const project = useSelector(
+    (state: RootState) => state.project.currentProject
   );
-  const selectedPageId = useSelector((state: RootState) =>
-    state.pages.selectedPageId
+  const selectedPageId = useSelector(
+    (state: RootState) => state.pages.selectedPageId
   );
 
   // Load comments when sidebar opens or filters change
@@ -40,9 +31,16 @@ const CommentsSidebar = ({ isOpen, onClose }: CommentsSidebarProps) => {
     if (isOpen && project?.id) {
       loadComments();
     }
-  }, [isOpen, project?.id, selectedPageId, showResolved, filterByCurrentPage]);
+  }, [
+    isOpen,
+    project?.id,
+    selectedPageId,
+    showResolved,
+    filterByCurrentPage,
+    loadComments,
+  ]);
 
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     if (!project?.id) return;
 
     dispatch(setLoading(true));
@@ -53,7 +51,7 @@ const CommentsSidebar = ({ isOpen, onClose }: CommentsSidebarProps) => {
       const commentsData = await commentService.getComments(
         project.id,
         pageId || undefined,
-        showResolved,
+        showResolved
       );
       dispatch(setComments(commentsData));
     } catch (error) {
@@ -63,15 +61,13 @@ const CommentsSidebar = ({ isOpen, onClose }: CommentsSidebarProps) => {
     } finally {
       dispatch(setLoading(false));
     }
-  };
-
-  const toggleShowResolved = () => {
-    dispatch(setShowResolved(!showResolved));
-  };
-
-  const toggleFilterByPage = () => {
-    dispatch(setFilterByCurrentPage(!filterByCurrentPage));
-  };
+  }, [
+    selectedPageId,
+    showResolved,
+    filterByCurrentPage,
+    project?.id,
+    dispatch,
+  ]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -121,32 +117,23 @@ const CommentsSidebar = ({ isOpen, onClose }: CommentsSidebarProps) => {
 
             {/* Comments Content */}
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-              {isLoading
-                ? (
-                  <div className="flex justify-center items-center h-full">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500">
-                    </div>
-                  </div>
-                )
-                : error
-                ? (
-                  <div className="text-red-500 text-sm text-center">
-                    {error}
-                  </div>
-                )
-                : comments.length === 0
-                ? (
-                  <div className="text-gray-400 text-sm text-center">
-                    No comments yet
-                  </div>
-                )
-                : (
-                  <div className="space-y-4">
-                    {comments.map((comment) => (
-                      <CommentCard key={comment.id} comment={comment} />
-                    ))}
-                  </div>
-                )}
+              {isLoading ? (
+                <div className="flex justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : error ? (
+                <div className="text-red-500 text-sm text-center">{error}</div>
+              ) : comments.length === 0 ? (
+                <div className="text-gray-400 text-sm text-center">
+                  No comments yet
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <CommentCard key={comment.id} comment={comment} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -163,8 +150,11 @@ interface CommentCardProps {
 const CommentCard = ({ comment }: CommentCardProps) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + " " +
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
   };
 
   return (
@@ -174,19 +164,17 @@ const CommentCard = ({ comment }: CommentCardProps) => {
       }`}
     >
       <div className="flex items-center gap-2 mb-2">
-        {comment.user?.user_metadata?.avatar_url
-          ? (
-            <img
-              src={comment.user?.user_metadata?.avatar_url}
-              alt={comment.user.user_metadata.name}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          )
-          : (
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-medium">
-              {getInitials(comment.user?.user_metadata?.name || "Unknown")}
-            </div>
-          )}
+        {comment.user?.user_metadata?.avatar_url ? (
+          <Image
+            src={comment.user?.user_metadata?.avatar_url}
+            alt={comment.user.user_metadata.name}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-medium">
+            {getInitials(comment.user?.user_metadata?.name || "Unknown")}
+          </div>
+        )}
 
         <div className="flex flex-col">
           <span className="inline-block text-sm text-gray-300">

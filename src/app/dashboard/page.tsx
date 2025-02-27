@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import type { Project } from '@/types/project';
-import { projectService } from '@/services/projectService';
-import CreateProjectModal from '@/components/Utils/CreateProjectModal';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import type { Project } from "@/types/project";
+import { projectService } from "@/services/projectService";
+import CreateProjectModal from "@/components/Utils/CreateProjectModal";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -16,9 +16,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
-        router.push('/');
+        router.push("/");
         return;
       }
       setUser(session.user);
@@ -31,9 +33,9 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      router.push('/');
+      router.push("/");
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error("Error logging out:", error);
     }
   };
 
@@ -42,7 +44,7 @@ export default function DashboardPage() {
       const projects = await projectService.getProjects();
       setProjects(projects);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
     }
@@ -53,20 +55,20 @@ export default function DashboardPage() {
       const project = await projectService.createProject(name, description);
       router.push(`/builder?project_id=${project.id}`);
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error("Error creating project:", error);
     }
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
-    
+    if (!confirm("Are you sure you want to delete this project?")) return;
+
     try {
       await projectService.deleteProject(projectId);
       // Refresh projects list
-      const updatedProjects = projects.filter(p => p.id !== projectId);
+      const updatedProjects = projects.filter((p) => p.id !== projectId);
       setProjects(updatedProjects);
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error("Error deleting project:", error);
     }
   };
 
@@ -103,18 +105,28 @@ export default function DashboardPage() {
           <table className="w-full">
             <thead>
               <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 border-b border-[#3c3c3c]">Name</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 hidden md:table-cell border-b border-[#3c3c3c]">Description</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 border-b border-[#3c3c3c]">Last Updated</th>
-                <th className="px-6 py-3 text-sm font-medium text-gray-400 w-20 border-b border-[#3c3c3c]">Actions</th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 border-b border-[#3c3c3c]">
+                  Name
+                </th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 hidden md:table-cell border-b border-[#3c3c3c]">
+                  Description
+                </th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 border-b border-[#3c3c3c]">
+                  Last Updated
+                </th>
+                <th className="px-6 py-3 text-sm font-medium text-gray-400 w-20 border-b border-[#3c3c3c]">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {projects.map((project) => (
-                <tr 
+                <tr
                   key={project.id}
                   className="hover:bg-[#2c2c2c] transition-colors cursor-pointer border-b border-[#3c3c3c] last:border-b-0"
-                  onClick={() => window.open(`/builder?project_id=${project.id}`, '_blank')}
+                  onClick={() =>
+                    window.open(`/builder?project_id=${project.id}`, "_blank")
+                  }
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -126,19 +138,23 @@ export default function DashboardPage() {
                             className="w-full h-full object-cover rounded"
                           />
                         ) : (
-                          <span className="material-icons text-gray-600">web</span>
+                          <span className="material-icons text-gray-600">
+                            web
+                          </span>
                         )}
                       </div>
                       <div>
-                        <div className="font-medium text-gray-200">{project.name}</div>
+                        <div className="font-medium text-gray-200">
+                          {project.name}
+                        </div>
                         <div className="text-sm text-gray-400 md:hidden">
-                          {project.description || 'No description'}
+                          {project.description || "No description"}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-300 hidden md:table-cell">
-                    {project.description || 'No description'}
+                    {project.description || "No description"}
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-sm">
                     {new Date(project.updated_at).toLocaleDateString()}
@@ -152,7 +168,9 @@ export default function DashboardPage() {
                         }}
                         className="text-red-400 hover:text-red-300 transition-colors p-2"
                       >
-                        <span className="material-icons text-[18px]">delete</span>
+                        <span className="material-icons text-[18px]">
+                          delete
+                        </span>
                       </button>
                     </div>
                   </td>
@@ -187,4 +205,4 @@ export default function DashboardPage() {
       />
     </div>
   );
-} 
+}

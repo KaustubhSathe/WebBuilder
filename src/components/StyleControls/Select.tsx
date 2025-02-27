@@ -6,10 +6,18 @@ interface SelectProps {
   className?: string;
 }
 
-const Select: React.FC<SelectProps> = ({ label, value, options, onChange, className = '' }) => {
+const Select: React.FC<SelectProps> = ({
+  label,
+  value,
+  options,
+  onChange,
+  className = "",
+}) => {
   return (
     <div className="flex flex-col gap-1">
-      {label && <label className="text-[10px] text-gray-400 uppercase">{label}</label>}
+      {label && (
+        <label className="text-[10px] text-gray-400 uppercase">{label}</label>
+      )}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -25,4 +33,4 @@ const Select: React.FC<SelectProps> = ({ label, value, options, onChange, classN
   );
 };
 
-export default Select; 
+export default Select;

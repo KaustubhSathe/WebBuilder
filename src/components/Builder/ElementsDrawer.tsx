@@ -41,10 +41,11 @@ const ELEMENTS: DraggableComponent[] = [
   { type: "form-button", label: "Form Button", icon: "📤" },
 ];
 
-const DraggableItem: React.FC<
-  { element: DraggableComponent; onDragEnd: () => void }
-> = ({ element, onDragEnd }) => {
-  const [{ isDragging }, drag, preview] = useDrag<
+const DraggableItem: React.FC<{
+  element: DraggableComponent;
+  onDragEnd: () => void;
+}> = ({ element, onDragEnd }) => {
+  const [{ isDragging }, drag] = useDrag<
     DraggableComponent,
     void,
     { isDragging: boolean }
@@ -66,7 +67,6 @@ const DraggableItem: React.FC<
 
   return (
     <div
-      //@ts-ignore
       ref={drag}
       className="draggable-item w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm"
       style={{
@@ -130,9 +130,10 @@ const Category: React.FC<CategoryProps> = ({
   );
 };
 
-const ElementsDrawer: React.FC<ComponentsDrawerProps> = (
-  { isOpen, onClose },
-) => {
+const ElementsDrawer: React.FC<ComponentsDrawerProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const [collapsedCategories, setCollapsedCategories] = useState<
     Record<string, boolean>
   >({

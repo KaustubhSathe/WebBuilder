@@ -64,9 +64,11 @@ const pagesSlice = createSlice({
     },
     updateCanvas: (
       state,
-      action: PayloadAction<{ pageId: string; component_tree: Component }>,
+      action: PayloadAction<{ pageId: string; component_tree: Component }>
     ) => {
-      const page = state.pages.find((p: Page) => p.id === action.payload.pageId);
+      const page = state.pages.find(
+        (p: Page) => p.id === action.payload.pageId
+      );
       if (page) {
         page.component_tree = action.payload.component_tree;
         page.updated_at = new Date().toISOString();
@@ -78,7 +80,7 @@ const pagesSlice = createSlice({
         pageId: string;
         parentId: string;
         element: Omit<Component, "id" | "children">;
-      }>,
+      }>
     ) => {
       const page = state.pages.find((p) => p.id === action.payload.pageId);
       if (!page) return;

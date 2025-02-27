@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -8,9 +8,13 @@ interface CreateProjectModalProps {
   onSubmit: (name: string, description: string) => Promise<void>;
 }
 
-export default function CreateProjectModal({ isOpen, onClose, onSubmit }: CreateProjectModalProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+export default function CreateProjectModal({
+  isOpen,
+  onClose,
+  onSubmit,
+}: CreateProjectModalProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,11 +22,11 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     setIsLoading(true);
     try {
       await onSubmit(name, description);
-      setName('');
-      setDescription('');
+      setName("");
+      setDescription("");
       onClose();
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error("Error creating project:", error);
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +50,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
                 Project Name
               </label>
               <input
@@ -61,7 +68,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
                 Description
               </label>
               <textarea
@@ -89,7 +99,9 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
             >
               {isLoading ? (
                 <>
-                  <span className="material-icons animate-spin text-[20px]">refresh</span>
+                  <span className="material-icons animate-spin text-[20px]">
+                    refresh
+                  </span>
                   Creating...
                 </>
               ) : (
@@ -104,4 +116,4 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       </div>
     </div>
   );
-} 
+}

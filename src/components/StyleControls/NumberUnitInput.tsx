@@ -19,9 +19,11 @@ const UNIT_OPTIONS = [
   { value: "none", label: "none" },
 ];
 
-const NumberUnitInput: React.FC<NumberUnitInputProps> = (
-  { label, value, onChange },
-) => {
+const NumberUnitInput: React.FC<NumberUnitInputProps> = ({
+  label,
+  value,
+  onChange,
+}) => {
   const parseValue = (val: string) => {
     if (!val || val === "auto" || val === "none") {
       return { number: "", unit: val || "none" };
@@ -59,7 +61,7 @@ const NumberUnitInput: React.FC<NumberUnitInputProps> = (
           onChange={handleNumberChange}
           disabled={unit === "auto" || unit === "none"}
           className={`w-20 bg-[#1a1a1a] text-gray-300 text-xs rounded border border-[#3c3c3c] px-2 py-1.5 focus:outline-none focus:border-blue-500 ${
-            (unit === "auto" || unit === "none")
+            unit === "auto" || unit === "none"
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}

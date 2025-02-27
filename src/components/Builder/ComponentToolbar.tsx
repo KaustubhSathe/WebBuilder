@@ -1,11 +1,11 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { Component } from "../../types/builder";
-import { deleteComponent, updateComponent } from "../../store/builderSlice";
+import { deleteComponent } from "../../store/builderSlice";
 
-const ComponentToolbar: React.FC<{ component: Component }> = (
-  { component },
-) => {
+const ComponentToolbar: React.FC<{ component: Component }> = ({
+  component,
+}) => {
   const dispatch = useDispatch();
 
   return (

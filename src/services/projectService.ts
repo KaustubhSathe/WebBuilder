@@ -4,11 +4,13 @@ import type { Page } from "@/store/pagesSlice";
 
 export const projectService = {
   async createProject(name: string, description?: string): Promise<Project> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
-    const { data: functionData, error: functionError } = await supabase
-      .functions.invoke("create-project", {
+    const { data: functionData, error: functionError } =
+      await supabase.functions.invoke("create-project", {
         body: { name, description },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -20,17 +22,19 @@ export const projectService = {
   },
 
   async getProjects(projectId?: string): Promise<Project[]> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
-    const { data: functionData, error: functionError } = await supabase
-      .functions.invoke(
+    const { data: functionData, error: functionError } =
+      await supabase.functions.invoke(
         projectId ? `get-projects?project_id=${projectId}` : "get-projects",
         {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
-        },
+        }
       );
 
     if (functionError) throw functionError;
@@ -38,7 +42,9 @@ export const projectService = {
   },
 
   async deleteProject(projectId: string): Promise<void> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
     const { error: functionError } = await supabase.functions.invoke(
@@ -48,35 +54,36 @@ export const projectService = {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
-      },
+      }
     );
 
     if (functionError) throw functionError;
   },
 
   async addPage(projectId: string, name: string): Promise<Page> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
     const path = "/" + name.toLowerCase().replace(/\s+/g, "-");
 
-    const { data: functionData, error: functionError } = await supabase
-      .functions.invoke(
-        "add-page",
-        {
-          body: { project_id: projectId, name, path },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
+    const { data: functionData, error: functionError } =
+      await supabase.functions.invoke("add-page", {
+        body: { project_id: projectId, name, path },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
         },
-      );
+      });
 
     if (functionError) throw functionError;
     return functionData.page;
   },
 
   async saveProject(projectId: string, pages: Page[]): Promise<void> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
     const { error: functionError } = await supabase.functions.invoke(
@@ -86,25 +93,24 @@ export const projectService = {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
-      },
+      }
     );
 
     if (functionError) throw functionError;
   },
 
   async deletePage(pageId: string): Promise<void> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
-    const { error } = await supabase.functions.invoke(
-      "delete-page",
-      {
-        body: { pageId },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+    const { error } = await supabase.functions.invoke("delete-page", {
+      body: { pageId },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
       },
-    );
+    });
 
     if (error) throw error;
   },
