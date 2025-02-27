@@ -13,6 +13,7 @@ import { RootState } from "@/store/store";
 import ComponentToolbar from "./ComponentToolbar";
 import ResizeHandle from "./ResizeHandle";
 import Image from "next/image";
+
 interface BuilderComponentProps {
   component: Component;
 }
@@ -389,8 +390,8 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
         return (
           <Image
             id={component.id}
-            src={component.src}
-            alt={component.content}
+            src={component.src || ""}
+            alt={component.content || ""}
             style={otherStyles}
             className="rounded-lg"
           />
@@ -432,6 +433,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
 
   return (
     <div
+      // @ts-expect-error: dragRef is not typed
       ref={dragRef}
       data-is-builder-component="true"
       data-component-id={component.id}

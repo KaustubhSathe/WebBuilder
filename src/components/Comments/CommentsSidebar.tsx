@@ -68,8 +68,6 @@ const CommentsSidebar = ({ isOpen }: CommentsSidebarProps) => {
     loadComments,
   ]);
 
-  
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -108,9 +106,7 @@ const CommentsSidebar = ({ isOpen }: CommentsSidebarProps) => {
                   </span>
                 </button>
                 <div ref={settingsRef}>
-                  <CommentSettings
-                    isOpen={isSettingsOpen}
-                  />
+                  <CommentSettings isOpen={isSettingsOpen} />
                 </div>
               </div>
             </div>

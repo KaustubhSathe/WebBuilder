@@ -28,6 +28,7 @@ const createEmptyCanvas = (): Component => ({
     margin: "0",
   },
   children: [],
+  customAttributes: {},
 });
 
 const initialState: PagesState = {

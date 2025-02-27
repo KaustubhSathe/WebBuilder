@@ -1,10 +1,4 @@
-import {
-  createSlice,
-  PayloadAction,
-  Store,
-  Dispatch,
-  Action,
-} from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { BuilderState, Component, ComponentType } from "../types/builder";
 import { generateComponentId } from "@/utils/idGenerator";
 
@@ -206,7 +200,7 @@ const builderSlice = createSlice({
 
 // Create a middleware to sync component updates with the selected page
 export const builderMiddleware =
-  (store: Store) => (next: Dispatch) => (action: Action) => {
+  (store: any) => (next: any) => (action: any) => {
     const result = next(action);
 
     // List of actions that modify the component tree or interactions

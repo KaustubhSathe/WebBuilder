@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState, Suspense } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -392,9 +392,7 @@ function BuilderCanvas() {
 
         {/* Right Sidebar - Show either style editor or comments */}
         {isCommentsSidebarOpen ? (
-          <CommentsSidebar
-            isOpen={isCommentsSidebarOpen}
-          />
+          <CommentsSidebar isOpen={isCommentsSidebarOpen} />
         ) : (
           <div className="right-sidebar h-full fixed right-0 w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">
             {/* Tabs */}
@@ -495,7 +493,7 @@ function BuilderPageContent() {
     };
 
     checkUserAndProject();
-  }, [router, searchParams, dispatch]);
+  }, [router, dispatch, searchParams]);
 
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
@@ -565,7 +563,15 @@ export default function BuilderPage() {
   return (
     <Provider store={store}>
       <DndProvider backend={HTML5Backend}>
-        <BuilderPageContent />
+        <Suspense
+          fallback={
+            <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
+              <LoadingBar onComplete={() => {}} />
+            </div>
+          }
+        >
+          <BuilderPageContent />
+        </Suspense>
       </DndProvider>
     </Provider>
   );

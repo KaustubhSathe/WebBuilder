@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
   // Refresh session if expired - required for Server Components
   const {
     data: { session },
-    _error,
+    error: _error,
   } = await supabase.auth.getSession();
 
   // Allow access to auth callback route

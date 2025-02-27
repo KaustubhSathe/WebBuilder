@@ -67,6 +67,7 @@ const DraggableItem: React.FC<{
 
   return (
     <div
+      // @ts-expect-error: drag is not typed
       ref={drag}
       className="draggable-item w-full text-left px-3 py-2 text-gray-400 hover:text-gray-200 hover:bg-[#3c3c3c] rounded text-sm"
       style={{
