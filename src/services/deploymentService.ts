@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 export const deploymentService = {
     async deployToVercel(
         projectId: string,
-    ): Promise<{ deploymentUrl: string }> {
+    ): Promise<{ deploymentUrl: string; defaultDomain: string }> {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error("Not authenticated");
 

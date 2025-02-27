@@ -194,12 +194,13 @@ serve(async (req: Request) => {
       throw new Error(deployData.error?.message || "Deployment failed");
     }
 
-    // Update project with deployment URL
-    console.log("Updating project with deployment URL...");
+    // Update project with deployment URLs
+    console.log("Updating project with deployment URLs...");
     await supabase
       .from("projects")
       .update({
         deployment_url: `https://${deployData.url}`,
+        default_domain: `${deployData.name}.vercel.app`,
         last_deployed: new Date().toISOString(),
       })
       .eq("id", projectId);
@@ -208,6 +209,7 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         deploymentUrl: `https://${deployData.url}`,
+        defaultDomain: `${deployData.name}.vercel.app`,
         deploymentId: deployData.id,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },

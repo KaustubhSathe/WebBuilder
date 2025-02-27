@@ -126,23 +126,34 @@ function BuilderCanvas() {
     const publishToast = toast.loading("Publishing project...");
 
     try {
-      const { deploymentUrl } = await deploymentService.deployToVercel(
-        project.id,
-      );
+      const { deploymentUrl, defaultDomain } = await deploymentService
+        .deployToVercel(
+          project.id,
+        );
 
       toast.success(
         <div className="flex flex-col gap-2">
           <span>Project published successfully!</span>
-          <a
-            href={deploymentUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-300 underline text-sm"
-          >
-            View published site
-          </a>
+          <div className="flex flex-col gap-1 text-sm">
+            <a
+              href={deploymentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
+              {deploymentUrl}
+            </a>
+            <a
+              href={`https://${defaultDomain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
+              {defaultDomain}
+            </a>
+          </div>
         </div>,
-        { id: publishToast, duration: 5000 },
+        { id: publishToast, duration: 8000 },
       );
     } catch (error) {
       console.error("Deployment error:", error);
