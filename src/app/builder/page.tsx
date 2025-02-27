@@ -14,10 +14,8 @@ import PagesSidebar from "@/components/Builder/PagesSidebar";
 import PageSelector from "@/components/Builder/PageSelector";
 import StyleEditor from "@/components/Builder/StyleEditor";
 import {
-  deleteComponent,
   setComponent,
   setSelectedComponent,
-  updateComponent,
   updateInteractions,
 } from "@/store/builderSlice";
 import { setCurrentProject } from "@/store/projectSlice";

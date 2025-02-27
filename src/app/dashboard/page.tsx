@@ -6,12 +6,14 @@ import { supabase } from "@/lib/supabase";
 import type { Project } from "@/types/project";
 import { projectService } from "@/services/projectService";
 import CreateProjectModal from "@/components/Utils/CreateProjectModal";
+import { User } from "@supabase/supabase-js";
+import Image from "next/image";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [_user, setUser] = useState<User>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function DashboardPage() {
     }
   };
 
-  const fetchProjects = async (userId: string) => {
+  const fetchProjects = async () => {
     try {
       const projects = await projectService.getProjects();
       setProjects(projects);
@@ -132,7 +134,7 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-[#2c2c2c] rounded flex items-center justify-center">
                         {project.thumbnail ? (
-                          <img
+                          <Image
                             src={project.thumbnail}
                             alt={project.name}
                             className="w-full h-full object-cover rounded"
