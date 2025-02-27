@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     });
 
     return new Response(stream.toReadableStream());
-  } catch (error: { message: string }) {
+  } catch (error: any) {
     console.error("API Error:", error);
     return new Response(
       JSON.stringify({
