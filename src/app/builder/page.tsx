@@ -394,7 +394,6 @@ function BuilderCanvas() {
         {isCommentsSidebarOpen ? (
           <CommentsSidebar
             isOpen={isCommentsSidebarOpen}
-            onClose={() => setIsCommentsSidebarOpen(false)}
           />
         ) : (
           <div className="right-sidebar h-full fixed right-0 w-[300px] bg-[#2c2c2c] border-l border-[#3c3c3c]">

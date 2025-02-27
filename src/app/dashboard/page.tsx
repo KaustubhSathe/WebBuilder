@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_user, setUser] = useState<User>(null);
+  const [_, setUser] = useState<User | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function DashboardPage() {
         return;
       }
       setUser(session.user);
-      fetchProjects(session.user.id);
+      fetchProjects();
     };
 
     checkUser();

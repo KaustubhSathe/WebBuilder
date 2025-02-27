@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import CommentSettings from "./CommentSettings";
@@ -25,21 +25,6 @@ const CommentsSidebar = ({ isOpen }: CommentsSidebarProps) => {
   const selectedPageId = useSelector(
     (state: RootState) => state.pages.selectedPageId
   );
-
-  // Load comments when sidebar opens or filters change
-  useEffect(() => {
-    if (isOpen && project?.id) {
-      loadComments();
-    }
-  }, [
-    isOpen,
-    project?.id,
-    selectedPageId,
-    showResolved,
-    filterByCurrentPage,
-    loadComments,
-  ]);
-
   const loadComments = useCallback(async () => {
     if (!project?.id) return;
 
@@ -68,6 +53,22 @@ const CommentsSidebar = ({ isOpen }: CommentsSidebarProps) => {
     project?.id,
     dispatch,
   ]);
+
+  // Load comments when sidebar opens or filters change
+  useEffect(() => {
+    if (isOpen && project?.id) {
+      loadComments();
+    }
+  }, [
+    isOpen,
+    project?.id,
+    selectedPageId,
+    showResolved,
+    filterByCurrentPage,
+    loadComments,
+  ]);
+
+  
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -109,7 +110,6 @@ const CommentsSidebar = ({ isOpen }: CommentsSidebarProps) => {
                 <div ref={settingsRef}>
                   <CommentSettings
                     isOpen={isSettingsOpen}
-                    onClose={() => setIsSettingsOpen(false)}
                   />
                 </div>
               </div>

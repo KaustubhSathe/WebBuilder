@@ -8,7 +8,7 @@ import { getInitials } from "@/utils/utils";
 
 interface CommentBoxProps {
   position: { x: number; y: number };
-  comment?: CommentData;
+  comment: CommentData | undefined;
   onClose: () => void;
   onSubmit?: (content: string) => void;
   onCancel?: () => void;
@@ -33,6 +33,7 @@ const CommentBox = ({
     (state: RootState) => state.pages.selectedPageId
   );
   const dispatch = useDispatch();
+  const commentID = comment?.id;
 
   const handleSubmit = async () => {
     if (!content.trim() || !project?.id || !selectedPageId) return;
@@ -196,7 +197,7 @@ const CommentBox = ({
             </button>
             <button
               className="px-3 py-1 text-sm text-green-500 hover:text-green-400 border border-green-500 hover:border-green-400 rounded flex items-center gap-1"
-              onClick={() => onResolve?.(comment?.id || "")}
+              onClick={() => onResolve?.(commentID || "")}
               disabled={isSubmitting}
               title="Mark as resolved"
             >

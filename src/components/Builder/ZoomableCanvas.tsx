@@ -479,6 +479,20 @@ const ZoomableCanvas = ({
       {isCommentsOpen && commentBox && (
         <CommentBox
           position={commentBox}
+          comment={{
+            id: commentBox.id,
+            content: "",
+            position_x: commentBox.x,
+            position_y: commentBox.y,
+            project_id: project?.id,
+            page_id: selectedPage?.id,
+            user: user,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            is_resolved: false,
+            parent_id: null,
+            replies: [],
+          }}
           onSubmit={handleCommentSubmit}
           onCancel={handleCommentCancel}
           onClose={() => setCommentBox(null)}
