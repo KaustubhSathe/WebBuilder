@@ -5,9 +5,9 @@ import { DragSourceMonitor, useDrag } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { Component } from "@/types/builder";
 import {
-  moveElement,
+  moveComponent,
   setSelectedComponent,
-  updateElementSize,
+  updateComponentSize,
 } from "@/store/builderSlice";
 import { RootState } from "@/store/store";
 import ComponentToolbar from "./ComponentToolbar";
@@ -80,7 +80,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
         break;
     }
 
-    dispatch(updateElementSize({
+    dispatch(updateComponentSize({
       id: component.id,
       size: {
         width: newWidth,
@@ -98,7 +98,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
 
     // Compare both x and y positions properly
     if (hasPositionChanged(newX, left) || hasPositionChanged(newY, top)) {
-      dispatch(moveElement({
+      dispatch(moveComponent({
         id: component.id,
         position: {
           x: newX,
@@ -178,7 +178,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = (
               </div>
             )}
 
-            <main id={component.id} className="w-full h-full">
+            <main id={component.id} className="w-full h-full" style={otherStyles}>
               {component.children?.map((child) => (
                 <BuilderComponent key={child.id} component={child} />
               ))}

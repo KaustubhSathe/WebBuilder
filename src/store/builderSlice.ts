@@ -89,7 +89,7 @@ const builderSlice = createSlice({
         state.selectedComponent = null;
       }
     },
-    selectElement: (state, action: PayloadAction<string>) => {
+    selectComponent: (state, action: PayloadAction<string>) => {
       const elementId = action.payload;
       // Only set selected if element exists in the tree
       const element = findComponentById(state.component, elementId);
@@ -97,7 +97,7 @@ const builderSlice = createSlice({
         state.selectedComponent = elementId;
       }
     },
-    addElement: (
+    addComponent: (
       state,
       action: PayloadAction<{
         parentId: string;
@@ -130,7 +130,7 @@ const builderSlice = createSlice({
         state.selectedComponent = newComponent.id;
       }
     },
-    moveElement: (
+    moveComponent: (
       state,
       action: PayloadAction<{
         id: string;
@@ -165,7 +165,7 @@ const builderSlice = createSlice({
         delete component.styles.right;
       }
     },
-    updateElementSize: (
+    updateComponentSize: (
       state,
       action: PayloadAction<{
         id: string;
@@ -206,9 +206,9 @@ export const builderMiddleware =
     const componentModifyingActions = [
       "builder/setComponent",
       "builder/deleteComponent",
-      "builder/addElement",
-      "builder/moveElement",
-      "builder/updateElementSize",
+      "builder/addComponent",
+      "builder/moveComponent",
+      "builder/updateComponentSize",
       "builder/updateComponent",
       "builder/updateInteractions",
     ];
@@ -219,6 +219,9 @@ export const builderMiddleware =
       if (selectedPageId) {
         // Get the updated component tree after the action has been processed
         const updatedComponent = state.builder.component;
+        console.log("Updated component:", updatedComponent);
+        console.log("Selected page ID:", selectedPageId);
+
 
         store.dispatch({
           type: "pages/updateCanvas",
@@ -237,10 +240,10 @@ export const {
   setComponent,
   setSelectedComponent,
   deleteComponent,
-  selectElement,
-  addElement,
-  moveElement,
-  updateElementSize,
+  selectComponent,
+  addComponent,
+  moveComponent,
+  updateComponentSize,
   updateComponent,
   updateInteractions,
 } = builderSlice.actions;

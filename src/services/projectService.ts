@@ -91,4 +91,21 @@ export const projectService = {
 
     if (functionError) throw functionError;
   },
+
+  async deletePage(pageId: string): Promise<void> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("Not authenticated");
+
+    const { error } = await supabase.functions.invoke(
+      "delete-page",
+      {
+        body: { pageId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      },
+    );
+
+    if (error) throw error;
+  },
 };

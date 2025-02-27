@@ -6,9 +6,9 @@ import { DropTargetMonitor, useDrop } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { Component, DraggableComponent } from "../../types/builder";
 import {
-  addElement,
+  addComponent,
   deleteComponent,
-  moveElement,
+  moveComponent,
   setSelectedComponent,
 } from "../../store/builderSlice";
 import { RootState } from "../../store/store";
@@ -232,13 +232,13 @@ const ZoomableCanvas = (
     const relativeY = y - targetAbsPos.y;
 
     if (monitor.getItemType() === "component") {
-      dispatch(addElement({
+      dispatch(addComponent({
         parentId: targetComponent.id,
         type: item.type,
         position: { x: relativeX, y: relativeY },
       }));
     } else if (monitor.getItemType() === "placed-component" && item.id) {
-      dispatch(moveElement({
+      dispatch(moveComponent({
         id: item.id,
         position: {
           x: { value: relativeX, unit: "px" },

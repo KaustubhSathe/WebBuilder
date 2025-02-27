@@ -6,6 +6,7 @@ import { addPage, deletePage, Page, setSelectedPage } from "@/store/pagesSlice";
 import type { RootState } from "@/store/store";
 import { projectService } from "@/services/projectService";
 import { setComponent } from "@/store/builderSlice";
+import toast from "react-hot-toast";
 
 interface PagesSidebarProps {
   isOpen: boolean;
@@ -88,8 +89,17 @@ const PagesSidebar: React.FC<PagesSidebarProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleDeletePage = (pageId: string) => {
-    dispatch(deletePage(pageId));
+  const handleDeletePage = async (pageId: string) => {
+    try {
+      await projectService.deletePage(pageId);
+      dispatch(deletePage(pageId));
+      toast.success("Page deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete page:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete page",
+      );
+    }
   };
 
   const handleSelectPage = (pageId: string) => {

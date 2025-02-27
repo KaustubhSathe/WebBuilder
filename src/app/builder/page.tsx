@@ -31,6 +31,7 @@ import SaveIndicator from "@/components/Utils/SaveIndicator";
 import { markSaved, setSaving } from "@/store/saveStateSlice";
 import CommentsSidebar from "@/components/Comments/CommentsSidebar";
 import InteractionsEditor from "@/components/Builder/InteractionsEditor";
+import { deploymentService } from "@/services/deploymentService";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -52,6 +53,9 @@ function BuilderCanvas() {
     state.builder.component.interactions || ""
   );
   const component = useSelector((state: RootState) => state.builder.component);
+  const project = useSelector((state: RootState) =>
+    state.project.currentProject
+  );
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Check if clicked element is a sidebar icon or button
@@ -111,6 +115,36 @@ function BuilderCanvas() {
     if (previewWindow) {
       previewWindow.document.write(previewHTML);
       previewWindow.document.close();
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!project?.id) return;
+
+    const publishToast = toast.loading("Publishing project...");
+
+    try {
+      const { deploymentUrl } = await deploymentService.deployToVercel(
+        project.id,
+      );
+
+      toast.success(
+        <div className="flex flex-col gap-2">
+          <span>Project published successfully!</span>
+          <a
+            href={deploymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-300 underline text-sm"
+          >
+            View published site
+          </a>
+        </div>,
+        { id: publishToast, duration: 5000 },
+      );
+    } catch (error) {
+      console.error("Deployment error:", error);
+      toast.error("Failed to publish project", { id: publishToast });
     }
   };
 
@@ -249,6 +283,7 @@ function BuilderCanvas() {
 
           {/* Publish */}
           <button
+            onClick={handlePublish}
             className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-colors px-4 h-[26px] rounded ml-2 mr-3 text-sm"
             title="Publish"
           >
@@ -407,7 +442,7 @@ function BuilderPageContent() {
   const interactions = useSelector((state: RootState) =>
     state.builder.component.interactions || ""
   );
-  
+
   useLayoutEffect(() => {
     eval(interactions);
   }, [interactions]);

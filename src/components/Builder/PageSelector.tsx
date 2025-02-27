@@ -19,9 +19,11 @@ const PageSelector = () => {
 
     if (page && page.component_tree) {
       // First set the component tree from the selected page
+      console.log("Setting component tree:", page.component_tree);
       dispatch(setComponent(page.component_tree));
-
+    
       // Then update the selected page ID
+      console.log("Setting selected page ID:", pageId);
       dispatch(setSelectedPage(pageId));
     }
   };
