@@ -47,6 +47,7 @@ function BuilderCanvas() {
     "style" | "settings" | "interactions"
   >("style");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   // Get interactions from the store once at the component level
   const interactions = useSelector((state: RootState) =>
@@ -119,8 +120,9 @@ function BuilderCanvas() {
   };
 
   const handlePublish = async () => {
-    if (!project?.id) return;
+    if (!project?.id || isPublishing) return;
 
+    setIsPublishing(true);
     const publishToast = toast.loading("Publishing project...");
 
     try {
@@ -145,6 +147,8 @@ function BuilderCanvas() {
     } catch (error) {
       console.error("Deployment error:", error);
       toast.error("Failed to publish project", { id: publishToast });
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -284,10 +288,21 @@ function BuilderCanvas() {
           {/* Publish */}
           <button
             onClick={handlePublish}
-            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-colors px-4 h-[26px] rounded ml-2 mr-3 text-sm"
+            disabled={isPublishing}
+            className={`flex items-center justify-center ${
+              isPublishing ? "bg-blue-600" : "bg-blue-500 hover:bg-blue-600"
+            } text-white transition-colors px-4 h-[26px] rounded ml-2 mr-3 text-sm`}
             title="Publish"
           >
-            Publish
+            {isPublishing
+              ? (
+                <span className="material-icons animate-spin text-[18px]">
+                  refresh
+                </span>
+              )
+              : (
+                "Publish"
+              )}
           </button>
         </div>
       </nav>

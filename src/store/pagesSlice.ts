@@ -66,9 +66,7 @@ const pagesSlice = createSlice({
       state,
       action: PayloadAction<{ pageId: string; component_tree: Component }>,
     ) => {
-      console.log("Updating canvas:", action.payload);
-      console.log("State pages:", state.pages);
-      const page = state.pages.find((p) => p.id === action.payload.pageId);
+      const page = state.pages.find((p: Page) => p.id === action.payload.pageId);
       if (page) {
         page.component_tree = action.payload.component_tree;
         page.updated_at = new Date().toISOString();

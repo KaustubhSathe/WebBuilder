@@ -9,11 +9,10 @@ const saveStateMiddleware: Middleware = (store) => (next) => (action: any) => {
   const result = next(action);
 
   const modifyingActions = [
-    "builder/setComponent",
     "builder/deleteComponent",
-    "builder/addElement",
-    "builder/moveElement",
-    "builder/updateElementSize",
+    "builder/addComponent",
+    "builder/moveComponent",
+    "builder/updateComponentSize",
     "builder/updateComponent",
     "pages/updateCanvas",
     "pages/addElementToCanvas",

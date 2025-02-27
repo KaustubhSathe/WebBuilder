@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedPage } from "@/store/pagesSlice";
+import { Page, setSelectedPage } from "@/store/pagesSlice";
 import { setComponent } from "@/store/builderSlice";
 import type { RootState } from "@/store/store";
 
@@ -15,16 +15,10 @@ const PageSelector = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handlePageChange = (pageId: string) => {
-    const page = pages.find((p) => p.id === pageId);
-
-    if (page && page.component_tree) {
-      // First set the component tree from the selected page
-      console.log("Setting component tree:", page.component_tree);
+    dispatch(setSelectedPage(pageId));
+    const page = pages.find((page) => page.id === pageId);
+    if (page) {
       dispatch(setComponent(page.component_tree));
-    
-      // Then update the selected page ID
-      console.log("Setting selected page ID:", pageId);
-      dispatch(setSelectedPage(pageId));
     }
   };
 
@@ -67,7 +61,7 @@ const PageSelector = () => {
           {/* Dropdown Menu */}
           <div className="absolute top-full left-0 mt-1 w-48 bg-[#2c2c2c] border border-[#3c3c3c] rounded shadow-lg z-30">
             <div className="py-1">
-              {pages.map((page) => (
+              {pages.map((page: Page) => (
                 <button
                   key={page.id}
                   onClick={() => {
