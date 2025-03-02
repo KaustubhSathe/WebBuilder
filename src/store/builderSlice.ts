@@ -15,6 +15,7 @@ const initialState: BuilderState = {
     },
   },
   selectedComponent: null,
+  clipboardComponent: null,
 };
 
 // Move findComponentById outside the slice and export it
@@ -57,6 +58,55 @@ interface Position {
   y: { value: number; unit: string };
 }
 
+// Helper function to update a component in the tree
+const updateComponentInTree = (component: Component, id: string, updater: (comp: Component) => Component): Component => {
+  if (component.id === id) {
+    return updater(component);
+  }
+  
+  if (component.children) {
+    return {
+      ...component,
+      children: component.children.map(child => updateComponentInTree(child, id, updater))
+    };
+  }
+  
+  return component;
+};
+
+// Helper function to delete a component from the tree
+const deleteComponentFromTree = (component: Component, id: string): Component => {
+  if (component.children) {
+    return {
+      ...component,
+      children: component.children
+        .filter(child => child.id !== id)
+        .map(child => deleteComponentFromTree(child, id))
+    };
+  }
+  
+  return component;
+};
+
+// Helper function to add a child component to a parent
+const addChildToParent = (component: Component, parentId: string, childComponent: Component): Component => {
+  if (component.id === parentId) {
+    return {
+      ...component,
+      children: [...(component.children || []), childComponent]
+    };
+  }
+  
+  if (component.children) {
+    return {
+      ...component,
+      children: component.children.map(child => addChildToParent(child, parentId, childComponent))
+    };
+  }
+  
+  return component;
+};
+
 const builderSlice = createSlice({
   name: "builder",
   initialState,
@@ -76,15 +126,7 @@ const builderSlice = createSlice({
       state.selectedComponent = action.payload;
     },
     deleteComponent: (state, action: PayloadAction<string>) => {
-      const deleteFromChildren = (children: Component[]): Component[] => {
-        return children.filter((child) => {
-          if (child.id === action.payload) return false;
-          child.children = deleteFromChildren(child.children);
-          return true;
-        });
-      };
-
-      state.component.children = deleteFromChildren(state.component.children);
+      state.component = deleteComponentFromTree(state.component, action.payload);
       if (state.selectedComponent?.id === action.payload) {
         state.selectedComponent = null;
       }
@@ -195,6 +237,89 @@ const builderSlice = createSlice({
     updateInteractions: (state, action: PayloadAction<string>) => {
       state.component.interactions = action.payload;
     },
+    addChildComponent: (state, action: PayloadAction<{ parentId: string; component: Component }>) => {
+      const { parentId, component } = action.payload;
+      state.component = addChildToParent(state.component, parentId, component);
+    },
+    addClassToComponent: (state, action: PayloadAction<{ componentId: string; className: string }>) => {
+      const { componentId, className } = action.payload;
+      state.component = updateComponentInTree(
+        state.component,
+        componentId,
+        (comp) => {
+          const currentClasses = comp.className ? comp.className.split(" ") : [];
+          if (!currentClasses.includes(className)) {
+            return {
+              ...comp,
+              className: currentClasses.length > 0 
+                ? `${comp.className} ${className}` 
+                : className
+            };
+          }
+          return comp;
+        }
+      );
+    },
+    removeClassFromComponent: (state, action: PayloadAction<{ componentId: string; className: string }>) => {
+      const { componentId, className } = action.payload;
+      state.component = updateComponentInTree(
+        state.component,
+        componentId,
+        (comp) => {
+          if (comp.className) {
+            const classes = comp.className.split(" ").filter(c => c !== className);
+            return {
+              ...comp,
+              className: classes.join(" ")
+            };
+          }
+          return comp;
+        }
+      );
+    },
+    renameClassInComponent: (state, action: PayloadAction<{ componentId: string; className: string; newClassName: string }>) => {
+      const { componentId, className, newClassName } = action.payload;
+      state.component = updateComponentInTree(
+        state.component,
+        componentId,
+        (comp) => {
+          if (comp.className) {
+            const classes = comp.className.split(" ").map(c => c === className ? newClassName : c);
+            return {
+              ...comp,
+              className: classes.join(" ")
+            };
+          }
+          return comp;
+        }
+      );
+    },
+    duplicateClassInComponent: (state, action: PayloadAction<{ componentId: string; className: string; newClassName: string }>) => {
+      const { componentId, className, newClassName } = action.payload;
+      state.component = updateComponentInTree(
+        state.component,
+        componentId,
+        (comp) => {
+          if (comp.className && comp.className.includes(className)) {
+            return {
+              ...comp,
+              className: `${comp.className} ${newClassName}`
+            };
+          }
+          return comp;
+        }
+      );
+    },
+    createComponentFromElement: (state, action: PayloadAction<{ componentId: string; name: string }>) => {
+      // This would typically involve more complex logic to extract a component
+      // and register it in a component library
+      const { componentId, name } = action.payload;
+      // For now, we'll just log this action
+      console.log(`Creating component "${name}" from element ${componentId}`);
+    },
+    setClipboardComponent: (state, action: PayloadAction<Component | null>) => {
+      state.clipboardComponent = action.payload;
+    },
   },
 });
 
@@ -237,6 +362,7 @@ export const builderMiddleware =
 export const {
   setComponent,
   setSelectedComponent,
+  setClipboardComponent,
   deleteComponent,
   selectComponent,
   addComponent,
@@ -244,6 +370,12 @@ export const {
   updateComponentSize,
   updateComponent,
   updateInteractions,
+  addChildComponent,
+  addClassToComponent,
+  removeClassFromComponent,
+  renameClassInComponent,
+  duplicateClassInComponent,
+  createComponentFromElement,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;

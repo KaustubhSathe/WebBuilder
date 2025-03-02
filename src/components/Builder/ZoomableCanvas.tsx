@@ -20,6 +20,7 @@ import { supabase } from "@/lib/supabase";
 import { getInitials } from "@/utils/utils";
 import { CommentData } from "@/services/commentService";
 import { User } from "@supabase/supabase-js";
+import ContextMenu from "./ContextMenu";
 
 interface ZoomableCanvasProps {
   children?: React.ReactNode;
@@ -77,6 +78,7 @@ const ZoomableCanvas = ({
   const [selectedComment, setSelectedComment] = useState<CommentData | null>(
     null
   );
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   // Current canvas dimensions based on the selected responsive mode
   const canvasSize = CANVAS_SIZES[responsiveMode];
@@ -100,7 +102,7 @@ const ZoomableCanvas = ({
         e.preventDefault();
 
         // Delete the selected component
-        dispatch(deleteComponent(selectedComponent.id));
+        dispatch(deleteComponent(selectedComponent.id || ""));
 
         // Clear the selection
         dispatch(setSelectedComponent(null));
@@ -384,6 +386,17 @@ const ZoomableCanvas = ({
     setCommentBox(null);
   };
 
+  // Handle right click on canvas
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
+  
+  // Close context menu
+  const closeContextMenu = () => {
+    setContextMenu(null);
+  };
+
   return (
     <div className="relative w-full h-full">
       {/* Canvas Content */}
@@ -443,6 +456,7 @@ const ZoomableCanvas = ({
               height: responsiveMode === "none" ? "" : `${canvasSize.height}px`,
             }}
             onClick={() => dispatch(setSelectedComponent(null))}
+            onContextMenu={handleContextMenu}
           >
             <div className="absolute inset-0 border-2 border-gray-300">
               <BuilderComponent component={component} />
@@ -507,6 +521,15 @@ const ZoomableCanvas = ({
           }}
           comment={selectedComment}
           onClose={() => setSelectedComment(null)}
+        />
+      )}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={closeContextMenu}
         />
       )}
     </div>

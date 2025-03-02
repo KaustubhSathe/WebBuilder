@@ -26,11 +26,13 @@ export interface Component {
   customAttributes: {
     [key: string]: string | undefined;
   };
+  className?: string;
 }
 
 export interface BuilderState {
   component: Component;
   selectedComponent: Component | null;
+  clipboardComponent: Component | null;
 }
 
 export type ComponentType =
