@@ -1,6 +1,6 @@
 import type { Component } from "@/types/builder";
 
-const generateCSS = (component: Component): string => {
+export const generateCSS = (component: Component): string => {
   if (!component.styles) return "";
 
   const cssRules = Object.entries(component.styles)
@@ -15,7 +15,7 @@ const generateCSS = (component: Component): string => {
   return cssRules ? `#${component.id} {\n    ${cssRules}\n  }` : "";
 };
 
-const getAllCSS = (component: Component): string => {
+export const getAllCSS = (component: Component): string => {
   let css = generateCSS(component);
 
   // Recursively get CSS for all children

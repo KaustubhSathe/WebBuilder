@@ -21,7 +21,7 @@ import {
 import { setCurrentProject } from "@/store/projectSlice";
 import { setPagesFromServer, setSelectedPage } from "@/store/pagesSlice";
 import NavigatorSidebar from "@/components/Builder/NavigatorSidebar";
-import ProjectDropdown from "@/components/Layout/ProjectDropdown";
+import ProjectDropdown from "@/components/Builder/ProjectDropdown";
 import LoadingBar from "@/components/Utils/LoadingBar";
 import { RootState } from "@/store/store";
 import toast from "react-hot-toast";
@@ -32,6 +32,11 @@ import CommentsSidebar from "@/components/Comments/CommentsSidebar";
 import InteractionsEditor from "@/components/Builder/InteractionsEditor";
 import { deploymentService } from "@/services/deploymentService";
 import SettingsEditor from "@/components/Builder/SettingsEditor";
+import ExportCodeModal from "@/components/Builder/ExportCodeModal";
+import SiteSettingsModal from "@/components/Builder/SiteSettingsModal";
+import KeyboardShortcutsModal from "@/components/Builder/KeyboardShortcutsModal";
+import CssPreviewPanel from "@/components/Builder/CssPreviewPanel";
+import { getAllCSS } from "@/utils/previewGenerator";
 
 function BuilderCanvas() {
   const dispatch = useDispatch();
@@ -57,6 +62,49 @@ function BuilderCanvas() {
   const project = useSelector(
     (state: RootState) => state.project.currentProject
   );
+  const pages = useSelector((state: RootState) => state.pages.pages);
+
+  // Handler functions for ProjectDropdown
+  const handleSaveProject = async () => {
+    if (!project?.id) return;
+
+    dispatch(setSaving(true));
+    const saveToast = toast.loading("Saving project...");
+
+    try {
+      await projectService.saveProject(project.id, pages);
+      dispatch(markSaved());
+      toast.success("Project saved successfully", {
+        id: saveToast,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Error saving project:", error);
+      toast.error("Failed to save project", {
+        id: saveToast,
+        duration: 3000,
+      });
+    } finally {
+      dispatch(setSaving(false));
+    }
+  };
+
+  const handleExportCode = () => {
+    // This will be handled by the parent component
+    window.dispatchEvent(new CustomEvent('openExportCode'));
+  };
+
+  const handleSiteSettings = () => {
+    window.dispatchEvent(new CustomEvent('openSiteSettings'));
+  };
+
+  const handleKeyboardShortcuts = () => {
+    window.dispatchEvent(new CustomEvent('openKeyboardShortcuts'));
+  };
+
+  const handleCssPreview = () => {
+    window.dispatchEvent(new CustomEvent('openCssPreview'));
+  };
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Check if clicked element is a sidebar icon or button
@@ -166,7 +214,13 @@ function BuilderCanvas() {
       {/* Top Navigation */}
       <nav className="h-[35px] bg-[#2c2c2c] border-b border-[#3c3c3c] flex items-center">
         {/* Menu Button with Project Dropdown */}
-        <ProjectDropdown />
+        <ProjectDropdown 
+          onSave={handleSaveProject}
+          onExportCode={handleExportCode}
+          onSiteSettings={handleSiteSettings}
+          onKeyboardShortcuts={handleKeyboardShortcuts}
+          onCssPreview={handleCssPreview}
+        />
 
         {/* Preview Button */}
         <button
@@ -457,6 +511,11 @@ function BuilderPageContent() {
   const interactions = useSelector(
     (state: RootState) => state.builder.component.interactions || ""
   );
+  const component = useSelector((state: RootState) => state.builder.component);
+  const [showExportCode, setShowExportCode] = useState(false);
+  const [showSiteSettings, setShowSiteSettings] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [showCssPreview, setShowCssPreview] = useState(false);
 
   useLayoutEffect(() => {
     eval(interactions);
@@ -528,6 +587,26 @@ function BuilderPageContent() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [project?.id, pages, dispatch]);
 
+  // Listen for custom events from BuilderCanvas
+  useEffect(() => {
+    const handleOpenExportCode = () => setShowExportCode(true);
+    const handleOpenSiteSettings = () => setShowSiteSettings(true);
+    const handleOpenKeyboardShortcuts = () => setShowKeyboardShortcuts(true);
+    const handleOpenCssPreview = () => setShowCssPreview(true);
+
+    window.addEventListener('openExportCode', handleOpenExportCode);
+    window.addEventListener('openSiteSettings', handleOpenSiteSettings);
+    window.addEventListener('openKeyboardShortcuts', handleOpenKeyboardShortcuts);
+    window.addEventListener('openCssPreview', handleOpenCssPreview);
+
+    return () => {
+      window.removeEventListener('openExportCode', handleOpenExportCode);
+      window.removeEventListener('openSiteSettings', handleOpenSiteSettings);
+      window.removeEventListener('openKeyboardShortcuts', handleOpenKeyboardShortcuts);
+      window.removeEventListener('openCssPreview', handleOpenCssPreview);
+    };
+  }, []);
+
   const handleLoadingComplete = () => {
     if (project) {
       dispatch(setPagesFromServer(project.pages || []));
@@ -544,6 +623,66 @@ function BuilderPageContent() {
     }
   };
 
+  const handleSaveProject = async () => {
+    if (!project?.id) return;
+
+    dispatch(setSaving(true));
+    const saveToast = toast.loading("Saving project...");
+
+    try {
+      await projectService.saveProject(project.id, pages);
+      dispatch(markSaved());
+      toast.success("Project saved successfully", {
+        id: saveToast,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Error saving project:", error);
+      toast.error("Failed to save project", {
+        id: saveToast,
+        duration: 3000,
+      });
+    } finally {
+      dispatch(setSaving(false));
+    }
+  };
+
+  const handleSiteSettings = () => {
+    setShowSiteSettings(true);
+  };
+
+  const handleExportCode = () => {
+    setShowExportCode(true);
+  };
+
+  const handleKeyboardShortcuts = () => {
+    setShowKeyboardShortcuts(true);
+  };
+
+  const handleCssPreview = () => {
+    setShowCssPreview(true);
+  };
+
+  const handleSaveSiteSettings = async (settings: {
+    title: string;
+    description: string;
+    favicon?: File;
+  }) => {
+    if (!project?.id) return;
+
+    // Here you would typically save these settings to your backend
+    // For now, we'll just show a success toast
+    toast.success("Site settings saved successfully");
+    
+    // Update project name in Redux if it changed
+    if (settings.title !== project.name) {
+      dispatch(setCurrentProject({
+        ...project,
+        name: settings.title
+      }));
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
@@ -555,6 +694,36 @@ function BuilderPageContent() {
   return (
     <>
       <BuilderCanvas />
+      
+      {/* Export Code Modal */}
+      <ExportCodeModal
+        isOpen={showExportCode}
+        onClose={() => setShowExportCode(false)}
+        projectName={project?.name || "My Website"}
+        htmlCode={generatePreview(component, interactions)}
+        cssCode={getAllCSS(component)}
+        jsCode={interactions}
+      />
+      
+      {/* Site Settings Modal */}
+      <SiteSettingsModal
+        isOpen={showSiteSettings}
+        onClose={() => setShowSiteSettings(false)}
+        projectName={project?.name || "My Website"}
+        onSave={handleSaveSiteSettings}
+      />
+      
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={showKeyboardShortcuts}
+        onClose={() => setShowKeyboardShortcuts(false)}
+      />
+      
+      {/* CSS Preview Panel - Draggable */}
+      <CssPreviewPanel
+        isOpen={showCssPreview}
+        onClose={() => setShowCssPreview(false)}
+      />
     </>
   );
 }

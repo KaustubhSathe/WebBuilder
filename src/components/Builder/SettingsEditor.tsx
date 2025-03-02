@@ -185,7 +185,6 @@ function VisibilitySettings({
           chevron_right
         </span>
       </button>
-      a
       {isOpen && (
         <div className="mt-4 flex flex-row justify-between items-center gap-2">
           <label className="text-[10px] mb-auto mt-auto text-center text-gray-400 uppercase block">
