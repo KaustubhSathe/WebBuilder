@@ -14,19 +14,56 @@ import ComponentToolbar from "./ComponentToolbar";
 import ResizeHandle from "./ResizeHandle";
 import Image from "next/image";
 
+/**
+ * Props interface for the BuilderComponent
+ * 
+ * @property {Component} component - The component data to render, including its type, styles, content, and children
+ */
 interface BuilderComponentProps {
   component: Component;
 }
 
+/**
+ * BuilderComponent
+ * 
+ * A versatile component that renders different HTML elements based on the component type.
+ * It handles:
+ * - Rendering various component types (div, section, headings, form elements, media, etc.)
+ * - Drag and drop functionality for component positioning
+ * - Resize functionality with handles
+ * - Selection and highlighting of components
+ * - Rendering child components recursively
+ * 
+ * This is a core component of the builder interface that visualizes the component tree
+ * and allows users to interact with it.
+ */
 const BuilderComponent: React.FC<BuilderComponentProps> = ({
   component,
 }: BuilderComponentProps) => {
   const dispatch = useDispatch();
+  
+  /**
+   * Get the currently selected component from Redux store
+   * Used to highlight the selected component and show its toolbar/resize handles
+   */
   const selectedComponent = useSelector(
     (state: RootState) => state.builder.selectedComponent
   );
+  
+  /**
+   * State to track if the component is currently being resized
+   * Used to disable dragging during resize operations
+   */
   const [isResizing, setIsResizing] = useState(false);
 
+  /**
+   * Set up drag functionality using react-dnd
+   * 
+   * - type: Identifies this as a placed component for the drag and drop system
+   * - item: The data that will be available to the drop target
+   * - collect: Extracts the isDragging state from the monitor
+   * - canDrag: Prevents dragging while resizing is in progress
+   */
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: "placed-component",
@@ -39,15 +76,40 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
     [component.id, component.type, isResizing]
   );
 
+  /**
+   * Handle click on the component
+   * 
+   * Sets this component as the selected component in the Redux store
+   * Stops propagation to prevent parent components from also being selected
+   * 
+   * @param {React.MouseEvent} e - The click event
+   */
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     dispatch(setSelectedComponent(component));
   };
 
+  /**
+   * Handle resize operations for the component
+   * 
+   * This function:
+   * 1. Parses the current style values and their units
+   * 2. Calculates new dimensions and positions based on the resize direction and delta
+   * 3. Dispatches actions to update the component size and position in the Redux store
+   * 
+   * @param {string} direction - The resize direction ('top', 'right', 'bottom', or 'left')
+   * @param {number} deltaX - The horizontal change in pixels
+   * @param {number} deltaY - The vertical change in pixels
+   */
   const handleResize = (direction: string, deltaX: number, deltaY: number) => {
     const currentStyles = component.styles;
 
-    // Parse current values and units
+    /**
+     * Parse a CSS value string into its numeric value and unit
+     * 
+     * @param {string} value - The CSS value string (e.g., "100px", "50%")
+     * @returns {Object} An object containing the numeric value and unit
+     */
     const parseStyleValue = (value: string) => {
       const match = value.match(/^(-?\d+\.?\d*)(.*)$/);
       return match
@@ -65,6 +127,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
     let newX = left;
     let newY = top;
 
+    // Calculate new dimensions and position based on resize direction
     switch (direction) {
       case "right":
         newWidth = { value: width.value + deltaX, unit: width.unit };
@@ -84,6 +147,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
         break;
     }
 
+    // Update component size in Redux store
     dispatch(
       updateComponentSize({
         id: component.id,
@@ -94,7 +158,13 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
       })
     );
 
-    // Helper function to compare position values
+    /**
+     * Compare two position values to check if they're different
+     * 
+     * @param {Object} pos1 - First position with value and unit
+     * @param {Object} pos2 - Second position with value and unit
+     * @returns {boolean} True if positions are different
+     */
     const hasPositionChanged = (
       pos1: { value: number; unit: string },
       pos2: { value: number; unit: string }
@@ -102,7 +172,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
       return pos1.value !== pos2.value || pos1.unit !== pos2.unit;
     };
 
-    // Compare both x and y positions properly
+    // Only dispatch move action if position actually changed
     if (hasPositionChanged(newX, left) || hasPositionChanged(newY, top)) {
       dispatch(
         moveComponent({
@@ -116,6 +186,17 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
     }
   };
 
+  /**
+   * Handle mouse over event for hover highlighting
+   * 
+   * This function:
+   * 1. Stops event propagation to prevent parent components from also being highlighted
+   * 2. Skips if this is already the selected component
+   * 3. Removes hover highlighting from all parent builder components
+   * 4. Adds hover highlighting to the current component
+   * 
+   * @param {React.MouseEvent} e - The mouse over event
+   */
   const handleMouseOver = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -140,6 +221,11 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
     currentTarget.classList.add("builder-component-hover");
   };
 
+  /**
+   * Handle mouse leave event to remove hover highlighting
+   * 
+   * @param {React.MouseEvent} e - The mouse leave event
+   */
   const handleMouseLeave = (e: React.MouseEvent) => {
     e.stopPropagation();
     (e.currentTarget as HTMLElement).classList.remove(
@@ -147,8 +233,20 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
     );
   };
 
+  /**
+   * Render the appropriate HTML element based on component type
+   * 
+   * This function:
+   * 1. Extracts positioning styles to apply them separately to the wrapper
+   * 2. Renders different HTML elements based on the component.type
+   * 3. Recursively renders child components
+   * 4. Applies appropriate styles and content to each element type
+   * 
+   * @returns {JSX.Element} The rendered component
+   */
   const renderComponent = () => {
     // Create a copy of styles without position properties
+    // These will be applied to the wrapper div instead
     const {
       position: _position,
       left: _left,
@@ -168,7 +266,9 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
       ...otherStyles
     } = component.styles || {};
 
+    // Render different elements based on component type
     switch (component.type) {
+      // Layout components
       case "main":
         return (
           <div
@@ -203,17 +303,46 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
           <section
             id={component.id}
             style={otherStyles}
-            className="min-h-[100px] rounded-lg border border-slate-200"
+            className="h-full w-full border border-slate-200"
+            {...component.customAttributes}
           >
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
             ))}
           </section>
         );
+      
+      case 'container':
+        return (
+          <div
+          id={component.id}
+          style={otherStyles}
+          className="min-h-[100px] rounded-lg border border-slate-200"
+        >
+          {component.children?.map((child) => (
+            <BuilderComponent key={child.id} component={child} />
+          ))}
+        </div>
+        );
 
       case "div":
         return (
           <div
+            id={component.id}
+            style={otherStyles}
+            className="h-full w-full border border-slate-200 text-clip"
+            {...component.customAttributes}
+          >
+            {component.content}
+            {component.children?.map((child) => (
+              <BuilderComponent key={child.id} component={child} />
+            ))}
+          </div>
+        );
+
+      case "footer":
+        return (
+          <footer
             id={component.id}
             style={otherStyles}
             className="h-full w-full border border-slate-200"
@@ -222,8 +351,37 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
             {component.children?.map((child) => (
               <BuilderComponent key={child.id} component={child} />
             ))}
-          </div>
+          </footer>
         );
+      
+      case "nav":
+        return (
+          <nav
+            id={component.id}
+            style={otherStyles}
+            className="h-full w-full border border-slate-200"
+            {...component.customAttributes}
+          >
+            {component.children?.map((child) => (
+              <BuilderComponent key={child.id} component={child} />
+            ))}
+          </nav>
+        );
+      
+      case "article":
+        return (
+          <article
+            id={component.id}
+            style={otherStyles}
+            className="h-full w-full border border-slate-200"
+            {...component.customAttributes}
+          >
+            {component.children?.map((child) => (
+              <BuilderComponent key={child.id} component={child} />
+            ))}
+          </article>
+        );
+
 
       // Typography components
       case "h1":
@@ -418,6 +576,7 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
           />
         );
 
+      // Fallback for unknown component types
       default:
         return (
           <div id={component.id} style={otherStyles}>
@@ -427,10 +586,20 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
     }
   };
 
+  // Special case for the main container component
   if (component.type === "main") {
     return renderComponent();
   }
 
+  /**
+   * Main component render
+   * 
+   * For all components except "main", we wrap the rendered component in a div that:
+   * 1. Handles drag and drop functionality
+   * 2. Applies positioning and dimension styles
+   * 3. Handles selection and hover states
+   * 4. Renders resize handles and toolbar when selected
+   */
   return (
     <div
       // @ts-expect-error: dragRef is not typed
@@ -466,7 +635,10 @@ const BuilderComponent: React.FC<BuilderComponentProps> = ({
         transition-all duration-200
       `}
     >
+      {/* Render the actual component based on its type */}
       {renderComponent()}
+      
+      {/* Render toolbar and resize handles when component is selected */}
       {selectedComponent?.id === component.id && !isDragging && (
         <>
           <ComponentToolbar component={component} />

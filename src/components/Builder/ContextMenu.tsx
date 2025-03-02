@@ -17,12 +17,25 @@ import {
 } from "@/store/builderSlice";
 import { Component } from "@/types/builder";
 
+/**
+ * Props for the ContextMenu component
+ * @property {number} x - The x-coordinate where the context menu should appear
+ * @property {number} y - The y-coordinate where the context menu should appear
+ * @property {Function} onClose - Callback function to close the context menu
+ */
 interface ContextMenuProps {
   x: number;
   y: number;
   onClose: () => void;
 }
 
+/**
+ * ContextMenu Component
+ * 
+ * Displays a context menu with various options for manipulating components
+ * in the builder. The menu appears at the specified coordinates and
+ * provides options like cut, copy, paste, delete, etc.
+ */
 const ContextMenu: React.FC<ContextMenuProps> = ({
   x,
   y,
@@ -30,16 +43,31 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 }) => {
   const dispatch = useDispatch();
   const menuRef = useRef<HTMLDivElement>(null);
+  // State to track the adjusted position of the menu
   const [position, setPosition] = useState({ x, y });
+  
+  // Get the currently selected component from Redux store
   const selectedComponent = useSelector(
     (state: RootState) => state.builder.selectedComponent
   );
+  
+  // Get the root component (entire component tree) from Redux store
   const component = useSelector((state: RootState) => state.builder.component);
+  
+  // Get the component in clipboard (if any) from Redux store
   const clipboardComponent = useSelector(
     (state: RootState) => state.builder.clipboardComponent
   );
 
-  // Adjust position after the menu is rendered and we know its dimensions
+  /**
+   * Adjust the position of the context menu after it renders
+   * 
+   * This ensures the menu stays within the viewport boundaries by:
+   * 1. Measuring the actual dimensions of the rendered menu
+   * 2. Checking if it would go beyond any edge of the viewport
+   * 3. Adjusting the position to keep it fully visible
+   * 4. Maintaining a 10px margin from any edge
+   */
   useEffect(() => {
     if (menuRef.current) {
       const menuWidth = menuRef.current.offsetWidth;
@@ -74,7 +102,13 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     }
   }, [x, y]);
   
-  // Close menu when clicking outside
+  /**
+   * Close the context menu when clicking outside of it
+   * 
+   * Adds a global click event listener that checks if the click
+   * occurred outside the menu, and if so, calls the onClose callback.
+   * The listener is properly cleaned up when the component unmounts.
+   */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -88,7 +122,13 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     };
   }, [onClose]);
   
-  // Close menu when pressing Escape
+  /**
+   * Close the context menu when pressing the Escape key
+   * 
+   * Adds a global keydown event listener that checks for the Escape key
+   * and calls the onClose callback when pressed.
+   * The listener is properly cleaned up when the component unmounts.
+   */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -102,11 +142,25 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     };
   }, [onClose]);
 
-  // Context menu actions
+  /**
+   * Select the parent of the currently selected component
+   * 
+   * This function:
+   * 1. Recursively searches the component tree to find the parent of the selected component
+   * 2. If found, updates the selected component in the Redux store to the parent
+   * 3. Closes the context menu
+   */
   const handleSelectParent = () => {
     if (!selectedComponent) return;
     
-    // Find parent of selected component
+    /**
+     * Recursively find the parent of a component in the component tree
+     * 
+     * @param comp - The component to search in (starting from root)
+     * @param targetId - The ID of the component whose parent we're looking for
+     * @param parent - The current parent in the recursion (null for root)
+     * @returns The parent component if found, null otherwise
+     */
     const findParent = (comp: Component, targetId: string, parent: Component | null = null): Component | null => {
       if (comp.id === targetId) return parent;
       if (comp.children) {
@@ -125,10 +179,25 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Cut the selected component
+   * 
+   * This function:
+   * 1. Finds the selected component in the component tree
+   * 2. Copies it to the clipboard
+   * 3. Removes it from the component tree
+   * 4. Closes the context menu
+   */
   const handleCut = () => {
     if (!selectedComponent) return;
     
-    // Find the component to cut
+    /**
+     * Find a component by ID in the component tree
+     * 
+     * @param comp - The component to search in (starting from root)
+     * @param id - The ID of the component to find
+     * @returns A copy of the found component, or null if not found
+     */
     const findComponent = (comp: Component, id: string): Component | null => {
       if (comp.id === id) return { ...comp };
       if (comp.children) {
@@ -151,10 +220,24 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Copy the selected component to the clipboard
+   * 
+   * This function:
+   * 1. Finds the selected component in the component tree
+   * 2. Copies it to the clipboard
+   * 3. Closes the context menu
+   */
   const handleCopy = () => {
     if (!selectedComponent) return;
     
-    // Find the component to copy
+    /**
+     * Find a component by ID in the component tree
+     * 
+     * @param comp - The component to search in (starting from root)
+     * @param id - The ID of the component to find
+     * @returns A copy of the found component, or null if not found
+     */
     const findComponent = (comp: Component, id: string): Component | null => {
       if (comp.id === id) return { ...comp };
       if (comp.children) {
@@ -174,10 +257,27 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Paste the component from clipboard as a child of the selected component
+   * 
+   * This function:
+   * 1. Checks if there's a component in the clipboard and a selected component
+   * 2. Generates new IDs for the clipboard component and all its children
+   * 3. Adds the component as a child of the selected component
+   * 4. Closes the context menu
+   */
   const handlePaste = () => {
     if (!clipboardComponent || !selectedComponent) return;
     
-    // Generate new IDs for the component and its children
+    /**
+     * Generate new IDs for a component and all its children
+     * 
+     * This ensures that pasted components have unique IDs and don't
+     * conflict with existing components in the tree.
+     * 
+     * @param comp - The component to generate new IDs for
+     * @returns A new component with fresh IDs
+     */
     const generateNewIds = (comp: Component): Component => {
       const newComp = { ...comp, id: uuidv4() };
       if (newComp.children) {
@@ -197,10 +297,25 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Duplicate the selected component
+   * 
+   * This function:
+   * 1. Finds the selected component and its parent in the component tree
+   * 2. Creates a copy of the component with new IDs
+   * 3. Adds the copy as a child of the parent component
+   * 4. Closes the context menu
+   */
   const handleDuplicate = () => {
     if (!selectedComponent) return;
     
-    // Find the component to duplicate
+    /**
+     * Find a component by ID in the component tree
+     * 
+     * @param comp - The component to search in (starting from root)
+     * @param id - The ID of the component to find
+     * @returns A copy of the found component, or null if not found
+     */
     const findComponent = (comp: Component, id: string): Component | null => {
       if (comp.id === id) return { ...comp };
       if (comp.children) {
@@ -212,7 +327,14 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       return null;
     };
     
-    // Find the parent of the selected component
+    /**
+     * Find the parent ID of a component in the component tree
+     * 
+     * @param comp - The component to search in (starting from root)
+     * @param targetId - The ID of the component whose parent we're looking for
+     * @param parent - The current parent ID in the recursion (null for root)
+     * @returns The parent ID if found, null otherwise
+     */
     const findParent = (comp: Component, targetId: string, parent: string | null = null): string | null => {
       if (comp.id === targetId) return parent;
       if (comp.children) {
@@ -228,7 +350,15 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     const parentId = findParent(component, selectedComponent.id);
     
     if (componentToDuplicate && parentId) {
-      // Generate new IDs for the component and its children
+      /**
+       * Generate new IDs for a component and all its children
+       * 
+       * This ensures that duplicated components have unique IDs and don't
+       * conflict with existing components in the tree.
+       * 
+       * @param comp - The component to generate new IDs for
+       * @returns A new component with fresh IDs
+       */
       const generateNewIds = (comp: Component): Component => {
         const newComp = { ...comp, id: uuidv4() };
         if (newComp.children) {
@@ -248,12 +378,27 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Delete the selected component
+   * 
+   * This function:
+   * 1. Dispatches an action to remove the selected component from the tree
+   * 2. Closes the context menu
+   */
   const handleDelete = () => {
     if (!selectedComponent) return;
     dispatch(deleteComponent(selectedComponent.id));
     onClose();
   };
   
+  /**
+   * Add a CSS class to the selected component
+   * 
+   * This function:
+   * 1. Prompts the user to enter a class name
+   * 2. If provided, adds the class to the selected component
+   * 3. Closes the context menu
+   */
   const handleAddClass = () => {
     if (!selectedComponent) return;
     
@@ -268,6 +413,15 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Duplicate a CSS class in the selected component
+   * 
+   * This function:
+   * 1. Prompts the user to enter the name of a class to duplicate
+   * 2. Prompts for a new class name
+   * 3. If both are provided, duplicates the class with the new name
+   * 4. Closes the context menu
+   */
   const handleDuplicateClass = () => {
     if (!selectedComponent) return;
     
@@ -284,6 +438,14 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Remove a CSS class from the selected component
+   * 
+   * This function:
+   * 1. Prompts the user to enter the name of a class to remove
+   * 2. If provided, removes the class from the selected component
+   * 3. Closes the context menu
+   */
   const handleRemoveClass = () => {
     if (!selectedComponent) return;
     
@@ -298,6 +460,15 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Rename a CSS class in the selected component
+   * 
+   * This function:
+   * 1. Prompts the user to enter the name of a class to rename
+   * 2. Prompts for a new class name
+   * 3. If both are provided, renames the class
+   * 4. Closes the context menu
+   */
   const handleRenameClass = () => {
     if (!selectedComponent) return;
     
@@ -314,6 +485,14 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
   
+  /**
+   * Create a reusable component from the selected element
+   * 
+   * This function:
+   * 1. Prompts the user to enter a name for the new component
+   * 2. If provided, extracts the selected component as a reusable component
+   * 3. Closes the context menu
+   */
   const handleCreateComponent = () => {
     if (!selectedComponent) return;
     
@@ -329,6 +508,18 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
 
+  /**
+   * MenuItem Component
+   * 
+   * Renders a single menu item in the context menu with an icon,
+   * label, optional shortcut, and handles click events.
+   * 
+   * @param icon - Material icon name
+   * @param label - Text to display for the menu item
+   * @param onClick - Function to call when the item is clicked
+   * @param disabled - Whether the item should be disabled
+   * @param shortcut - Optional keyboard shortcut to display
+   */
   const MenuItem = ({ 
     icon, 
     label, 
@@ -356,6 +547,11 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     </div>
   );
   
+  /**
+   * Divider Component
+   * 
+   * Renders a horizontal divider line between groups of menu items
+   */
   const Divider = () => <div className="border-t border-[#3c3c3c] my-1"></div>;
   
   return (

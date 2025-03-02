@@ -205,6 +205,59 @@ function VisibilitySettings({
   );
 }
 
+function DivComponentSettings({
+  selectedComponent,
+}: {
+  selectedComponent: Component;
+}) {
+  const dispatch = useDispatch();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleContentChange = (value: string) => {
+    dispatch(
+      updateComponent({
+        id: selectedComponent.id,
+        updates: {
+          content: value
+        },
+      })
+    );
+  };
+
+  return (
+    <div className="border-t border-[#3c3c3c] pt-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex justify-between w-full text-gray-400 hover:text-gray-300"
+      >
+        <span className="text-sm font-medium ml-1">Div Content</span>
+        <span
+          className={`material-icons text-[18px] transition-transform ${
+            isOpen ? "rotate-90" : ""
+          }`}
+        >
+          chevron_right
+        </span>
+      </button>
+      {isOpen && (
+        <div className="mt-4 space-y-2">
+          <label className="text-[10px] text-gray-400 uppercase block">
+            Content
+          </label>
+          <textarea
+            value={selectedComponent.content || ""}
+            onChange={(e) => handleContentChange(e.target.value)}
+            className="w-full bg-[#1a1a1a] text-gray-300 text-xs rounded border 
+                        border-[#3c3c3c] px-2 py-1.5 focus:outline-none focus:border-blue-500"
+            rows={4}
+            placeholder="Enter content here..."
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 const SettingsEditor = () => {
   const dispatch = useDispatch();
   const selectedComponent = useSelector(
@@ -242,12 +295,49 @@ const SettingsEditor = () => {
             placeholder="Component ID"
           />
         </div>
+        {
+          (selectedComponent.type === "div" || 
+          selectedComponent.type === 'section' || 
+          selectedComponent.type === 'container' ||
+          selectedComponent.type === 'footer' ||
+          selectedComponent.type === 'nav' ||
+          selectedComponent.type === 'article'
+        ) && (
+            <div className="flex flex-row justify-between">
+            <label className="text-[20px] text-gray-400 uppercase mb-auto mt-auto">
+              Type
+            </label>
+            <select
+              value={selectedComponent?.type}
+              onChange={(e) => {
+                dispatch(
+                  updateComponent({
+                    id: selectedComponent?.id,
+                    updates: { type: e.target.value as any },
+                  })
+                );
+              }}
+              className="bg-[#1a1a1a] text-gray-300 text-xs rounded border 
+                              border-[#3c3c3c] px-2 py-1.5 focus:outline-none focus:border-blue-500"
+            >
+              <option value="div">Div</option>
+              <option value="footer">Footer</option>
+              <option value="nav">Nav</option>
+              <option value="section">Section</option>
+              <option value="article">Article</option>
+            </select>
+          </div>  
+          )
+        }
 
         <CustomAttributes selectedComponent={selectedComponent} />
         {selectedComponent.type !== "main" && (
           <>
             <VisibilitySettings selectedComponent={selectedComponent} />
           </>
+        )}
+        {selectedComponent.type === 'div' && (
+          <DivComponentSettings selectedComponent={selectedComponent} />
         )}
       </div>
     </div>

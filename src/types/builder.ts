@@ -35,8 +35,13 @@ export interface BuilderState {
   clipboardComponent: Component | null;
 }
 
+ 
 export type ComponentType =
   | "section"
+  | "container"
+  | "footer"
+  | "nav"
+  | "article"
   | "h1"
   | "h2"
   | "h3"
@@ -65,6 +70,9 @@ export type ComponentType =
   | "radio"
   | "select"
   | "form-button";
+
+   
+
 
 export interface DraggableComponent {
   type: ComponentType;
